@@ -1,10 +1,19 @@
-﻿using SamaCardAll.Core.Models;
-using SamaCardAll.Core.Services;
+﻿using System;
+using SamaCardAll.Infra;
+using SamaCardAll.Infra.Models;
 
-namespace SamaCardAll.Api.Services
+namespace SamaCardAll.Core.Services
 {
     public class SpendService : ISpendService
     {
+
+        private readonly AppDbContext _context;
+
+        public SpendService(AppDbContext context)
+        {
+            _context = context;
+        }
+
         private readonly List<Spend> _spends; // Simulação de um repositório em memória
 
         public SpendService()

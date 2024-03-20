@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace SamaCardAll.Core.Models;
+namespace SamaCardAll.Infra.Models;
 
 public class Card
 {

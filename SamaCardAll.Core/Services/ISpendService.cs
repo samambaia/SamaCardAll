@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using SamaCardAll.Core.Models;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using SamaCardAll.Infra.Models;
 
 namespace SamaCardAll.Core.Services
 {

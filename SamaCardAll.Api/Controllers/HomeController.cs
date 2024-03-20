@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using SamaCardAll.Api;
 
 namespace SamaCardAll.Api.Controllers
 {
@@ -10,7 +11,7 @@ namespace SamaCardAll.Api.Controllers
         [HttpGet]
         public IActionResult Index()
         {
-            return Redirect("/api/ping");
+            return Redirect("/api/Spend/ping");
         }
     }
 }

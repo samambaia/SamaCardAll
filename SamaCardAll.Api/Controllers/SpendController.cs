@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using SamaCardAll.Core.Models;
+using SamaCardAll.Infra.Models;
 using SamaCardAll.Core.Services;
 using System;
 using System.Collections.Generic;
@@ -97,8 +97,8 @@ namespace SamaCardAll.Api.Controllers
             return Ok(spend);
         }
 
-        [HttpGet]
-        public IActionResult Ping()
+        [HttpGet("Ping")]
+        public IActionResult CheckStatus()
         {
             return Ok("Ping successful! The API is up and running.");
         }

@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34701.34
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SamaCardAll.Core", "SamaCardAll.Core\SamaCardAll.Core.csproj", "{B94533B2-8CFD-48BF-A12D-B6A5680A04CC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SamaCardAll.Core", "SamaCardAll.Core\SamaCardAll.Core.csproj", "{B94533B2-8CFD-48BF-A12D-B6A5680A04CC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SamaCardAll.Api", "SamaCardAll.Api\SamaCardAll.Api.csproj", "{DDE8D069-11DF-4CAC-9C6B-BC627083D1AA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SamaCardAll.Api", "SamaCardAll.Api\SamaCardAll.Api.csproj", "{DDE8D069-11DF-4CAC-9C6B-BC627083D1AA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SamaCardAll.Infra", "SamaCardAll.Infra\SamaCardAll.Infra.csproj", "{A7615CA0-1DF5-416F-ABCC-4CE6C7FA4CEA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{DDE8D069-11DF-4CAC-9C6B-BC627083D1AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DDE8D069-11DF-4CAC-9C6B-BC627083D1AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DDE8D069-11DF-4CAC-9C6B-BC627083D1AA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A7615CA0-1DF5-416F-ABCC-4CE6C7FA4CEA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A7615CA0-1DF5-416F-ABCC-4CE6C7FA4CEA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A7615CA0-1DF5-416F-ABCC-4CE6C7FA4CEA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A7615CA0-1DF5-416F-ABCC-4CE6C7FA4CEA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

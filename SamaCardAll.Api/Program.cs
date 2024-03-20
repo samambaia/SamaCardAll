@@ -1,9 +1,7 @@
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Hosting;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Sqlite;
-using Microsoft.Extensions.DependencyInjection;
-using SamaCardAll.Api;
+using SamaCardAll.Core.Services;
+using SamaCardAll.Infra;
 
 public class Program
 {
@@ -17,9 +15,10 @@ public class Program
         builder.Services.AddDbContext<AppDbContext>(options =>
             options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-        var app = builder.Build();
+        // Register ISpendService and its implementation
+        builder.Services.AddScoped<ISpendService, SpendService>();
 
-        // Optional: Configure middleware pipeline (if needed)
+        var app = builder.Build();
 
         app.MapControllers(); // Maps controllers to the request pipeline
 

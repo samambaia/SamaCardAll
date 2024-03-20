@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34701.34
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SamaCardAll.Core", "SamaCardAll.Core\SamaCardAll.Core.csproj", "{B94533B2-8CFD-48BF-A12D-B6A5680A04CC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SamaCardAll.Api", "SamaCardAll.Api\SamaCardAll.Api.csproj", "{DDE8D069-11DF-4CAC-9C6B-BC627083D1AA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B94533B2-8CFD-48BF-A12D-B6A5680A04CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B94533B2-8CFD-48BF-A12D-B6A5680A04CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B94533B2-8CFD-48BF-A12D-B6A5680A04CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B94533B2-8CFD-48BF-A12D-B6A5680A04CC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DDE8D069-11DF-4CAC-9C6B-BC627083D1AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DDE8D069-11DF-4CAC-9C6B-BC627083D1AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DDE8D069-11DF-4CAC-9C6B-BC627083D1AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DDE8D069-11DF-4CAC-9C6B-BC627083D1AA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F184A912-88F0-4033-99AF-2FA5EC85C1AB}
+	EndGlobalSection
+EndGlobal

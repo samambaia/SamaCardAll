@@ -1,5 +1,4 @@
-﻿using System;
-using SamaCardAll.Infra;
+﻿using SamaCardAll.Infra;
 using SamaCardAll.Infra.Models;
 
 namespace SamaCardAll.Core.Services
@@ -8,18 +7,12 @@ namespace SamaCardAll.Core.Services
     {
 
         private readonly AppDbContext _context;
+        private readonly List<Spend> _spends;
 
         public SpendService(AppDbContext context)
         {
             _context = context;
-        }
-
-        private readonly List<Spend> _spends; // Simulação de um repositório em memória
-
-        public SpendService()
-        {
-            // Inicializa a lista de gastos (simulação de um banco de dados)
-            _spends = new List<Spend>();
+            _spends = _context.Spends.ToList(); // Initialize _spends here
         }
 
         public IEnumerable<Spend> GetSpends()
@@ -88,6 +81,8 @@ namespace SamaCardAll.Core.Services
                                                     // Atualize outras propriedades de User conforme necessário
                     };
                 }
+
+                _context.SaveChanges();
             }
         }
 
@@ -98,6 +93,7 @@ namespace SamaCardAll.Core.Services
             if (spendToRemove != null)
             {
                 _spends.Remove(spendToRemove);
+                _context.SaveChanges();
             }
         }
     }

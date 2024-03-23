@@ -97,10 +97,10 @@ namespace SamaCardAll.Api.Controllers
             return Ok(spend);
         }
 
-        [HttpGet("Ping")]
-        public IActionResult CheckStatus()
-        {
-            return Ok("Ping successful! The API is up and running.");
-        }
+        //[HttpGet("Ping")]
+        //public IActionResult CheckStatus()
+        //{
+        //    return Ok("Ping successful! The API is up and running.");
+        //}
     }
 }

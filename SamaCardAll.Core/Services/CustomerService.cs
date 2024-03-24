@@ -3,7 +3,7 @@ using SamaCardAll.Infra.Models;
 
 namespace SamaCardAll.Core.Services
 {
-    internal class CustomerService : ICustomerService
+    public class CustomerService : ICustomerService
     {
 
         private readonly AppDbContext _context;
@@ -17,8 +17,7 @@ namespace SamaCardAll.Core.Services
             _customers = _context.Customers.ToList();
         }
 
-
-        IEnumerable<Customer> ICustomerService.GetCustomer()
+        IEnumerable<Customer> ICustomerService.GetCustomers()
         {
             return _customers;
         }
@@ -32,7 +31,8 @@ namespace SamaCardAll.Core.Services
         {
             customer.IdCustomer = _customers.Count + 1;
 
-            _customers.Add(customer);
+            _context.Add(customer);
+            _context.SaveChanges();
         }
 
         void ICustomerService.Update(Customer customer)
@@ -50,13 +50,13 @@ namespace SamaCardAll.Core.Services
 
         void ICustomerService.Delete(int id)
         {
-            var customerToRemore = _customers.FirstOrDefault(s => s.IdCustomer == id);
-            if (customerToRemore != null)
+            var customerToRemove = _customers.FirstOrDefault(s => s.IdCustomer == id);
+
+            if (customerToRemove != null)
             {
-                _customers.Remove(customerToRemore);
+                _context.Remove(customerToRemove);
                 _context.SaveChanges();
             }
         }
-
     }
 }

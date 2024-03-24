@@ -1,18 +1,19 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using SamaCardAll.Core.Services;
 using SamaCardAll.Infra.Models;
 
 namespace SamaCardAll.Api.Controllers
 {
-    [ApiController]
     [Route("api/[controller]")]
-    public class SpendController : ControllerBase
+    [ApiController]
+    public class CardController : ControllerBase
     {
-        private readonly ISpendService _spendService;
+        private readonly ICardService _cardService;
 
-        public SpendController(ISpendService spendService)
+        public CardController(ICardService cardService)
         {
-            _spendService = spendService;
+            _cardService = cardService;
         }
 
         [HttpGet]
@@ -20,8 +21,8 @@ namespace SamaCardAll.Api.Controllers
         {
             try
             {
-                IEnumerable<Spend> spends = _spendService.GetSpends();
-                return Ok(spends);
+                IEnumerable<Card> cards = _cardService.GetCards();
+                return Ok(cards);
             }
             catch (Exception ex)
             {
@@ -29,15 +30,26 @@ namespace SamaCardAll.Api.Controllers
             }
         }
 
+        [HttpGet("{id}")]
+        public IActionResult GetById(int id)
+        {
+            var card = _cardService.GetById(id);
+            if (card == null)
+            {
+                return NotFound();
+            }
+            return Ok(card);
+        }
+
         [HttpPost]
-        public IActionResult Create(Spend spend)
+        public IActionResult Create(Card card)
         {
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _spendService.Create(spend);
-                    return CreatedAtAction(nameof(GetById), new { id = spend.IdSpend }, spend);
+                    _cardService.Create(card);
+                    return CreatedAtAction(nameof(GetById), new { id = card.IdCard }, card);
                 }
                 catch (Exception ex)
                 {
@@ -47,10 +59,10 @@ namespace SamaCardAll.Api.Controllers
             return BadRequest(ModelState);
         }
 
-        [HttpPut("{idSpend}")]
-        public IActionResult Update(int idSpend, Spend spend)
+        [HttpPut("{id}")]
+        public IActionResult Update(int id, Card card)
         {
-            if (idSpend != spend.IdSpend)
+            if (id != card.IdCard)
             {
                 return BadRequest("ID mismatch");
             }
@@ -59,7 +71,7 @@ namespace SamaCardAll.Api.Controllers
             {
                 try
                 {
-                    _spendService.Update(spend);
+                    _cardService.Update(card);
                     return NoContent();
                 }
                 catch (Exception ex)
@@ -75,7 +87,7 @@ namespace SamaCardAll.Api.Controllers
         {
             try
             {
-                _spendService.Delete(id);
+                _cardService.Delete(id);
                 return NoContent();
             }
             catch (Exception ex)
@@ -83,22 +95,5 @@ namespace SamaCardAll.Api.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
-
-        [HttpGet("{id}")]
-        public IActionResult GetById(int id)
-        {
-            var spend = _spendService.GetById(id);
-            if (spend == null)
-            {
-                return NotFound();
-            }
-            return Ok(spend);
-        }
-
-        //[HttpGet("Ping")]
-        //public IActionResult CheckStatus()
-        //{
-        //    return Ok("Ping successful! The API is up and running.");
-        //}
     }
 }

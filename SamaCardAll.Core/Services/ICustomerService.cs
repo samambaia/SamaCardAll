@@ -2,9 +2,9 @@
 
 namespace SamaCardAll.Core.Services
 {
-    internal interface ICustomerService
+    public interface ICustomerService
     {
-        IEnumerable<Customer> GetCustomer();
+        IEnumerable<Customer> GetCustomers();
         Customer GetById(int id);
         void Create(Customer customer);
         void Update(Customer customer);

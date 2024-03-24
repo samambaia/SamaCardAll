@@ -16,8 +16,10 @@ namespace SamaCardAll
             // Register services (replace with your specific service registrations)
             builder.Services.AddControllers(); // Enables controllers for API endpoints
 
-            // Register ISpendService and its implementation
+            // Register Services and its implementation
             builder.Services.AddScoped<ISpendService, SpendService>();
+            builder.Services.AddScoped<ICustomerService, CustomerService>();
+            builder.Services.AddScoped<ICardService, CardService>();
 
             var app = builder.Build();
 

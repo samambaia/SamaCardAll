@@ -30,7 +30,9 @@
                 <td>@card.Number</td>
                 <td>@card.Expiration</td>
                 <td>@card.Brand</td>
-                <td>@card.Active</td>
+                <td>
+                    <input type="checkbox" id="cardActive" checked="@(card.Active == 1)" readonly />
+                </td>
                 <td>
                     <!-- Action buttons for editing/deleting -->
                     <button class="btn btn-primary" @onclick="() => EditCard(card)">Edit</button>
@@ -41,14 +43,15 @@
     </tbody>
 </table>
 
-<ModalDialog @ref="@modalDialog" Title="Create Card">
-    <EditCardForm Card="@card" OnValidSubmit="() => AddCard()" />
+<ModalDialog @ref="@modalDialog" Title="Edit Card">
+    <EditCardForm Card="@card" OnValidSubmit="SaveCard" />
 </ModalDialog>
 
 @code {
     private ModalDialog modalDialog { get; set; }
     private EditCardForm editCardForm { get; set; }
     private List<Card> _cards = new List<Card>();
+    private Card card = new Card();
 
     protected override async Task OnInitializedAsync()
     {
@@ -70,31 +73,65 @@
         modalDialog.Open();
     }
 
-    async Task AddCard()
+    // async Task AddCard()
+    // {
+    //     if (card == null)
+    //     {
+    //         return;
+    //     }
+
+    //     // Assuming you have implemented the EditCardForm component
+    //     // with appropriate validation logic, your 'AddCard' method can be simplified
+    //     // if (await editCardForm.)
+    //     // {
+    //         // Implement your API call and update the _cards list or refresh it
+    //         // when a card is added or updated
+    //         var response = await HttpClient.PostAsJsonAsync<Card>($"/api/Card/", card);
+
+    //         if (response.IsSuccessStatusCode)
+    //         {
+    //             // Instead of adding the card manually, just refresh the list
+    //             _cards = await HttpClient.GetFromJsonAsync<List<Card>>("/api/Card");
+    //             modalDialog.Close();
+    //         }
+
+    //         // Reset the card object after the successful operation
+    //         card = null;
+    //     // }
+    // }
+
+    async Task SaveCard()
     {
         if (card == null)
         {
             return;
         }
 
-        // Assuming you have implemented the EditCardForm component
-        // with appropriate validation logic, your 'AddCard' method can be simplified
-        if (await editCardForm.ValidateAsync())
+        if (card.IdCard == 0)
         {
-            // Implement your API call and update the _cards list or refresh it
-            // when a card is added or updated
+            // New card, use POST
             var response = await HttpClient.PostAsJsonAsync<Card>($"/api/Card/", card);
-
             if (response.IsSuccessStatusCode)
             {
-                // Instead of adding the card manually, just refresh the list
+                // Refresh the card list
                 _cards = await HttpClient.GetFromJsonAsync<List<Card>>("/api/Card");
                 modalDialog.Close();
             }
-
-            // Reset the card object after the successful operation
-            card = null;
         }
+        else
+        {
+            // Existing card, use PUT for update
+            var response = await HttpClient.PutAsJsonAsync<Card>($"/api/Card/{card.IdCard}", card);
+            if (response.IsSuccessStatusCode)
+            {
+                // Refresh the card list
+                _cards = await HttpClient.GetFromJsonAsync<List<Card>>("/api/Card");
+                modalDialog.Close();
+            }
+        }
+
+        // Reset the card object after the operation
+        card = null;
     }
 
     private void EditCard(Card card)

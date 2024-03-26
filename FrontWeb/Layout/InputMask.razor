@@ -1,0 +1,81 @@
+﻿@inject IJSRuntime JSRuntime
+@inherits InputBase<string>
+@using SamaCardAll.FrontWeb
+
+@if (validateOnKeyPress)
+{
+    <input id="@id" @attributes="AdditionalAttributes" class="@CssClass" value="@CurrentValue" @oninput="EventCallback.Factory.CreateBinder<string>(this, __value => CurrentValueAsString = __value, CurrentValueAsString)" />
+}
+else
+{
+    <input id="@id" @attributes="AdditionalAttributes" class="@CssClass" @bind="CurrentValueAsString" />
+}
+
+
+@code {
+
+    [Parameter]
+    public string id { get; set; }
+    [Parameter]
+    public EventCallback<InputChanged> OnChanged { get; set; }
+    [Parameter]
+    public bool validateOnKeyPress { get; set; } = true;
+    protected override void OnInitialized()
+    {
+        if (string.IsNullOrEmpty(id))
+            id = Guid.NewGuid().ToString();
+    }
+
+    private async Task HandleInput(ChangeEventArgs e)
+    {
+        CurrentValueAsString = e.Value.ToString();
+        await OnChanged.InvokeAsync(new InputChanged { value = CurrentValueAsString, unMaskedValue = CurrentValueAsString });
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            object mask = null;
+            if (AdditionalAttributes.TryGetValue("data-mask", out mask))
+            {
+                var pattern = mask.ToString();
+                var isRegEx = pattern.StartsWith("/") && pattern.EndsWith("/");
+                if (isRegEx)
+                    pattern = pattern.TrimStart('/').TrimEnd('/');
+                await JSRuntime.InvokeVoidAsync("mask", id, pattern, isRegEx, false, DotNetObjectReference.Create(this));
+            }
+        }
+    }
+
+    [JSInvokable]
+    public InputChanged returnValue(InputChanged value)
+    {
+        if (!string.IsNullOrEmpty(value.value))
+            OnChanged.InvokeAsync(value);
+        return value;
+
+    }
+    protected override bool TryParseValueFromString(string value, out string result, out string validationErrorMessage)
+    {
+        result = value;
+        validationErrorMessage = null;
+        return true;
+    }
+
+    public async Task updateMask(string mask)
+    {
+        var pattern = mask.ToString();
+        var isRegEx = pattern.StartsWith("/") && pattern.EndsWith("/");
+        if (isRegEx)
+            pattern = pattern.TrimStart('/').TrimEnd('/');
+        await JSRuntime.InvokeVoidAsync("mask", id, pattern, isRegEx, true, DotNetObjectReference.Create(this));
+    }
+
+    public async Task clearValue()
+    {
+        CurrentValue = null;
+        await JSRuntime.InvokeVoidAsync("clearValue", id);
+
+    }
+}

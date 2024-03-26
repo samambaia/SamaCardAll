@@ -1,6 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using SamaCardAll.Core.Services;
 using SamaCardAll.Infra;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace SamaCardAll
 {
@@ -22,6 +25,14 @@ namespace SamaCardAll
             builder.Services.AddScoped<ICardService, CardService>();
 
             var app = builder.Build();
+
+            // Adiciona a configuração de CORS
+            app.UseCors(options =>
+            {
+                options.AllowAnyOrigin()
+                       .AllowAnyMethod()
+                       .AllowAnyHeader();
+            });
 
             app.MapControllers(); // Maps controllers to the request pipeline
 

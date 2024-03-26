@@ -1,0 +1,270 @@
+﻿        @if (!IsBankValid())
+        {
+            <div class="text-danger">Bank is required.</div>
+        }
+        // if (string.IsNullOrWhiteSpace(card.Bank))
+        // {
+        //     await JSRuntime.InvokeAsync<bool>("Alert", "Bank needs to be filled out.");
+        //     return;
+        // }
+
+        // if (string.IsNullOrWhiteSpace(card.Number))
+        // {
+        //     await JSRuntime.InvokeAsync<bool>("Alert", "Number needs to be filled out.");
+        //     return;
+        // }
+
+        // if (string.IsNullOrWhiteSpace(card.Expiration))
+        // {
+        //     await JSRuntime.InvokeAsync<bool>("Alert", "Expiration needs to be filled out.");
+        //     return;
+        // }
+
+
+            private async Task SaveCard()
+    {
+
+
+        var newCard = new Card
+            {
+                IdCard = card.IdCard,
+                Bank = card.Bank,
+                Number = card.Number,
+                Expiration = card.Expiration,
+                Brand = card.Brand,
+                Active = card.Active
+            };
+
+        try
+        {
+            var response = await HttpClient.PostAsJsonAsync($"/api/Card/", newCard);
+
+            if (response.IsSuccessStatusCode)
+            {
+                // If the card is successfully added, update the local list
+                _cards.Add(newCard);
+                modalDialog.Close();
+            }
+            else
+            {
+                // Handle HTTP error
+                Console.WriteLine($"Failed to add card. Status code: {response.StatusCode}");
+            }
+
+        }
+        catch (Exception ex)
+        {
+            // Handle exception
+            Console.WriteLine($"Error occurred: {ex.Message}");
+        }
+    }
+
+
+        // Method to edit a card
+    // private void EditCard(Card card)
+    // {
+    //     EditedCard = card;
+    //     IsEditing = true;
+    // }
+
+    // private async Task SaveCard()
+    // {
+    //     try
+    //     {
+    //         // Implement logic to save changes to the edited card via API
+    //         var response = await HttpClient.PutAsJsonAsync($"/api/Card/{EditedCard.IdCard}", EditedCard);
+
+    //         if (response.IsSuccessStatusCode)
+    //         {
+    //             // If update is successful, refresh the list of cards or update the edited card in the list
+    //             var index = _cards.FindIndex(c => c.IdCard == EditedCard.IdCard);
+    //             if (index != -1)
+    //             {
+    //                 _cards[index] = EditedCard;
+    //             }
+    //         }
+    //         else
+    //         {
+    //             // Handle error case
+    //             var errorMessage = await response.Content.ReadAsStringAsync();
+    //             // Display error message or handle in appropriate way
+    //         }
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         // Handle exception
+    //         Console.WriteLine($"Error occurred: {ex.Message}");
+    //     }
+
+    //     IsEditing = false;
+    // }
+
+
+       // Method to delete a card
+    private async Task DeleteCard(Card card)
+    {
+        var confirmDelete = await JSRuntime.InvokeAsync<bool>("confirm", new object?[] { "Are you sure you want to delete this card?" });
+
+        if (confirmDelete)
+        {
+            // Implement logic to delete card via API
+            var response = await HttpClient.DeleteAsync($"/api/Card/{card.IdCard}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                // If deletion is successful, remove card from the list
+                _cards.Remove(card);
+            }
+            else
+            {
+                // Handle error case
+                var errorMessage = await response.Content.ReadAsStringAsync();
+                // Display error message or handle in appropriate way
+            }
+
+        }
+
+    }
+
+
+    @*         <ModalDialog @ref="@modalDialog" Title="Card Details" onclose="CloseModal">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="cardBank" class="col-form-label">Bank:</label>
+                    <input @bind-value="card.Bank" type="text" id="cardBank" class="form-control">
+                    <ValidationMessage For="@(() => card.Bank)" />
+                </div>
+                <div class="form-group">
+                    <label for="cardNumber class="col-form-label">Number:</label>
+                    <input @bind-value="card.Number" type="text" id="cardNumber" class="form-control" />
+                    <ValidationMessage For="@(() => card.Number)" />
+                </div>
+
+                @* put a mask here: xx/xx *@
+                <div class="form-group">
+                    <label for="cardExpiration" class="col-form-label">Expiration:</label>
+                    <input @bind-value="card.Expiration" type="text" id="cardExpiration" class="form-control" />
+                </div>
+
+                @* put a dropdown here: two options (Visa and Mastercard) *@
+                <div class="form-group">
+                    <label for="cardBrand" class="col-form-label">Brand:</label>
+                    <input @bind-value="card.Brand" type="text" id="cardBrand" class="form-control" />
+                    <ValidationMessage For="@(() => card.Brand)" />
+                </div>
+
+                <div class="form-group">
+                    <label for="cardActive" class="col-form-label">Active:</label>
+                    <input type="checkbox" id="cardActive" @onchange="ToggleActive" checked="@card.Active == 1" />
+                </div>
+
+                <div class="modal-footer">
+@*                     <button class="btn btn-secondary" @onclick="() => modalDialog.Close()">Cancelar</button>
+                    <button type="button" class="btn btn-primary" @onclick="async () => await AddCard()">Save</button>
+ *@
+                    <button class="btn btn-secondary" @onclick="CloseModal">Cancel</button>
+                    <button class="btn btn-primary" @onclick="SaveCard">Save</button>
+                </div>
+            </div>
+        </ModalDialog>
+ *@
+
+
+
+ @code {
+    private ModalDialog modalDialog;
+
+    private List<Card> _cards = new List<Card>();
+    private Card card = new Card();
+
+    // private Card EditedCard { get; set; } = new Card();
+    // private bool IsEditing { get; set; } = false;
+
+    private void ToggleActive(ChangeEventArgs args)
+    {
+        if ((bool)args.Value)
+        {
+            card.Active = 1; // Set to 1 when checked
+        }
+        else
+        {
+            card.Active = 0; // Set to 0 when unchecked
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        // // Captura a URL base do HttpClient
+        // string baseUrl = HttpClient.BaseAddress.AbsoluteUri;
+
+        try
+        {
+            // Fetch cards from API when component initializes
+            _cards = await HttpClient.GetFromJsonAsync<List<Card>>("/api/Card");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Ocorreu um erro ao buscar os cartões da API: " + ex.Message);
+        }
+    }
+
+    private void OpenModal()
+    {
+        card = new Card();
+        modalDialog.Open();
+    }
+
+    private void CloseModal()
+    {
+        modalDialog.Close();
+    }
+
+    private async Task SaveCard()
+    {
+        try
+        {
+            var response = await HttpClient.PostAsJsonAsync("/api/Card", card);
+
+            if (response.IsSuccessStatusCode)
+            {
+                _cards.Add(card);
+                modalDialog.Close();
+            }
+            else
+            {
+                Console.WriteLine($"Failed to add card. Status code: {response.StatusCode}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error occurred: {ex.Message}");
+        }
+    }
+
+
+    private async Task EditCard(Card cardToEdit)
+    {
+        card = cardToEdit;
+        modalDialog.Open();
+    }
+
+    private async Task DeleteCard(Card card)
+    {
+        var confirmDelete = await JSRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to delete this card?");
+
+        if (confirmDelete)
+        {
+            var response = await HttpClient.DeleteAsync($"/api/Card/{card.IdCard}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                _cards.Remove(card);
+            }
+            else
+            {
+                var errorMessage = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Failed to delete card. Error: {errorMessage}");
+            }
+        }
+    }
+}

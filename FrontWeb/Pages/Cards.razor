@@ -22,7 +22,7 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var card in _cards)
+        @foreach (var card in _cards.Skip((currentPage - 1) * recordsPerPage).Take(recordsPerPage))
         {
             <tr>
                 <td>@card.IdCard</td>
@@ -42,6 +42,27 @@
         }
     </tbody>
 </table>
+
+<nav aria-label="Page navigation example">
+    <ul class="pagination justify-content-center">
+        @if (currentPage > 1)
+        {
+            <li class="page-item"><button class="page-link" @onclick="() => OnPageChanged(currentPage - 1)">Previous</button></li>
+        }
+
+        @for (int i = 1; i <= Math.Ceiling((double)_cards.Count / recordsPerPage); i++)
+        {
+            <li class="@(currentPage == i ? "page-item active" : "page-item")">
+                <button class="page-link" @onclick="() => OnPageChanged(i)">@i</button>
+            </li>
+        }
+
+        @if (Math.Ceiling((double)_cards.Count / recordsPerPage) > currentPage)
+        {
+            <li class="page-item"><button class="page-link" @onclick="() => OnPageChanged(currentPage + 1)">Next</button></li>
+        }
+    </ul>
+</nav>
 
 <ModalDialog @ref="@modalDialog" Title=@TitleModal>
     <EditCardForm card="card" OnValidSubmit="HandleValidSubmit"/>
@@ -64,6 +85,9 @@
 
     private String TitleModal = "New Card";
 
+    private int currentPage = 1;
+    private int recordsPerPage = 5;
+
     private async void HandleValidSubmit()
     {
         if (await SaveCard())
@@ -82,6 +106,11 @@
     protected override async Task OnInitializedAsync()
     {
         _cards = await HttpClient.GetFromJsonAsync<List<Card>>("/api/Card");
+    }
+
+    private void OnPageChanged(int newPage)
+    {
+        currentPage = newPage;
     }
 
     private void OpenModal(Card cardToEdit = null)

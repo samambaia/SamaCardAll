@@ -1,43 +1,39 @@
 ﻿@using SamaCardAll.Infra.Models
 @using Microsoft.AspNetCore.Components.Forms
 
-<EditForm Model="@Model" OnValidSubmit="HandleValidSubmit">
-
+<EditForm Model="card" OnValidSubmit="HandleValidSubmit">
     <div class="form-group">
         <label for="Bank">Bank:</label>
-        <InputText id="Bank" class="form-control" @bind-Value="Model.Bank" />
+        <InputText id="Bank" class="form-control" @bind-Value="card.Bank" />
     </div>
     <div class="form-group">
         <label for="Number">Number:</label>
-        <InputText id="Number" class="form-control" @bind-Value="Model.Number" />
+        <InputText id="Number" class="form-control" @bind-Value="card.Number" />
     </div>
 
     <div class="form-group">
         <label for="Expiration">Expiration:</label>
-        <InputText id="Expiration" class="form-control" @bind-Value="Model.Expiration" placeholder="01/30" style="width: 100px" />
+        <InputText id="Expiration" class="form-control" @bind-Value="card.Expiration" placeholder="01/30" style="width: 100px" />
     </div>
 
     <div class="form-group">
         <label for="Brand">Brand:</label>
-        <InputSelect id="Brand" class="form-control" @bind-Value="Model.Brand" style="width: 200px;">
+        <InputSelect id="Brand" class="form-control" @bind-Value="card.Brand" style="width: 200px;">
             <option value="Visa">Visa</option>
             <option value="Mastercard">Mastercard</option>
         </InputSelect>
     </div>
     <div class="form-group">
         <label for="cardActive" class="col-form-label">Active:</label>
-        <input type="checkbox" id="cardActive" checked="@(Model.Active == 1)" @onchange="ToggleActive" />
+        <input type="checkbox" id="cardActive" checked="@(card.Active == 1)" @onchange="ToggleActive" />
     </div>
 
-    <ValidationSummary />
-
     <button type="submit" class="btn btn-primary">Save</button>
-
 </EditForm>
 
 @code {
     [Parameter]
-    public Card Model { get; set; }
+    public Card card { get; set; }
 
     [Parameter]
     public EventCallback OnValidSubmit { get; set; }
@@ -53,11 +49,19 @@
         bool isChecked = (bool)args.Value;
         if (isChecked)
         {
-            Model.Active = 1; // Set to 1 when checked
+            card.Active = 1; // Set to 1 when checked
         }
         else
         {
-            Model.Active = 0; // Set to 0 when unchecked
+            card.Active = 0; // Set to 0 when unchecked
+        }
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (card == null)
+        {
+            throw new InvalidOperationException("EditForm requires a Model parameter");
         }
     }
 }

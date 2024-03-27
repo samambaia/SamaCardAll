@@ -43,8 +43,8 @@
     </tbody>
 </table>
 
-<ModalDialog @ref="@modalDialog" Title="Edit Card">
-    <EditCardForm Model="card" OnValidSubmit="HandleValidSubmit"/>
+<ModalDialog @ref="@modalDialog" Title=@TitleModal>
+    <EditCardForm card="card" OnValidSubmit="HandleValidSubmit"/>
 </ModalDialog>
 
 @code {
@@ -52,18 +52,32 @@
     [Parameter]
     public EventCallback OnValidSubmit { get; set; }
 
+    [Parameter]
+    public ModalDialog modalDialog { get; set; }
+
+    [Parameter]
+    public EditCardForm editCardForm { get; set; }
+
     private Card card = new Card();
 
-    private ModalDialog modalDialog { get; set; }
-    private EditCardForm editCardForm { get; set; }
     private List<Card> _cards = new List<Card>();
 
+    private String TitleModal = "New Card";
 
     private async void HandleValidSubmit()
     {
-        //OnValidSubmit.InvokeAsync();
-        await SaveCard();
+        if (await SaveCard())
+        {
+            await OnValidSubmit.InvokeAsync();
+            modalDialog.Close(); // Close the modal dialog after successful save
+        }
     }
+
+    // private async void HandleValidSubmit()
+    // {
+    //     await OnValidSubmit.InvokeAsync();
+    //     await SaveCard();
+    // }
 
     protected override async Task OnInitializedAsync()
     {
@@ -75,48 +89,79 @@
         if (cardToEdit != null)
         {
             this.card = cardToEdit;
+            TitleModal = "Edit Card";
         }
         else
         {
             this.card = new Card();
+            TitleModal = "New Card";
         }
 
         modalDialog.Open();
     }
 
-    async Task SaveCard()
+    private async Task<bool> SaveCard()
     {
         if (card == null)
-        {
-            return;
-        }
+            return false;
 
-        if (card.IdCard == 0)
+        var response = card.IdCard == 0
+            ? await HttpClient.PostAsJsonAsync<Card>($"/api/Card/", card) // New card, use POST
+            : await HttpClient.PutAsJsonAsync<Card>($"/api/Card/{card.IdCard}", card); // Existing card, use PUT for update
+
+        if (response.IsSuccessStatusCode)
         {
-            // New card, use POST
-            var response = await HttpClient.PostAsJsonAsync<Card>($"/api/Card/", card);
-            if (response.IsSuccessStatusCode)
-            {
-                // Refresh the card list
-                _cards = await HttpClient.GetFromJsonAsync<List<Card>>("/api/Card");
-                modalDialog.Close();
-            }
+            _cards = await HttpClient.GetFromJsonAsync<List<Card>>("/api/Card"); // Refresh the card list
+            return true; // Return true indicating successful save
         }
         else
-        {
-            // Existing card, use PUT for update
-            var response = await HttpClient.PutAsJsonAsync<Card>($"/api/Card/{card.IdCard}", card);
-            if (response.IsSuccessStatusCode)
-            {
-                // Refresh the card list
-                _cards = await HttpClient.GetFromJsonAsync<List<Card>>("/api/Card");
-                modalDialog.Close();
-            }
-        }
-
-        // Reset the card object after the operation
-        card = null;
+            return false; // Return false indicating save failed
     }
+
+    // private async Task SaveCard()
+    // {
+    //     if (card == null)
+    //         return;
+
+    //     var response = card.IdCard == 0
+    //         ? await HttpClient.PostAsJsonAsync<Card>($"/api/Card/", card) // New card, use POST
+    //         : await HttpClient.PutAsJsonAsync<Card>($"/api/Card/{card.IdCard}", card); // Existing card, use PUT for update
+
+    //     if (response.IsSuccessStatusCode)
+    //     {
+    //         _cards = await HttpClient.GetFromJsonAsync<List<Card>>("/api/Card"); // Refresh the card list
+    //         modalDialog.Close(); // Close the modal dialog after successful save
+    //     }
+    // }
+
+    // private async Task SaveCard()
+    // {
+    //     if (card == null)
+    //         return;
+
+    //     if (card.IdCard == 0)
+    //     {
+    //         // New card, use POST
+    //         var response = await HttpClient.PostAsJsonAsync<Card>($"/api/Card/", card);
+    //         if (response.IsSuccessStatusCode)
+    //         {
+    //             // Refresh the card list
+    //             _cards = await HttpClient.GetFromJsonAsync<List<Card>>("/api/Card");
+    //             modalDialog.Close();
+    //         }
+    //     }
+    //     else
+    //     {
+    //         // Existing card, use PUT for update
+    //         var response = await HttpClient.PutAsJsonAsync<Card>($"/api/Card/{card.IdCard}", card);
+    //         if (response.IsSuccessStatusCode)
+    //         {
+    //             // Refresh the card list
+    //             _cards = await HttpClient.GetFromJsonAsync<List<Card>>("/api/Card");
+    //             modalDialog.Close();
+    //         }
+    //     }
+    // }
 
     private void EditCard(Card card)
     {

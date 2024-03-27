@@ -1,76 +1,63 @@
 ﻿@using SamaCardAll.Infra.Models
 @using Microsoft.AspNetCore.Components.Forms
-@using SamaCardAll.FrontWeb
 
-<EditForm Model="card" OnValidSubmit="OnValidSubmit">
-    <DataAnnotationsValidator />
-    <ValidationSummary />
+<EditForm Model="@Model" OnValidSubmit="HandleValidSubmit">
 
     <div class="form-group">
         <label for="Bank">Bank:</label>
-        <InputText id="Bank" class="form-control" @bind-Value="card.Bank" />
+        <InputText id="Bank" class="form-control" @bind-Value="Model.Bank" />
     </div>
     <div class="form-group">
         <label for="Number">Number:</label>
-        <InputText id="Number" class="form-control" @bind-Value="card.Number" />
+        <InputText id="Number" class="form-control" @bind-Value="Model.Number" />
     </div>
 
     <div class="form-group">
         <label for="Expiration">Expiration:</label>
-        <InputText id="Expiration" class="form-control" @bind-Value="card.Expiration" placeholder="01/30" style="width: 100px" />
+        <InputText id="Expiration" class="form-control" @bind-Value="Model.Expiration" placeholder="01/30" style="width: 100px" />
     </div>
-
-@*     <div class="form-group">
-        <label for="Expiration">Expiration:</label>
-        <InputMask id="Expiration" @bind-Value="card.Expiration" class="form-control" data-mask="00/00" OnChanged="OnMaskChanged" placeholder="01/30" style="width: 100px" />
-    </div>
- *@
 
     <div class="form-group">
         <label for="Brand">Brand:</label>
-        <InputSelect id="Brand" class="form-control" @bind-Value="card.Brand" style="width: 200px;">
+        <InputSelect id="Brand" class="form-control" @bind-Value="Model.Brand" style="width: 200px;">
             <option value="Visa">Visa</option>
             <option value="Mastercard">Mastercard</option>
         </InputSelect>
     </div>
     <div class="form-group">
         <label for="cardActive" class="col-form-label">Active:</label>
-        <input type="checkbox" id="cardActive" checked="@(card.Active == 1)" @onchange="ToggleActive" />
+        <input type="checkbox" id="cardActive" checked="@(Model.Active == 1)" @onchange="ToggleActive" />
     </div>
+
+    <ValidationSummary />
+
     <button type="submit" class="btn btn-primary">Save</button>
+
 </EditForm>
 
 @code {
     [Parameter]
-    public Card card { get; set; }
+    public Card Model { get; set; }
 
     [Parameter]
     public EventCallback OnValidSubmit { get; set; }
+
+    private void HandleValidSubmit()
+    {
+        // Pass the event upwards to the parent component
+        OnValidSubmit.InvokeAsync();
+    }
 
     private void ToggleActive(ChangeEventArgs args)
     {
         bool isChecked = (bool)args.Value;
         if (isChecked)
         {
-            card.Active = 1; // Set to 1 when checked
+            Model.Active = 1; // Set to 1 when checked
         }
         else
         {
-            card.Active = 0; // Set to 0 when unchecked
+            Model.Active = 0; // Set to 0 when unchecked
         }
     }
-
-    bool wasSubmitted { get; set; }
-    string maskedOnly { get; set; }
-    string rawValue { get; set; }
-    private void OnMaskChanged(InputChanged input)
-    {
-        rawValue = input.unMaskedValue;
-    }
-
-    private void Submit()
-    {
-        wasSubmitted = true;
-    }
-
 }

@@ -28,8 +28,7 @@ namespace SamaCardAll.Core.Services
 
         public void Create(Card card)
         {
-
-            card.IdCard = _cards.Count + 1;
+            card.IdCard = _cards.Max(s => s.IdCard) + 1; 
 
             _context.Add(card);
             _context.SaveChanges();

@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Remove="Layout\EditSpendForm_old.razor" />
     <Content Remove="Layout\InputMask.razor" />
     <Content Remove="Pages\Counter.razor" />
     <Content Remove="Pages\Weather.razor" />

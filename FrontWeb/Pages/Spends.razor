@@ -7,8 +7,8 @@
 
 <h3>Spends</h3>
 
-@* <button class="btn btn-primary" @onclick="() => OpenModal()">New Spend</button>
- *@
+<button class="btn btn-primary" @onclick="() => OpenModal()">New Spend</button>
+
 <table class="table">
     <thead>
         <tr>
@@ -21,7 +21,7 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var spend in _spends)
+        @foreach (var spend in _spends.Skip((currentPage -1) * recordsPerPage).Take(recordsPerPage))
         {
             <tr>
                 <td>@spend.IdSpend</td>
@@ -29,23 +29,116 @@
                 <td>@spend.Amount</td>
                 <td>@(spend.Card != null ? spend.Card.Bank : "")</td>
                 <td>@(spend.Customer != null ? spend.Customer.CustomerName : "")</td>
-                @*                 <td>
+                <td>
                     <!-- Action buttons for editing/deleting -->
-                    <button class="btn btn-primary" @onclick="() => Edit(customer)">Edit</button>
-                    <button class="btn btn-danger" @onclick="() => Delete(customer)">Delete</button>
+                    <button class="btn btn-primary" @onclick="() => Edit(spend)">Edit</button>
+                    <button class="btn btn-danger" @onclick="() => Delete(spend)">Delete</button>
                 </td>
- *@            </tr>
+            </tr>
         }
     </tbody>
 </table>
+
+<nav aria-label="Page navigation example">
+    <ul class="pagination justify-content-center">
+        @if (currentPage > 1)
+        {
+            <li class="page-item"><button class="page-link" @onclick="() => OnPageChanged(currentPage - 1)">Previous</button></li>
+        }
+
+        @for (int i = 1; i <= Math.Ceiling((double)_spends.Count / recordsPerPage); i++)
+        {
+            <li class="@(currentPage == i ? "page-item active" : "page-item")">
+                <button class="page-link" @onclick="() => OnPageChanged(i)">@i</button>
+            </li>
+        }
+
+        @if (Math.Ceiling((double)_spends.Count / recordsPerPage) > currentPage)
+        {
+            <li class="page-item"><button class="page-link" @onclick="() => OnPageChanged(currentPage + 1)">Next</button></li>
+        }
+    </ul>
+</nav>
+
+<ModalDialog @ref="@modalDialog" Title=@TitleModal>
+    <EditSpendForm spend="spend" OnValidSubmit="HandleValidSubmit"/>
+</ModalDialog>
 
 @code {
     private Spend spend = new Spend();
     private List<Spend> _spends = new List<Spend>();
 
+    [Parameter]
+    public ModalDialog modalDialog { get; set; }
+
+    [Parameter]
+    public EditSpendForm editSpendForm { get; set; }
+
+    private String TitleModal = "New Card";
+
+    private int currentPage = 1;
+    private int recordsPerPage = 5;
+
     protected override async Task OnInitializedAsync()
     {
+        // Loading all spends
         _spends = await HttpClient.GetFromJsonAsync<List<Spend>>("/api/Spend?include=card,customer");
+
+        // // Loading all Customers
+        // _customers = await HttpClient.GetFromJsonAsync<List<Customer>>("/api/Customer");
+
+        // // Loading all Cards
+        // _cards = await HttpClient.GetFromJsonAsync<List<Card>>("/api/Card");
     }
 
+    private async void HandleValidSubmit()
+    {
+        // if (await Save())
+        // {
+        //     await OnValidSubmit.InvokeAsync();
+        //     modalDialog.Close();
+        // }
+        modalDialog.Close();
+    }
+
+    private void OnPageChanged(int newPage)
+    {
+        currentPage = newPage;
+    }
+
+    private void OpenModal(Spend spendToEdit = null)
+    {
+        if (spendToEdit != null)
+        {
+            this.spend = spendToEdit;
+            TitleModal = "Edit Spend";
+        }
+        else
+        {
+            this.spend = new Spend();
+            TitleModal = "New Spend";
+        }
+
+        modalDialog.Open();
+    }
+
+    private void Edit(Spend spend)
+    {
+        OpenModal(spend);
+    }
+
+    private async Task Delete(Spend spend)
+    {
+        var confirmDelete = await JSRuntime.InvokeAsync<bool>("confirm", new object?[] { "Are you sure you want to delete this Spend?" });
+
+        if (confirmDelete)
+        {
+            var response = await HttpClient.DeleteAsync($"/api/Spend/{spend.IdSpend}");
+            if (response.IsSuccessStatusCode)
+            {
+                // Remove the spend from the list
+                _spends.Remove(spend);
+            }
+        }
+    }
 }

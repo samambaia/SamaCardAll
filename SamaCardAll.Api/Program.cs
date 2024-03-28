@@ -1,9 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using SamaCardAll.Core.Services;
 using SamaCardAll.Infra;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 
 namespace SamaCardAll
 {

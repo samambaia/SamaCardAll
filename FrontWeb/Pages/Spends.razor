@@ -1,0 +1,51 @@
+﻿@page "/spends"
+
+@using SamaCardAll.Infra.Models
+
+@inject HttpClient HttpClient
+@inject IJSRuntime JSRuntime;
+
+<h3>Spends</h3>
+
+@* <button class="btn btn-primary" @onclick="() => OpenModal()">New Spend</button>
+ *@
+<table class="table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Expense</th>
+            <th>Amount</th>
+            <th>Card Bank</th>
+            <th>Customer Name</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var spend in _spends)
+        {
+            <tr>
+                <td>@spend.IdSpend</td>
+                <td>@spend.Expenses</td>
+                <td>@spend.Amount</td>
+                <td>@(spend.Card != null ? spend.Card.Bank : "")</td>
+                <td>@(spend.Customer != null ? spend.Customer.CustomerName : "")</td>
+                @*                 <td>
+                    <!-- Action buttons for editing/deleting -->
+                    <button class="btn btn-primary" @onclick="() => Edit(customer)">Edit</button>
+                    <button class="btn btn-danger" @onclick="() => Delete(customer)">Delete</button>
+                </td>
+ *@            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private Spend spend = new Spend();
+    private List<Spend> _spends = new List<Spend>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _spends = await HttpClient.GetFromJsonAsync<List<Spend>>("/api/Spend?include=card,customer");
+    }
+
+}

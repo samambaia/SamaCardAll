@@ -1,0 +1,155 @@
+﻿@page "/customers"
+
+@using SamaCardAll.Infra.Models
+
+@inject HttpClient HttpClient
+@inject IJSRuntime JSRuntime;
+
+<h3>Customers</h3>
+
+<button class="btn btn-primary" @onclick="() => OpenModal()">New Customer</button>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Active</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var customer in _customers)
+        {
+            <tr>
+                <td>@customer.IdCustomer</td>
+                <td>@customer.CustomerName</td>
+                <td>
+                    <input type="checkbox" id="customerActive" checked="@(customer.Active == 1)" readonly />
+                </td>
+                <td>
+                    <!-- Action buttons for editing/deleting -->
+                    <button class="btn btn-primary" @onclick="() => Edit(customer)">Edit</button>
+                    <button class="btn btn-danger" @onclick="() => Delete(customer)">Delete</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<ModalDialog @ref="@modalDialog" Title=@TitleModal>
+    <EditForm Model="customer" OnValidSubmit="HandleValidSubmit">
+        <div class="form-group">
+            <label for="customerName">Customer Name:</label>
+            <InputText id="Name" class="form-control" @bind-Value="customer.CustomerName" />
+        </div>
+        <div class="form-group">
+            <label for="customerActive" class="col-form-label">Active:</label>
+            <input type="checkbox" id="customerActive" checked="@(customer.Active == 1)" @onchange="ToggleActive" />
+        </div>
+
+        <p />
+        <button type="submit" class="btn btn-primary" @onclick="HandleValidSubmit">Save</button>
+    </EditForm>
+</ModalDialog>
+
+
+@code {
+
+    [Parameter]
+    public EventCallback OnValidSubmit { get; set; }
+
+    [Parameter]
+    public ModalDialog modalDialog { get; set; }
+
+    private Customer customer = new Customer();
+
+    private List<Customer> _customers = new List<Customer>();
+
+    private String TitleModal = "New Customer";
+
+    protected override async Task OnInitializedAsync()
+    {
+        _customers = await HttpClient.GetFromJsonAsync<List<Customer>>("/api/Customer");
+    }
+
+    private async void HandleValidSubmit()
+    {
+        if (await Save())
+        {
+            await OnValidSubmit.InvokeAsync();
+            modalDialog.Close();
+        }
+    }
+
+    private void OpenModal(Customer customerToEdit = null)
+    {
+        if (customerToEdit != null)
+        {
+            this.customer = customerToEdit;
+            TitleModal = "Edit Customer";
+        }
+        else
+        {
+            this.customer = new Customer();
+            TitleModal = "New Customer";
+        }
+
+        modalDialog.Open();
+    }
+
+    private async Task<bool> Save()
+    {
+        if (customer == null)
+            return false;
+
+        var response = customer.IdCustomer == 0
+            ? await HttpClient.PostAsJsonAsync<Customer>($"/api/Customer/", customer) // New customer, use POST
+            : await HttpClient.PutAsJsonAsync<Customer>($"/api/Customer/{customer.IdCustomer}", customer); // Existing customer, use PUT for update
+
+        if (response.IsSuccessStatusCode)
+        {
+            _customers = await HttpClient.GetFromJsonAsync<List<Customer>>("/api/Customer"); // Refresh the customer list
+            return true; // Return true indicating successful save
+        }
+        else
+        {
+            Console.WriteLine($"Error saving customer: {response.StatusCode} - {await response.Content.ReadAsStringAsync()}");
+            return false; // Return false indicating save failed
+
+        }
+    }
+
+    private void Edit(Customer customer)
+    {
+        OpenModal(customer);
+    }
+
+    private async Task Delete(Customer customer)
+    {
+        var confirmDelete = await JSRuntime.InvokeAsync<bool>("confirm", new object?[] { "Are you sure you want to delete this Customer?" });
+
+        if (confirmDelete)
+        {
+            var response = await HttpClient.DeleteAsync($"/api/Customer/{customer.IdCustomer}");
+            if (response.IsSuccessStatusCode)
+            {
+                // Remove the card from the list
+                _customers.Remove(customer);
+            }
+        }
+    }
+
+    private void ToggleActive(ChangeEventArgs args)
+    {
+        bool isChecked = (bool)args.Value;
+        if (isChecked)
+        {
+            customer.Active = 1; // Set to 1 when checked
+        }
+        else
+        {
+            customer.Active = 0; // Set to 0 when unchecked
+        }
+    }
+}

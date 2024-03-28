@@ -35,8 +35,8 @@
                 </td>
                 <td>
                     <!-- Action buttons for editing/deleting -->
-                    <button class="btn btn-primary" @onclick="() => EditCard(card)">Edit</button>
-                    <button class="btn btn-danger" @onclick="() => DeleteCard(card)">Delete</button>
+                    <button class="btn btn-primary" @onclick="() => Edit(card)">Edit</button>
+                    <button class="btn btn-danger" @onclick="() => Delete(card)">Delete</button>
                 </td>
             </tr>
         }
@@ -88,24 +88,18 @@
     private int currentPage = 1;
     private int recordsPerPage = 5;
 
-    private async void HandleValidSubmit()
-    {
-        if (await SaveCard())
-        {
-            await OnValidSubmit.InvokeAsync();
-            modalDialog.Close(); // Close the modal dialog after successful save
-        }
-    }
-
-    // private async void HandleValidSubmit()
-    // {
-    //     await OnValidSubmit.InvokeAsync();
-    //     await SaveCard();
-    // }
-
     protected override async Task OnInitializedAsync()
     {
         _cards = await HttpClient.GetFromJsonAsync<List<Card>>("/api/Card");
+    }
+
+    private async void HandleValidSubmit()
+    {
+        if (await Save())
+        {
+            await OnValidSubmit.InvokeAsync();
+            modalDialog.Close();
+        }
     }
 
     private void OnPageChanged(int newPage)
@@ -129,7 +123,7 @@
         modalDialog.Open();
     }
 
-    private async Task<bool> SaveCard()
+    private async Task<bool> Save()
     {
         if (card == null)
             return false;
@@ -147,57 +141,12 @@
             return false; // Return false indicating save failed
     }
 
-    // private async Task SaveCard()
-    // {
-    //     if (card == null)
-    //         return;
-
-    //     var response = card.IdCard == 0
-    //         ? await HttpClient.PostAsJsonAsync<Card>($"/api/Card/", card) // New card, use POST
-    //         : await HttpClient.PutAsJsonAsync<Card>($"/api/Card/{card.IdCard}", card); // Existing card, use PUT for update
-
-    //     if (response.IsSuccessStatusCode)
-    //     {
-    //         _cards = await HttpClient.GetFromJsonAsync<List<Card>>("/api/Card"); // Refresh the card list
-    //         modalDialog.Close(); // Close the modal dialog after successful save
-    //     }
-    // }
-
-    // private async Task SaveCard()
-    // {
-    //     if (card == null)
-    //         return;
-
-    //     if (card.IdCard == 0)
-    //     {
-    //         // New card, use POST
-    //         var response = await HttpClient.PostAsJsonAsync<Card>($"/api/Card/", card);
-    //         if (response.IsSuccessStatusCode)
-    //         {
-    //             // Refresh the card list
-    //             _cards = await HttpClient.GetFromJsonAsync<List<Card>>("/api/Card");
-    //             modalDialog.Close();
-    //         }
-    //     }
-    //     else
-    //     {
-    //         // Existing card, use PUT for update
-    //         var response = await HttpClient.PutAsJsonAsync<Card>($"/api/Card/{card.IdCard}", card);
-    //         if (response.IsSuccessStatusCode)
-    //         {
-    //             // Refresh the card list
-    //             _cards = await HttpClient.GetFromJsonAsync<List<Card>>("/api/Card");
-    //             modalDialog.Close();
-    //         }
-    //     }
-    // }
-
-    private void EditCard(Card card)
+    private void Edit(Card card)
     {
         OpenModal(card);
     }
 
-    private async Task DeleteCard(Card card)
+    private async Task Delete(Card card)
     {
         var confirmDelete = await JSRuntime.InvokeAsync<bool>("confirm", new object?[] { "Are you sure you want to delete this card?" });
 

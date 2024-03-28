@@ -29,7 +29,7 @@ namespace SamaCardAll.Core.Services
 
         void ICustomerService.Create(Customer customer)
         {
-            customer.IdCustomer = _customers.Count + 1;
+            customer.IdCustomer = _customers.Max(c => c.IdCustomer) + 1;
 
             _context.Add(customer);
             _context.SaveChanges();

@@ -1,0 +1,8 @@
+﻿Based on the code you provided, here are the endpoints for your CustomersController:
+
+HTTP Verb	Endpoint	Description
+GET	api/customer	Retrieve a list of all customers.
+GET	api/customer/{id}	Retrieve a specific customer by ID.
+POST	api/customer	Create a new customer.
+PUT	api/customer/{id}	Update a customer by ID.
+DELETE	api/customer/{id}	Delete a customer by ID.

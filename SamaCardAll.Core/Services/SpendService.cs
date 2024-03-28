@@ -1,5 +1,7 @@
 ﻿using SamaCardAll.Infra;
 using SamaCardAll.Infra.Models;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
 
 namespace SamaCardAll.Core.Services
 {
@@ -14,7 +16,12 @@ namespace SamaCardAll.Core.Services
             _context = context;
 
             // Initialize Spend
-            _spends = _context.Spends.ToList(); 
+            //_spends = _context.Spends.ToList(); 
+            var query = _context.Spends
+                .Include(s => s.Card)
+                .Include(s => s.Customer);
+
+            _spends = query.ToList();
         }
 
         //IEnumerable<Spend> GetSpends()
@@ -100,9 +107,16 @@ namespace SamaCardAll.Core.Services
         //    }
         //}
 
-        IEnumerable<Spend> ISpendService.GetSpends()
+        //IEnumerable<Spend> ISpendService.GetSpends()
+        //{
+        //    // Return all Spends
+        //    return _spends;
+        //}
+
+        // Assuming _spends is a DbSet<Spend> or IQueryable<Spend>
+        public IEnumerable<Spend> GetSpends()
         {
-            // Return all Spends
+            // Return IQueryable to enable further querying
             return _spends;
         }
 
@@ -115,7 +129,7 @@ namespace SamaCardAll.Core.Services
         void ISpendService.Create(Spend spend)
         {
             // Define de ID
-            spend.IdSpend = _spends.Count + 1;
+            spend.IdSpend = _spends.Max(s => s.IdSpend) + 1;
 
             // Add a new expense
             _context.Add(spend);

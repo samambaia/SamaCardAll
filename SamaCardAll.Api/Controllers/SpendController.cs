@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using SamaCardAll.Core.Services;
 using SamaCardAll.Infra.Models;
 
@@ -28,6 +29,33 @@ namespace SamaCardAll.Api.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+
+        //[HttpGet]
+        //public IActionResult GetAll(string include = "")
+        //{
+        //    try
+        //    {
+        //        IEnumerable<Spend> spendsQuery = _spendService.GetSpends();
+
+        //        // Check if include parameter is provided and include related entities accordingly
+        //        if (!string.IsNullOrEmpty(include))
+        //        {
+        //            foreach (var navProperty in include.Split(',', StringSplitOptions.RemoveEmptyEntries))
+        //            {
+        //                spendsQuery = spendsQuery.Include(navProperty);
+        //            }
+        //        }
+
+        //        // Execute the query and return the results
+        //        IEnumerable<Spend> spends = spendsQuery.ToList();
+        //        return Ok(spends);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(500, $"Internal server error: {ex.Message}");
+        //    }
+        //}
+
 
         [HttpPost]
         public IActionResult Create(Spend spend)

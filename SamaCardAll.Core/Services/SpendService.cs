@@ -130,6 +130,7 @@ namespace SamaCardAll.Core.Services
         {
             // Define de ID
             spend.IdSpend = _spends.Max(s => s.IdSpend) + 1;
+            spend.UserIdUser = 1;
 
             // Add a new expense
             _context.Add(spend);

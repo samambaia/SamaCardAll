@@ -80,7 +80,6 @@
     public EditCardForm editCardForm { get; set; }
 
     private Card card = new Card();
-
     private List<Card> _cards = new List<Card>();
 
     private String TitleModal = "New Card";
@@ -135,10 +134,14 @@
         if (response.IsSuccessStatusCode)
         {
             _cards = await HttpClient.GetFromJsonAsync<List<Card>>("/api/Card"); // Refresh the card list
+            StateHasChanged();
             return true; // Return true indicating successful save
         }
         else
+        {
+            Console.WriteLine($"Error saving Card: {response.StatusCode} - {await response.Content.ReadAsStringAsync()}");
             return false; // Return false indicating save failed
+        }
     }
 
     private void Edit(Card card)

@@ -110,13 +110,13 @@
         if (response.IsSuccessStatusCode)
         {
             _customers = await HttpClient.GetFromJsonAsync<List<Customer>>("/api/Customer"); // Refresh the customer list
+            StateHasChanged();
             return true; // Return true indicating successful save
         }
         else
         {
             Console.WriteLine($"Error saving customer: {response.StatusCode} - {await response.Content.ReadAsStringAsync()}");
             return false; // Return false indicating save failed
-
         }
     }
 

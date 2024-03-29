@@ -37,7 +37,7 @@
     </div>
     <div class="form-group">
         <label for="InstallmentPlan">Installment Plan:</label>
-        <InputNumber id="InstallmentPlan" class="form-control" @bind-Value="spend.InstallmentPlan" @oninput="UpdateInstallmentPlan" style="width: 100px" />
+        <InputNumber id="InstallmentPlan" class="form-control" @bind-Value="spend.InstallmentPlan" @oninput="UpdateInstallmentPlan" Min="1" Max="18" style="width: 100px" />
     </div>
 
     <div class="form-group">
@@ -50,11 +50,17 @@
 
 @code {
 
-        [Parameter]
-        public Spend spend { get; set; }
+    [Parameter]
+    public Spend spend { get; set; }
 
-        [Parameter]
-        public EventCallback OnValidSubmit { get; set; }
+    [Parameter]
+    public EventCallback OnValidSubmit { get; set; }
+
+    [Parameter]
+    public decimal pInstallmentValue { get; set; }
+
+    [Parameter]
+    public decimal pAmount { get; set; }
 
     private List<Customer> _customers = new List<Customer>();
     private List<Card> _cards = new List<Card>();
@@ -127,6 +133,14 @@
         if (spend == null)
         {
             throw new InvalidOperationException("EditForm requires a Model parameter");
+        }
+        else
+        {
+            if (spend.IdSpend != 0)
+            {
+                formattedAmount = pAmount.ToString("C");
+                InstallmentValue = pInstallmentValue;
+            }
         }
     }
 }

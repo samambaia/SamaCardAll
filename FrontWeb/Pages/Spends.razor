@@ -4,6 +4,7 @@
 
 @inject HttpClient HttpClient
 @inject IJSRuntime JSRuntime;
+@inject NavigationManager NavigationManager;
 
 <h3>Spends</h3>
 
@@ -61,20 +62,24 @@
 </nav>
 
 <ModalDialog @ref="@modalDialog" Title=@TitleModal>
-    <EditSpendForm spend="spend" OnValidSubmit="HandleValidSubmit"/>
+    <EditSpendForm spend="spend" OnValidSubmit="HandleValidSubmit" pAmount="@amount" pInstallmentValue="@installmentValue" />
 </ModalDialog>
 
 @code {
-    private Spend spend = new Spend();
-    private List<Spend> _spends = new List<Spend>();
+
+    [Parameter]
+    public EventCallback OnValidSubmit { get; set; }
 
     [Parameter]
     public ModalDialog modalDialog { get; set; }
 
-    [Parameter]
-    public EditSpendForm editSpendForm { get; set; }
+    private Spend spend = new Spend();
+    private List<Spend> _spends = new List<Spend>();
 
-    private String TitleModal = "New Card";
+    private decimal amount;
+    private decimal installmentValue;
+
+    private String TitleModal = "New Spend";
 
     private int currentPage = 1;
     private int recordsPerPage = 5;
@@ -83,21 +88,15 @@
     {
         // Loading all spends
         _spends = await HttpClient.GetFromJsonAsync<List<Spend>>("/api/Spend?include=card,customer");
-
-        // // Loading all Customers
-        // _customers = await HttpClient.GetFromJsonAsync<List<Customer>>("/api/Customer");
-
-        // // Loading all Cards
-        // _cards = await HttpClient.GetFromJsonAsync<List<Card>>("/api/Card");
     }
 
     private async void HandleValidSubmit()
     {
-        // if (await Save())
-        // {
-        //     await OnValidSubmit.InvokeAsync();
-        //     modalDialog.Close();
-        // }
+        if (await Save())
+        {
+            await OnValidSubmit.InvokeAsync();
+            modalDialog.Close();
+        }
         modalDialog.Close();
     }
 
@@ -111,6 +110,10 @@
         if (spendToEdit != null)
         {
             this.spend = spendToEdit;
+
+            amount = this.spend.Amount;
+            installmentValue = this.spend.InstallmentValue;
+
             TitleModal = "Edit Spend";
         }
         else
@@ -120,6 +123,29 @@
         }
 
         modalDialog.Open();
+    }
+
+    private async Task<bool> Save()
+    {
+        if (spend == null)
+            return false;
+
+        var response = spend.IdSpend == 0
+            ? await HttpClient.PostAsJsonAsync<Spend>($"/api/Spend/", spend) // New spend, use POST
+            : await HttpClient.PutAsJsonAsync<Spend>($"/api/Spend/{spend.IdSpend}", spend); // Existing spend, use PUT for update
+
+        if (response.IsSuccessStatusCode)
+        {
+            // Refresh the spend list
+            _spends = await HttpClient.GetFromJsonAsync<List<Spend>>("/api/Spend?include=card,customer");
+            StateHasChanged();
+            return true; // Return true indicating successful save
+        }
+        else
+        {
+            Console.WriteLine($"Error saving Spend: {response.StatusCode} - {await response.Content.ReadAsStringAsync()}");
+            return false; // Return false indicating save failed
+        }
     }
 
     private void Edit(Spend spend)

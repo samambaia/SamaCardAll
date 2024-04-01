@@ -2,14 +2,14 @@
 
 namespace SamaCardAll.Api.Controllers
 {
-    [Route("")]
+    [Route("api/[controller]")]
     [ApiController]
     public class HomeController : ControllerBase
     {
         [HttpGet]
         public IActionResult Index()
         {
-            return Redirect("/api/Spend");
+            return Ok("Success!");
         }
     }
 }

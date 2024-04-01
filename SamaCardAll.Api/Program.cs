@@ -32,7 +32,9 @@ namespace SamaCardAll
             });
 
             app.MapControllers(); // Maps controllers to the request pipeline
-
+            
+            app.MapGet("/", () => "API is Running...");
+            
             app.Run();
         }
     }

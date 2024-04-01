@@ -12,7 +12,6 @@
 <table class="table">
     <thead>
         <tr>
-            <th>ID</th>
             <th>Bank</th>
             <th>Number</th>
             <th>Expiration</th>
@@ -25,13 +24,12 @@
         @foreach (var card in _cards.Skip((currentPage - 1) * recordsPerPage).Take(recordsPerPage))
         {
             <tr>
-                <td>@card.IdCard</td>
                 <td>@card.Bank</td>
                 <td>@card.Number</td>
                 <td>@card.Expiration</td>
                 <td>@card.Brand</td>
                 <td>
-                    <input type="checkbox" id="cardActive" checked="@(card.Active == 1)" readonly />
+                    <input type="checkbox" id="cardActive" checked="@(card.Active == 1)" disabled/>
                 </td>
                 <td>
                     <!-- Action buttons for editing/deleting -->

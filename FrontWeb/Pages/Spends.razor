@@ -27,7 +27,7 @@
             <tr>
                 <td>@spend.IdSpend</td>
                 <td>@spend.Expenses</td>
-                <td>@spend.Amount</td>
+                <td>@spend.Amount.ToString("C")</td>
                 <td>@(spend.Card != null ? spend.Card.Bank : "")</td>
                 <td>@(spend.Customer != null ? spend.Customer.CustomerName : "")</td>
                 <td>

@@ -12,7 +12,6 @@
 <table class="table">
     <thead>
         <tr>
-            <th>ID</th>
             <th>Name</th>
             <th>Active</th>
             <th>Actions</th>
@@ -22,10 +21,9 @@
         @foreach (var customer in _customers)
         {
             <tr>
-                <td>@customer.IdCustomer</td>
                 <td>@customer.CustomerName</td>
                 <td>
-                    <input type="checkbox" id="customerActive" checked="@(customer.Active == 1)" readonly />
+                    <input type="checkbox" id="customerActive" checked="@(customer.Active == 1)" disabled/>
                 </td>
                 <td>
                     <!-- Action buttons for editing/deleting -->

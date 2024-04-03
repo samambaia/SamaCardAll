@@ -1,0 +1,11 @@
+﻿<div class="alert alert-danger" style="display:@(errorVisible ? "block" : "none")">
+    @errorMessage
+</div>
+
+@code {
+    [Parameter]
+    public bool errorVisible { get; set; }
+
+    [Parameter]
+    public string errorMessage { get; set; }
+}

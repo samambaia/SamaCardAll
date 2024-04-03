@@ -62,6 +62,8 @@
     </ul>
 </nav>
 
+<ErrorMessage ErrorVisible="@errorVisible" ErrorMessage="@errorMessage" />
+
 <ModalDialog @ref="@modalDialog" Title=@TitleModal>
     <EditCardForm card="card" OnValidSubmit="HandleValidSubmit"/>
 </ModalDialog>
@@ -76,6 +78,10 @@
 
     [Parameter]
     public EditCardForm editCardForm { get; set; }
+
+    // Using the ErrorMessage Component
+    private bool errorVisible { get; set; }
+    private string errorMessage { get; set; }
 
     private Card card = new Card();
     private List<Card> _cards = new List<Card>();
@@ -153,13 +159,32 @@
 
         if (confirmDelete)
         {
-            var response = await HttpClient.DeleteAsync($"/api/Card/{card.IdCard}");
-            if (response.IsSuccessStatusCode)
+            try
             {
-                // Remove the card from the list
-                _cards.Remove(card);
+                var response = await HttpClient.DeleteAsync($"/api/Card/{card.IdCard}");
+                if (response.IsSuccessStatusCode)
+                {
+                    // Remove the card from the list and update List
+                    _cards.Remove(card);
+                    StateHasChanged();
+                }
+                else
+                {
+                    // Extract error message from response body
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    int startIndex = errorContent.IndexOf("SQLite Error");
+                    var errorSubstring = errorContent.Substring(startIndex, 48);
+                    errorMessage = $"Error: {errorSubstring}";
+                    errorVisible = true;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                // Handle Network Error
+                errorVisible = true;
+                errorMessage = $"Error: {ex.Message}";
             }
         }
     }
-
 }

@@ -1,6 +1,7 @@
 ﻿@page "/customers"
 
 @using SamaCardAll.Infra.Models
+@using System.Text.Json
 
 @inject HttpClient HttpClient
 @inject IJSRuntime JSRuntime;
@@ -35,6 +36,8 @@
     </tbody>
 </table>
 
+<ErrorMessage ErrorVisible="@errorVisible" ErrorMessage="@errorMessage" />
+
 <ModalDialog @ref="@modalDialog" Title=@TitleModal>
     <EditForm Model="customer" OnValidSubmit="HandleValidSubmit">
         <div class="form-group">
@@ -53,12 +56,15 @@
 
 
 @code {
-
     [Parameter]
     public EventCallback OnValidSubmit { get; set; }
 
     [Parameter]
     public ModalDialog modalDialog { get; set; }
+
+    // Using the ErrorMessage Component
+    private bool errorVisible { get; set; }
+    private string errorMessage { get; set; }
 
     private Customer customer = new Customer();
 
@@ -129,11 +135,30 @@
 
         if (confirmDelete)
         {
-            var response = await HttpClient.DeleteAsync($"/api/Customer/{customer.IdCustomer}");
-            if (response.IsSuccessStatusCode)
+            try
             {
-                // Remove the card from the list
-                _customers.Remove(customer);
+                var response = await HttpClient.DeleteAsync($"/api/Customer/{customer.IdCustomer}");
+                if (response.IsSuccessStatusCode)
+                {
+                    // Remove the card from the list
+                    _customers.Remove(customer);
+                    StateHasChanged();
+                }
+                else
+                {
+                    // Extract error message from response body
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    int startIndex = errorContent.IndexOf("SQLite Error");
+                    var errorSubstring = errorContent.Substring(startIndex, 48);
+                    errorMessage = $"Error: {errorSubstring}";
+                    errorVisible = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                // Handle Network Error
+                errorVisible = true;
+                errorMessage = $"Error: {ex.Message}";
             }
         }
     }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using SamaCardAll.Core.Services;
 using SamaCardAll.Infra.Models;
 
@@ -91,8 +92,20 @@ namespace SamaCardAll.Api.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                if (ex is DbUpdateException)
+                {
+                    return BadRequest($"Could not delete {ex.InnerException}");
+                }
+                else
+                    return StatusCode(500, $"Internal server error: {ex.Message}");
             }
+        }
+    }
+
+    public class ForeignKeyException : Exception
+    {
+        public ForeignKeyException(string message) : base(message)
+        {
         }
     }
 }

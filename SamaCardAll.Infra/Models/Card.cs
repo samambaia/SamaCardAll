@@ -15,6 +15,7 @@ public class Card
     public string? Expiration { get; set; }
     [Required]
     public string? Brand { get; set;}
+    // 1 = Active, 0 = Inactive
     public short Active {  get; set; }
 
 }

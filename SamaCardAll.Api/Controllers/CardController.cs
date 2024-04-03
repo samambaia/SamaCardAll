@@ -30,6 +30,20 @@ namespace SamaCardAll.Api.Controllers
             }
         }
 
+        [HttpGet("active", Name = "GetActiveCards")]
+        public IActionResult GetActive()
+        {
+            try
+            {
+                IEnumerable<Card> cards = _cardService.GetActiveCards();
+                return Ok(cards);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server erro: {ex.Message}");
+            }
+        }
+
         [HttpGet("{id}")]
         public IActionResult GetById(int id)
         {

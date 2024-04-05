@@ -1,0 +1,36 @@
+﻿@inject IJSRuntime JSRuntime;
+
+<div id="ModalInstallment" class="modal" tabindex="-1" role="dialog" style="display:@(isVisible ? "block" : "none"); overflow-y: auto;">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Installment Plan</h5>
+                <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close" @onclick="@(() => Hide())">
+                </button>
+            </div>
+            <div class="modal-body">
+                @ChildContent
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    private bool isVisible { get; set; }
+
+    public void Show()
+    {
+        isVisible = true;
+        StateHasChanged();
+    }
+
+    public void Hide()
+    {
+        isVisible = false;
+        StateHasChanged();
+    }
+}

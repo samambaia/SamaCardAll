@@ -22,11 +22,11 @@ builder.Services.AddScoped(sp =>
     return httpClient;
 });
 
-// Register AppDbContext
-builder.Services.AddDbContext<AppDbContext>(options =>
-{
-    // Configure the database provider and connection string here
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
-});
+//// Register AppDbContext
+//builder.Services.AddDbContext<AppDbContext>(options =>
+//{
+//    // Configure the database provider and connection string here
+//    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
+//});
 
 await builder.Build().RunAsync();

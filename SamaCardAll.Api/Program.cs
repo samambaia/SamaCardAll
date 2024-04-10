@@ -1,9 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using SamaCardAll.Core.Services;
 using SamaCardAll.Infra;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 
 namespace SamaCardAll
 {
@@ -16,8 +13,8 @@ namespace SamaCardAll
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-            // Register services (replace with your specific service registrations)
-            builder.Services.AddControllers(); // Enables controllers for API endpoints
+            // Enables controllers for API endpoints
+            builder.Services.AddControllers(); 
 
             // Register Services and its implementation
             builder.Services.AddScoped<ISpendService, SpendService>();
@@ -34,8 +31,11 @@ namespace SamaCardAll
                        .AllowAnyHeader();
             });
 
-            app.MapControllers(); // Maps controllers to the request pipeline
-
+            // Maps controllers to the request pipeline
+            app.MapControllers(); 
+            
+            app.MapGet("/", () => "API is Running...");
+            
             app.Run();
         }
     }

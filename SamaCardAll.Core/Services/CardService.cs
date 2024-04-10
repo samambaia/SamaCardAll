@@ -60,5 +60,10 @@ namespace SamaCardAll.Core.Services
                 _context.SaveChanges();
             }
         }
+
+        public IEnumerable<Card> GetActiveCards()
+        {
+            return (IEnumerable<Card>)_cards.Select(c => c.Active == 0);
+        }
     }
 }

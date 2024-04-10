@@ -28,7 +28,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SamaCardAll.Core\SamaCardAll.Core.csproj" />
-    <ProjectReference Include="..\SamaCardAll.Infra\SamaCardAll.Infra.csproj" />
   </ItemGroup>
 
 </Project>

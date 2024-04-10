@@ -31,7 +31,8 @@ namespace SamaCardAll
                        .AllowAnyHeader();
             });
 
-            app.MapControllers(); // Maps controllers to the request pipeline
+            // Maps controllers to the request pipeline
+            app.MapControllers(); 
             
             app.MapGet("/", () => "API is Running...");
             

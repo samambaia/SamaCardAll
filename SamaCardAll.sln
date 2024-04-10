@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SamaCardAll.Api", "SamaCard
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SamaCardAll.Infra", "SamaCardAll.Infra\SamaCardAll.Infra.csproj", "{A7615CA0-1DF5-416F-ABCC-4CE6C7FA4CEA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FrontWeb", "FrontWeb\FrontWeb.csproj", "{50F2008D-45A1-4B48-8839-FF0701A2F8D0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FrontWeb", "FrontWeb\FrontWeb.csproj", "{50F2008D-45A1-4B48-8839-FF0701A2F8D0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,0 +1,100 @@
+﻿@using SamaCardAll.Infra.Models
+
+@inject IJSRuntime JSRuntime;
+
+<div class="modal" tabindex="-1" role="dialog" style="display:@(isVisible ? "block" : "none"); overflow-y: auto;">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Installment Plan</h5>
+                <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close" @onclick="@(() => Hide())">
+                </button>
+            </div>
+            <div class="modal-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Month</th>
+                            <th>Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var installment in installmentPlanList)
+                        {
+                            <tr>
+                                <td>@installment.DisplayDueDate</td>
+                                <td>@installment.DisplayAmount</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+
+    private bool isVisible { get; set; }
+
+    private void Show()
+    {
+        isVisible = true;
+        StateHasChanged();
+    }
+
+    private void Hide()
+    {
+        isVisible = false;
+        StateHasChanged();
+    }
+
+    /* Installment Plan */
+
+    private List<Installment> installmentPlanList = new List<Installment>();
+
+    // Função para exibir o plano de parcelamento
+    public void ShowInstallmentPlan(Spend spend)
+    {
+        installmentPlanList = GenerateInstallmentPlan(spend.InstallmentPlan, spend.InstallmentValue, spend.Date);
+
+        // Exibir o modal
+        Show();
+    }
+
+    class Installment
+    {
+        public decimal Amount { get; set; }
+        public DateTime DueDate { get; set; }
+        public string DisplayDueDate => DueDate.ToString("MM/yyyy") ?? "";
+        public string DisplayAmount => Amount.ToString("C");
+    }
+
+    private List<Installment> GenerateInstallmentPlan(int installmentPlan, decimal installmentValue, DateTime purchaseDate)
+    {
+        // Calcular o intervalo de meses entre cada parcela
+        int monthsInterval = 1;
+
+        // Adicionar parcelas ao plano de parcelamento
+        for (int i = 1; i <= installmentPlan; i++)
+        {
+            // Calcular o valor da parcela
+            decimal amount = installmentValue;
+
+            // Calcular a data da parcela
+            DateTime dueDate = purchaseDate.AddMonths(i * monthsInterval);
+
+            // Criar uma instância de Installment e adicioná-la à lista
+            Installment installment = new Installment
+                {
+                    Amount = amount,
+                    DueDate = dueDate
+                };
+            installmentPlanList.Add(installment);
+        }
+
+        return installmentPlanList;
+    }
+
+
+}

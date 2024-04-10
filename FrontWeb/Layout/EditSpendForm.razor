@@ -1,0 +1,193 @@
+﻿@using SamaCardAll.Infra.Models
+@using Microsoft.AspNetCore.Components.Forms
+@using System.Globalization
+
+@inject HttpClient HttpClient
+
+<EditForm Model="spend" OnValidSubmit="HandleValidSubmit">
+    <div class="form-group">
+        <label for="Expenses">Expenses:</label>
+        <InputText id="Expenses" class="form-control" @bind-Value="spend.Expenses" />
+    </div>
+    <div class="form-group">
+        <label for="IdCustomer">Customer:</label>
+        <InputSelect id="IdCustomer" class="form-select" @bind-Value="spend.CustomerIdCustomer" style="width: 300px">
+            @foreach (var customer in _customers)
+            {
+                // If it is a NEW Spend, filter by Active Customer
+                @if (spend.IdSpend == 0)
+                {
+                    @if (customer.Active == 1)
+                    {
+                        <option value="@customer.IdCustomer">@customer.CustomerName</option>
+                    }
+                }
+                else
+                {
+                    <option value="@customer.IdCustomer">@customer.CustomerName</option>
+                }
+            }
+        </InputSelect>
+    </div>
+    <div class="form-group">
+        <label for="Bank">Card:</label>
+        <InputSelect id="Bank" class="form-select" @bind-Value="spend.CardIdCard" style="width: 300px">
+            @foreach (var card in _cards)
+            {
+                // If it is a NEW Spend, filter by Active Card
+                @if (spend.IdSpend == 0)
+                {
+                    @if (card.Active == 1)
+                    {
+                        <option value="@card.IdCard">@card.Bank</option>
+                    }
+                }
+                else
+                {
+                    <option value="@card.IdCard">@card.Bank</option>
+                }
+            }
+        </InputSelect>
+    </div>
+    <div class="form-group">
+        <label for="Date">Date Purchase:</label>
+        <InputDate id="Date" class="form-control" @bind-Value="spend.Date" style="width: 200px" />
+    </div>
+    <div class="form-group">
+        <label for="Amount">Amount:</label>
+        <InputText id="Amount" class="form-control" @bind-Value="formattedAmount" @oninput="UpdateAmount" @onblur="FormatAndCalculate" style="width: 200px" />
+    </div>
+    <div class="form-group">
+        <label for="InstallmentPlan">Installment Plan:</label>
+        <InputNumber id="InstallmentPlan" class="form-control" @bind-Value="spend.InstallmentPlan" @oninput="UpdateInstallmentPlan" Min="1" Max="18" style="width: 100px" />
+    </div>
+
+    <div class="form-group">
+        <label for="InstallmentValue">Installment Value:</label>
+        <input id="InstallmentValue" class="form-control" Value="@InstallmentValue" readonly style="width: 200px" />
+    </div>
+
+    <hr />
+    <button type="submit" class="btn btn-primary">Save</button>
+
+    <!-- Botão para exibir o plano de parcelamento --> 
+    <button type="button" class="btn btn-danger" @onclick="() => ShowInstallmentPlan()">Installment Plan</button>
+
+    <ModalInstallment @ref="modalInstallment" />
+
+</EditForm>
+
+@code {
+
+    [Parameter]
+    public Spend spend { get; set; }
+
+    [Parameter]
+    public EventCallback OnValidSubmit { get; set; }
+
+    [Parameter]
+    public decimal pInstallmentValue { get; set; }
+
+    [Parameter]
+    public decimal pAmount { get; set; }
+
+    private List<Customer> _customers = new List<Customer>();
+    private List<Card> _cards = new List<Card>();
+
+    // Calculate InstallmentValue
+    private decimal Amount { get; set; } = 0;
+    private int InstallmentPlan { get; set; } = 1;
+    private decimal InstallmentValue { get; set; } = 0;
+
+    private string formattedAmount = "0";
+    private string AmountNoFormat = "0";
+    private string installmentPlan = "1";
+
+    private void CalculateInstallmentValue()
+    {
+        if (decimal.TryParse(AmountNoFormat, out decimal parsedAmount))
+        {
+            Amount = parsedAmount;
+            InstallmentPlan = Convert.ToInt32(installmentPlan);
+
+            // Calculate the InstallmentValue based on the provided Amount and InstallmentPlan
+            InstallmentValue = Amount / InstallmentPlan;
+
+            spend.Amount = Amount;
+            spend.InstallmentValue = InstallmentValue;
+        }
+    }
+
+    private void UpdateAmount(ChangeEventArgs e)
+    {
+        AmountNoFormat = (e.Value.ToString() == string.Empty? "0" : e.Value.ToString());
+
+        formattedAmount = AmountNoFormat;
+        Amount = Convert.ToDecimal(AmountNoFormat); // Update formattedAmount when the input value changes
+        CalculateInstallmentValue(); // Recalculate InstallmentValue
+    }
+
+    private void UpdateInstallmentPlan(ChangeEventArgs e)
+    {
+        installmentPlan = e.Value.ToString();
+        CalculateInstallmentValue();
+    }
+
+    private void FormatAndCalculate(FocusEventArgs e)
+    {
+        // Format the amount when focus leaves the input field
+        formattedAmount = decimal.Parse(AmountNoFormat).ToString("C"); // Assuming you want to format as currency
+
+        // Calculate InstallmentValue based on the formatted amount
+        CalculateInstallmentValue();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Loading all Customers
+        _customers = await HttpClient.GetFromJsonAsync<List<Customer>>("/api/Customer");
+
+        // Loading all Cards
+        _cards = await HttpClient.GetFromJsonAsync<List<Card>>("/api/Card");
+
+        Amount = 0;
+        InstallmentValue = 0;
+    }
+
+    private void HandleValidSubmit()
+    {
+        // Pass the event upwards to the parent component
+        OnValidSubmit.InvokeAsync();
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (spend == null)
+        {
+            throw new InvalidOperationException("EditForm requires a Model parameter");
+        }
+        else
+        {
+            if (spend.IdSpend != 0)
+            {
+                formattedAmount = pAmount.ToString("C");
+                InstallmentValue = pInstallmentValue;
+            }
+            else
+            {
+                formattedAmount = "0";
+                InstallmentValue = 0;
+            }
+        }
+    }
+
+    /* Installment Plan */
+
+    private ModalInstallment modalInstallment;
+
+    // Função para exibir o plano de parcelamento
+    private void ShowInstallmentPlan()
+    {
+        modalInstallment.ShowInstallmentPlan(spend);
+    }
+}

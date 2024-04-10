@@ -1,0 +1,85 @@
+﻿@using SamaCardAll.Infra.Models
+@using Microsoft.AspNetCore.Components.Forms
+
+@inject HttpClient HttpClient
+
+<EditForm Model="spend" OnValidSubmit="HandleValidSubmit">
+    <div class="form-group">
+        <label for="Expenses">Expenses:</label>
+        <InputText id="Expenses" class="form-control" @bind-Value="spend.Expenses" />
+    </div>
+    <div class="form-group">
+        <label for="IdCustomer">Customer:</label>
+        <InputSelect id="IdCustomer" @bind-Value="spend.CustomerIdCustomer">
+            @foreach (var customer in _customers)
+            {
+                <option value="@customer.IdCustomer">@customer.CustomerName</option>
+            }
+        </InputSelect>
+    </div>
+    <div class="form-group">
+        <label for="Bank">Card:</label>
+        <InputSelect id="Bank" @bind-Value="spend.CardIdCard">
+            @foreach (var card in _cards)
+            {
+                <option value="@card.IdCard">@card.Bank</option>
+            }
+        </InputSelect>
+    </div>
+    <div class="form-group">
+        <label for="Date">Date Purchase:</label>
+        <InputDate id="Date" class="form-control" @bind-Value="spend.Date" style="width: 100px" />
+    </div>
+    <div class="form-group">
+        <label for="Amount">Amount:</label>
+        <InputNumber id="Amount" class="form-control" @bind-Value="spend.Amount" />
+    </div>
+    <div class="form-group">
+        <label for="InstallmentPlan">Installment Plan:</label>
+        <InputNumber id="InstallmentPlan" class="form-control" @bind-Value="spend.InstallmentPlan" style="width: 100px" />
+    </div>
+
+    <div class="form-group">
+        <label for="InstallmentValue">Installment Value:</label>
+        <InputNumber id="InstallmentValue" class="form-control" @bind-Value="spend.InstallmentValue" />
+    </div>
+    <div class="form-group">
+        <label for="InstallmentValue">Installment Value:</label>
+        <InputNumber id="InstallmentValue" class="form-control" @bind-Value="spend.InstallmentValue" />
+    </div>
+    <button type="submit" class="btn btn-primary">Save</button>
+</EditForm>
+
+@code {
+    [Parameter]
+    public Spend spend { get; set; }
+
+    [Parameter]
+    public EventCallback OnValidSubmit { get; set; }
+
+    private List<Customer> _customers = new List<Customer>();
+    private List<Card> _cards = new List<Card>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Loading all Customers
+        _customers = await HttpClient.GetFromJsonAsync<List<Customer>>("/api/Customer");
+
+        // Loading all Cards
+        _cards = await HttpClient.GetFromJsonAsync<List<Card>>("/api/Card");
+    }
+
+    private void HandleValidSubmit()
+    {
+        // Pass the event upwards to the parent component
+        OnValidSubmit.InvokeAsync();
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (spend == null)
+        {
+            throw new InvalidOperationException("EditForm requires a Model parameter");
+        }
+    }
+}

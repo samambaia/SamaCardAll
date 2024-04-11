@@ -2,6 +2,8 @@
 using SamaCardAll.Infra.Models;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
+using System.Net.Http;
+using Microsoft.VisualBasic;
 
 namespace SamaCardAll.Core.Services
 {
@@ -10,6 +12,7 @@ namespace SamaCardAll.Core.Services
 
         private readonly AppDbContext _context;
         private readonly List<Spend> _spends;
+        private List<Installments> _installments = new List<Installments>();
 
         public SpendService(AppDbContext context)
         {
@@ -41,9 +44,56 @@ namespace SamaCardAll.Core.Services
             spend.IdSpend = _spends.Max(s => s.IdSpend) + 1;
             spend.UserIdUser = 1;
 
+            // Generate the Installment List
+            var installmentList = GenerateInstallmentPlan(spend.IdSpend, spend.InstallmentPlan, spend.InstallmentValue, spend.Date);
+
             // Add a new expense
             _context.Add(spend);
+            // Add Installment List
+            _context.Installments.AddRange(installmentList);
+
             _context.SaveChanges();
+        }
+
+        // Create Installment List
+        private List<Installments> GenerateInstallmentPlan(int spendId, int installmentPlan, decimal installmentValue, DateTime purchaseDate)
+        {
+            int maxId = 1;
+            // Calculate Installment ID
+            if (_installments.Count > 0)
+            {
+                maxId = _installments.Max(s => s.Id);
+            }
+
+            // Calcular o intervalo de meses entre cada parcela
+            int monthsInterval = 1;
+
+            decimal amount = 0;
+            DateTime dueDate;
+
+            // Adicionar parcelas ao plano de parcelamento
+            for (int i = 1; i <= installmentPlan; i++)
+            {
+                // Calcular o valor da parcela
+                amount = installmentValue;
+
+                // Calcular a data da parcela
+                dueDate = purchaseDate.AddMonths(i * monthsInterval);
+                string monthYear = dueDate.ToString("MM/yyyy");
+
+                // Criar uma instância de Installment e adicioná-la à lista
+                Installments installment = new Installments
+                {
+                    SpendIdSpend = spendId,
+                    Id = maxId++,
+                    InstallmentValue = amount,
+                    MonthYear = monthYear,
+                    Active = 1
+                };
+                _installments.Add(installment);
+            }
+
+            return _installments;
         }
 
         void ISpendService.Update(Spend spend)

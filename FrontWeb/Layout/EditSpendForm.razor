@@ -73,6 +73,7 @@
     <!-- Botão para exibir o plano de parcelamento --> 
     <button type="button" class="btn btn-danger" @onclick="() => ShowInstallmentPlan()">Installment Plan</button>
 
+    <!-- Creating the Installment Modal-->
     <ModalInstallment @ref="modalInstallment" />
 
 </EditForm>
@@ -93,6 +94,7 @@
 
     private List<Customer> _customers = new List<Customer>();
     private List<Card> _cards = new List<Card>();
+    private List<ModalInstallment.Installment> _installments = new List<ModalInstallment.Installment>();
 
     // Calculate InstallmentValue
     private decimal Amount { get; set; } = 0;

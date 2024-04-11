@@ -50,10 +50,9 @@
     }
 
     /* Installment Plan */
-
     private List<Installment> installmentPlanList = new List<Installment>();
 
-    // Função para exibir o plano de parcelamento
+    // Method to show the Installment List
     public void ShowInstallmentPlan(Spend spend)
     {
         installmentPlanList = GenerateInstallmentPlan(spend.InstallmentPlan, spend.InstallmentValue, spend.Date);
@@ -62,7 +61,7 @@
         Show();
     }
 
-    class Installment
+    public class Installment
     {
         public decimal Amount { get; set; }
         public DateTime DueDate { get; set; }
@@ -75,14 +74,17 @@
         // Calcular o intervalo de meses entre cada parcela
         int monthsInterval = 1;
 
+        decimal amount = 0;
+        DateTime dueDate;
+
         // Adicionar parcelas ao plano de parcelamento
         for (int i = 1; i <= installmentPlan; i++)
         {
             // Calcular o valor da parcela
-            decimal amount = installmentValue;
+            amount = installmentValue;
 
             // Calcular a data da parcela
-            DateTime dueDate = purchaseDate.AddMonths(i * monthsInterval);
+            dueDate = purchaseDate.AddMonths(i * monthsInterval);
 
             // Criar uma instância de Installment e adicioná-la à lista
             Installment installment = new Installment
@@ -95,6 +97,4 @@
 
         return installmentPlanList;
     }
-
-
 }

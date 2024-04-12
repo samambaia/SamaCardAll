@@ -55,6 +55,8 @@
     // Method to show the Installment List
     public void ShowInstallmentPlan(Spend spend)
     {
+        installmentPlanList = new List<Installment>();
+
         installmentPlanList = GenerateInstallmentPlan(spend.InstallmentPlan, spend.InstallmentValue, spend.Date);
 
         // Exibir o modal

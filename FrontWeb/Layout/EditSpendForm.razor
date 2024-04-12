@@ -55,16 +55,16 @@
     </div>
     <div class="form-group">
         <label for="Amount">Amount:</label>
-        <InputText id="Amount" class="form-control" @bind-Value="formattedAmount" @oninput="UpdateAmount" @onblur="FormatAndCalculate" style="width: 200px" />
+        <InputText id="Amount" class="form-control" @bind-Value="formattedAmount" @oninput="UpdateAmount" @onblur="FormatAndCalculate" readonly=@(spend.IdSpend != 0) style="width: 200px" />
     </div>
     <div class="form-group">
         <label for="InstallmentPlan">Installment Plan:</label>
-        <InputNumber id="InstallmentPlan" class="form-control" @bind-Value="spend.InstallmentPlan" @oninput="UpdateInstallmentPlan" Min="1" Max="18" style="width: 100px" />
+        <InputNumber id="InstallmentPlan" class="form-control" @bind-Value="spend.InstallmentPlan" @oninput="UpdateInstallmentPlan" readonly=@(spend.IdSpend != 0) Min="1" Max="18" style="width: 100px" />
     </div>
 
     <div class="form-group">
         <label for="InstallmentValue">Installment Value:</label>
-        <input id="InstallmentValue" class="form-control" Value="@InstallmentValue" readonly style="width: 200px" />
+        <input id="InstallmentValue" class="form-control" Value="@FormattedInstallmentValue" readonly style="width: 200px" />
     </div>
 
     <hr />
@@ -99,18 +99,25 @@
     // Calculate InstallmentValue
     private decimal Amount { get; set; } = 0;
     private int InstallmentPlan { get; set; } = 1;
-    private decimal InstallmentValue { get; set; } = 0;
+
+    // Format InstallmentValue
+    private decimal InstallmentValue { get; set; }
+    public string FormattedInstallmentValue
+    {
+        get { return InstallmentValue.ToString("C2"); }
+        set { InstallmentValue = decimal.Parse(value); }
+    }
 
     private string formattedAmount = "0";
     private string AmountNoFormat = "0";
-    private string installmentPlan = "1";
+    // private string installmentPlan = "1";  Sama 01
 
     private void CalculateInstallmentValue()
     {
         if (decimal.TryParse(AmountNoFormat, out decimal parsedAmount))
         {
             Amount = parsedAmount;
-            InstallmentPlan = Convert.ToInt32(installmentPlan);
+            // InstallmentPlan = Convert.ToInt32(installmentPlan); Sama 02
 
             // Calculate the InstallmentValue based on the provided Amount and InstallmentPlan
             InstallmentValue = Amount / InstallmentPlan;
@@ -131,14 +138,15 @@
 
     private void UpdateInstallmentPlan(ChangeEventArgs e)
     {
-        installmentPlan = e.Value.ToString();
+        //installmentPlan = e.Value.ToString(); Sama 03
+        InstallmentPlan = Convert.ToInt32(e.Value);
         CalculateInstallmentValue();
     }
 
     private void FormatAndCalculate(FocusEventArgs e)
     {
         // Format the amount when focus leaves the input field
-        formattedAmount = decimal.Parse(AmountNoFormat).ToString("C"); // Assuming you want to format as currency
+        formattedAmount = (AmountNoFormat == "0" ? formattedAmount : decimal.Parse(AmountNoFormat).ToString("C")); // Assuming you want to format as currency
 
         // Calculate InstallmentValue based on the formatted amount
         CalculateInstallmentValue();
@@ -172,13 +180,17 @@
         {
             if (spend.IdSpend != 0)
             {
+                AmountNoFormat = pAmount.ToString();
                 formattedAmount = pAmount.ToString("C");
                 InstallmentValue = pInstallmentValue;
+                InstallmentPlan = spend.InstallmentPlan;
             }
             else
             {
+                AmountNoFormat = "0";
                 formattedAmount = "0";
                 InstallmentValue = 0;
+                InstallmentPlan = 1;
             }
         }
     }

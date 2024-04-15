@@ -110,14 +110,12 @@
 
     private string formattedAmount = "0";
     private string AmountNoFormat = "0";
-    // private string installmentPlan = "1";  Sama 01
 
     private void CalculateInstallmentValue()
     {
         if (decimal.TryParse(AmountNoFormat, out decimal parsedAmount))
         {
             Amount = parsedAmount;
-            // InstallmentPlan = Convert.ToInt32(installmentPlan); Sama 02
 
             // Calculate the InstallmentValue based on the provided Amount and InstallmentPlan
             InstallmentValue = Amount / InstallmentPlan;
@@ -138,7 +136,6 @@
 
     private void UpdateInstallmentPlan(ChangeEventArgs e)
     {
-        //installmentPlan = e.Value.ToString(); Sama 03
         InstallmentPlan = Convert.ToInt32(e.Value);
         CalculateInstallmentValue();
     }

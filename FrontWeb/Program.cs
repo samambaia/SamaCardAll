@@ -1,14 +1,13 @@
 using FrontWeb;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
-bool IsDevelopmentEnvironment = false;
+// If I want run in Dev environment, set for true
+bool IsDevelopmentEnvironment = true;
 
 string API_BASE_URL_DEV = "https://localhost:44383/";
 string API_BASE_URL_PROD = "http://localhost:5000/";

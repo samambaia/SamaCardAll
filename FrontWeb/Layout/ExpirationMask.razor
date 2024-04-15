@@ -1,0 +1,57 @@
+﻿<h3>ExpirationMask</h3>
+
+<input type="text" class="form-control" @bind="maskedValue" placeholder="01/30" @oninput="HandleInput" style="width: 100px" />
+
+@code {
+
+    /*
+     * I created this component to format the Expiration field, like this:
+     * mm/yy
+     * Ex: 12/29
+     */
+
+    [Parameter]
+    public string Value { get; set; }
+
+    [Parameter]
+    public EventCallback<string> ValueChanged { get; set; }
+
+    private string maskedValue;
+
+    protected override void OnInitialized()
+    {
+        maskedValue = FormatValue(Value);
+    }
+
+    private void HandleInput(ChangeEventArgs e)
+    {
+        Value = e.Value?.ToString();
+        maskedValue = FormatValue(Value);
+        /*
+         * This line notifies the parent component (your form) that the value of the ExpirationMask component has changed, 
+         * and the new value should be assigned to the card.Expiration property.
+         */
+        ValueChanged.InvokeAsync(Value);
+    }
+
+    private string FormatValue(string value)
+    {
+        // Implement your masking logic here
+        // For example, format expiration date
+        if (!string.IsNullOrEmpty(value))
+        {
+            // Ensure that only alphanumeric characters are accepted
+            value = new string(value.Where(char.IsLetterOrDigit).ToArray());
+
+            // Apply mask (XX/XX)
+            if (value.Length >= 2)
+            {
+                value = value.Substring(0, 2) + "/" + value.Substring(2);
+            }
+
+            // Trim to ensure length does not exceed the mask
+            value = value.Substring(0, Math.Min(value.Length, 5));
+        }
+        return value;
+    }
+}

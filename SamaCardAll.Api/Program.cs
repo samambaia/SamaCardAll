@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using SamaCardAll.Core.Services;
 using SamaCardAll.Infra;
 
@@ -21,7 +22,29 @@ namespace SamaCardAll
             builder.Services.AddScoped<ICustomerService, CustomerService>();
             builder.Services.AddScoped<ICardService, CardService>();
 
+            // Integrating Swagger
+            builder.Services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "SamaCard API", Version = "v1" });
+            });
+
             var app = builder.Build();
+
+            // Configure the HTTP request pipeline.
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+                // Enable middleware to serve generated Swagger as a JSON endpoint.
+                app.UseSwagger();
+
+                // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.),
+                // specifying the Swagger JSON endpoint.
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "SamaCard v1");
+                    c.RoutePrefix = string.Empty; // To serve Swagger UI at the root URL (http://localhost:<port>/)
+                });
+            }
 
             // Adiciona a configuração de CORS
             app.UseCors(options =>
@@ -30,6 +53,10 @@ namespace SamaCardAll
                        .AllowAnyMethod()
                        .AllowAnyHeader();
             });
+
+            app.UseHttpsRedirection();
+
+            app.UseAuthorization();
 
             // Maps controllers to the request pipeline
             app.MapControllers(); 

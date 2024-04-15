@@ -1,27 +1,35 @@
-﻿using SamaCardAll.Infra;
+﻿using Microsoft.EntityFrameworkCore;
+using SamaCardAll.Infra;
 using SamaCardAll.Infra.Models;
-using System.Linq;
-using Microsoft.EntityFrameworkCore;
 
 namespace SamaCardAll.Core.Services
 {
     public class SpendService : ISpendService
     {
-
         private readonly AppDbContext _context;
         private readonly List<Spend> _spends;
+        private readonly List<Installments> _installmentsExist;
 
+        private List<Installments> _installments = new List<Installments>();
+       
         public SpendService(AppDbContext context)
         {
             _context = context;
 
             // Initialize Spend
-            //_spends = _context.Spends.ToList(); 
             var query = _context.Spends
+                .Where(s => s.Deleted == 0) // Filter only non Deleted Records
                 .Include(s => s.Card)
-                .Include(s => s.Customer);
+                .Include(s => s.Customer)
+                .Include(s => s.User);
 
             _spends = query.ToList();
+
+            // Initialize Installment
+            var q = _context.Installments
+                .Include(s => s.Spend);
+            
+            _installmentsExist = q.ToList();
         }
         public IEnumerable<Spend> GetSpends()
         {
@@ -40,10 +48,58 @@ namespace SamaCardAll.Core.Services
             // Define de ID
             spend.IdSpend = _spends.Max(s => s.IdSpend) + 1;
             spend.UserIdUser = 1;
+            spend.CreatedDate = DateTime.Now;
+
+            // Generate the Installment List
+            var installmentList = GenerateInstallmentPlan(spend.IdSpend, spend.InstallmentPlan, spend.InstallmentValue, spend.Date);
 
             // Add a new expense
             _context.Add(spend);
+            // Add Installment List
+            _context.Installments.AddRange(installmentList);
+
             _context.SaveChanges();
+        }
+
+        // Create Installment List
+        private List<Installments> GenerateInstallmentPlan(int spendId, int installmentPlan, decimal installmentValue, DateTime purchaseDate)
+        {
+            int maxId = 1;
+            // Calculate Installment ID
+            if (_installmentsExist is not null)
+            {
+                maxId = _installmentsExist.Max(s => s.Id) + 1;
+            }
+
+            // Calcular o intervalo de meses entre cada parcela
+            int monthsInterval = 1;
+
+            decimal amount = 0;
+            DateTime dueDate;
+
+            // Adicionar parcelas ao plano de parcelamento
+            for (int i = 1; i <= installmentPlan; i++)
+            {
+                // Calcular o valor da parcela
+                amount = installmentValue;
+
+                // Calcular a data da parcela
+                dueDate = purchaseDate.AddMonths(i * monthsInterval);
+                string monthYear = dueDate.ToString("MM/yyyy");
+
+                // Create a instance of Installment to Add the new
+                Installments installment = new Installments
+                {
+                    SpendIdSpend = spendId,
+                    Id = maxId++,
+                    InstallmentValue = amount,
+                    MonthYear = monthYear,
+                    Active = 1
+                };
+                _installments.Add(installment);
+            }
+
+            return _installments;
         }
 
         void ISpendService.Update(Spend spend)
@@ -61,36 +117,9 @@ namespace SamaCardAll.Core.Services
                 existingSpend.InstallmentValue = spend.InstallmentValue;
                 existingSpend.Deleted = spend.Deleted;
                 existingSpend.CreatedDate = spend.CreatedDate;
-
-                // Atualiza o Customer
-                if (spend.Customer != null)
-                {
-                    existingSpend.Customer = new Customer
-                    {
-                        IdCustomer = spend.Customer.IdCustomer, // Supondo que IdCustomer seja a chave primária de Customer
-                                                                // Atualize outras propriedades de Customer conforme necessário
-                    };
-                }
-
-                // Atualiza o Card
-                if (spend.Card != null)
-                {
-                    existingSpend.Card = new Card
-                    {
-                        IdCard = spend.Card.IdCard, // Supondo que IdCard seja a chave primária de Card
-                                                    // Atualize outras propriedades de Card conforme necessário
-                    };
-                }
-
-                // Atualiza o User
-                if (spend.User != null)
-                {
-                    existingSpend.User = new User
-                    {
-                        IdUser = spend.User.IdUser, // Supondo que IdUser seja a chave primária de User
-                                                    // Atualize outras propriedades de User conforme necessário
-                    };
-                }
+                existingSpend.CardIdCard = spend.CardIdCard;
+                existingSpend.CustomerIdCustomer = spend.CustomerIdCustomer;
+                existingSpend.UserIdUser = spend.UserIdUser;
 
                 _context.SaveChanges();
             }
@@ -102,7 +131,9 @@ namespace SamaCardAll.Core.Services
             var spendToRemove = _spends.FirstOrDefault(s => s.IdSpend == id);
             if (spendToRemove != null)
             {
-                _context.Remove(spendToRemove);
+                spendToRemove.Deleted = 1;
+
+                //_context.Remove(spendToRemove); Logical Delete
                 _context.SaveChanges();
             }
         }

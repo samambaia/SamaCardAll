@@ -7,7 +7,7 @@ builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
 // If I want run in Dev environment, set for true
-bool IsDevelopmentEnvironment = true;
+bool IsDevelopmentEnvironment = false;
 
 string API_BASE_URL_DEV = "https://localhost:44383/";
 string API_BASE_URL_PROD = "http://localhost:5000/";

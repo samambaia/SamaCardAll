@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using SamaCardAll.Core.DTO;
+using SamaCardAll.Core.Services;
 
 namespace SamaCardAll.Api.Controllers
 {
@@ -6,10 +8,33 @@ namespace SamaCardAll.Api.Controllers
     [ApiController]
     public class HomeController : ControllerBase
     {
-        [HttpGet]
-        public IActionResult Index()
+        private readonly IReportService _reportService;
+
+        public HomeController(IReportService reportService)
         {
-            return Ok("Success!");
+           _reportService = reportService;
+        }
+
+        //[HttpGet]
+        //public IActionResult Index()
+        //{
+        //    return Ok("Success!");
+        //}
+
+        [HttpGet("{customerId}/{monthYear}")]
+        public async Task<ActionResult<IEnumerable<InvoiceDto>>> GetInstallments(int? customerId, string? monthYear)
+        {
+            var filteredInstallments = await _reportService.GetFilteredInstallments(customerId, monthYear);
+
+            var invoiceDtos = filteredInstallments.Select(i => new InvoiceDto
+            {
+                CustomerName = i.CustomerName,
+                CardName = i.CardName,
+                InstallmentAmount = i.InstallmentAmount,
+                MonthYear = i.MonthYear
+            }).ToList();
+
+            return Ok(invoiceDtos);
         }
     }
 }

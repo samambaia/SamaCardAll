@@ -157,8 +157,10 @@
         if (response.IsSuccessStatusCode)
         {
             _cards = await HttpClient.GetFromJsonAsync<List<Card>>("/api/Card"); // Refresh the card list
+
             LoadCards();
             StateHasChanged();
+
             return true; // Return true indicating successful save
         }
         else

@@ -11,7 +11,7 @@ namespace SamaCardAll.Core.Services
         private readonly List<Installments> _installmentsExist;
 
         private List<Installments> _installments = new List<Installments>();
-       
+
         public SpendService(AppDbContext context)
         {
             _context = context;
@@ -28,9 +28,10 @@ namespace SamaCardAll.Core.Services
             // Initialize Installment
             var q = _context.Installments
                 .Include(s => s.Spend);
-            
+
             _installmentsExist = q.ToList();
         }
+
         public IEnumerable<Spend> GetSpends()
         {
             // Return IQueryable to enable further querying

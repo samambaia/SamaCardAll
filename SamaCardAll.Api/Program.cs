@@ -21,6 +21,7 @@ namespace SamaCardAll
             builder.Services.AddScoped<ISpendService, SpendService>();
             builder.Services.AddScoped<ICustomerService, CustomerService>();
             builder.Services.AddScoped<ICardService, CardService>();
+            builder.Services.AddScoped<IReportService, ReportService>();
 
             // Integrating Swagger
             builder.Services.AddSwaggerGen(c =>

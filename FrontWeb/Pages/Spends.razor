@@ -13,7 +13,6 @@
 <table class="table">
     <thead>
         <tr>
-            <th>ID</th>
             <th>Expense</th>
             <th>Amount</th>
             <th>Card Bank</th>
@@ -25,7 +24,6 @@
         @foreach (var spend in _spends.Skip((currentPage -1) * recordsPerPage).Take(recordsPerPage))
         {
             <tr>
-                <td>@spend.IdSpend</td>
                 <td>@spend.Expenses</td>
                 <td>@spend.Amount.ToString("C")</td>
                 <td>@(spend.Card != null ? spend.Card.Bank : "")</td>

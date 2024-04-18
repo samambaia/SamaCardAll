@@ -48,11 +48,12 @@
             <li class="page-item"><button class="page-link" @onclick="() => OnPageChanged(currentPage - 1)">Previous</button></li>
         }
 
-        @for (int i = 1; i <= Math.Ceiling((double)_cards.Count / recordsPerPage); i++)
+        @for (@i = 1; i < Math.Ceiling((double)_cards.Count / recordsPerPage); i++)
         {
             <li class="@(currentPage == i ? "page-item active" : "page-item")">
                 <button class="page-link" @onclick="() => OnPageChanged(i)">@i</button>
             </li>
+            Console.WriteLine($"Page number button: i = {i}");
         }
 
         @if (Math.Ceiling((double)_cards.Count / recordsPerPage) > currentPage)
@@ -79,6 +80,8 @@
     [Parameter]
     public EditCardForm editCardForm { get; set; }
 
+    private int i;
+
     // Using the ErrorMessage Component
     private bool errorVisible { get; set; }
     private string errorMessage { get; set; }
@@ -93,7 +96,19 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _cards = await HttpClient.GetFromJsonAsync<List<Card>>("/api/Card");
+        await LoadCards();
+    }
+
+    private async Task LoadCards()
+    {
+        Console.WriteLine($"LoadCards: currentPage = {currentPage}");
+
+        var allCards = await HttpClient.GetFromJsonAsync<List<Card>>("/api/Card");
+
+        _cards = allCards; //.Skip((currentPage - 1) * recordsPerPage).Take(recordsPerPage).ToList();
+
+        Console.WriteLine($"LoadCards: _cards.Count = {_cards.Count}");
+        StateHasChanged();
     }
 
     private async void HandleValidSubmit()
@@ -107,7 +122,11 @@
 
     private void OnPageChanged(int newPage)
     {
+        Console.WriteLine($"Page number button: i = {i}");
+
         currentPage = newPage;
+        
+        LoadCards();
     }
 
     private void OpenModal(Card cardToEdit = null)
@@ -138,7 +157,10 @@
         if (response.IsSuccessStatusCode)
         {
             _cards = await HttpClient.GetFromJsonAsync<List<Card>>("/api/Card"); // Refresh the card list
+
+            LoadCards();
             StateHasChanged();
+
             return true; // Return true indicating successful save
         }
         else

@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using SamaCardAll.Core.Services;
 using SamaCardAll.Infra.Models;
 
@@ -30,33 +29,6 @@ namespace SamaCardAll.Api.Controllers
             }
         }
 
-        //[HttpGet]
-        //public IActionResult GetAll(string include = "")
-        //{
-        //    try
-        //    {
-        //        IEnumerable<Spend> spendsQuery = _spendService.GetSpends();
-
-        //        // Check if include parameter is provided and include related entities accordingly
-        //        if (!string.IsNullOrEmpty(include))
-        //        {
-        //            foreach (var navProperty in include.Split(',', StringSplitOptions.RemoveEmptyEntries))
-        //            {
-        //                spendsQuery = spendsQuery.Include(navProperty);
-        //            }
-        //        }
-
-        //        // Execute the query and return the results
-        //        IEnumerable<Spend> spends = spendsQuery.ToList();
-        //        return Ok(spends);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return StatusCode(500, $"Internal server error: {ex.Message}");
-        //    }
-        //}
-
-
         [HttpPost]
         public IActionResult Create(Spend spend)
         {
@@ -65,6 +37,7 @@ namespace SamaCardAll.Api.Controllers
                 try
                 {
                     _spendService.Create(spend);
+                    int spendId = spend.IdSpend;
                     return CreatedAtAction(nameof(GetById), new { id = spend.IdSpend }, spend);
                 }
                 catch (Exception ex)
@@ -122,11 +95,5 @@ namespace SamaCardAll.Api.Controllers
             }
             return Ok(spend);
         }
-
-        //[HttpGet("Ping")]
-        //public IActionResult CheckStatus()
-        //{
-        //    return Ok("Ping successful! The API is up and running.");
-        //}
     }
 }

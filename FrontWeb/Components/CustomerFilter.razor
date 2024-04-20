@@ -1,0 +1,25 @@
+﻿@using SamaCardAll.Infra.Models
+@inject HttpClient HttpClient 
+
+<select @bind="SelectedCustomerId"> 
+  <option value="">-- Select Customer --</option>
+  @if (_customers != null)
+  {
+    @foreach (var customer in _customers)
+    {
+      <option value="@customer.IdCustomer">@customer.CustomerName</option>
+    }
+  }
+</select>
+
+@code {
+    [Parameter]
+    public int? SelectedCustomerId { get; set; }
+
+    private List<Customer> _customers = new List<Customer>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _customers = await HttpClient.GetFromJsonAsync<List<Customer>>("/api/Customer");
+    }
+}

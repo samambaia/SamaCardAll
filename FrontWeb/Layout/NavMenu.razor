@@ -10,23 +10,33 @@
 <div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
     <nav class="flex-column">
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+@*             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span class="bi bi-house-door" aria-hidden="true"></span> Home
             </NavLink>
+ *@
+            <NavLink class="nav-link" href="" @onclick="() => { }">
+                <span class="bi bi-house-door" aria-hidden="true"></span> Home
+            </NavLink>
+
         </div>
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="spends">
-                <span class="bi bi-cash-coin-nav-menu" aria-hidden="true"></span> Spends
+                <span class="bi bi-cash-coin" aria-hidden="true"></span> Spends
             </NavLink>
         </div>
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="customers">
-                <span class="bi bi-people-nav-menu" aria-hidden="true"></span> Customers
+                <span class="bi bi-people" aria-hidden="true"></span> Customers
             </NavLink>
         </div>
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="cards">
-                <span class="bi bi-credit-card-2-front-nav-menu" aria-hidden="true"></span> Cards
+                <span class="bi bi-credit-card" aria-hidden="true"></span> Cards
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="installments">
+                <span class="bi bi-card-heading" aria-hidden="true"></span> Invoice
             </NavLink>
         </div>
     </nav>

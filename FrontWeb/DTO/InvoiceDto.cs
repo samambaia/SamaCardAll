@@ -1,4 +1,4 @@
-﻿namespace SamaCardAll.Core.DTO
+﻿namespace FrontWeb
 {
     public class InvoiceDto
     {

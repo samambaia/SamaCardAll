@@ -55,6 +55,16 @@ namespace SamaCardAll
                        .AllowAnyHeader();
             });
 
+            /*
+             * To use in Production Environment
+             * app.UseCors(options =>
+                {
+                    options.WithOrigins("https://yourfrontenddomain.com")
+                            .AllowMethods("GET", "POST")
+                            .WithHeaders("Content-Type");
+                });
+            */
+
             app.UseHttpsRedirection();
 
             app.UseAuthorization();

@@ -43,7 +43,7 @@
             // Ensure that only alphanumeric characters are accepted
             value = new string(value.Where(char.IsLetterOrDigit).ToArray());
 
-            // Apply mask (XX/XX)
+            // Apply mask (MM/yy)
             if (value.Length >= 2)
             {
                 value = value.Substring(0, 2) + "/" + value.Substring(2);

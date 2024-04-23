@@ -35,7 +35,7 @@
     <table class="table">
         <thead>
             <tr> 
-                <th>Customer</th>
+                <th>Description Spend</th>
                 <th>Card</th>
                 <th>Month/Year</th>
                 <th>Amount</th>
@@ -45,16 +45,16 @@
             @foreach (var installment in _installments)
             {
                 <tr>
-                    <td>@installment.CustomerName</td>
+                    <td>@installment.DescriptionSpend</td>
                     <td>@installment.CardName</td>
                     <td>@installment.MonthYear</td>
-                    <td>@installment.InstallmentAmount</td>
+                    <td>@installment.InstallmentAmount.ToString("C")</td>
                 </tr>
             }
         </tbody>
         <tfoot>
             <tr>
-                <td colspan="3" style="text-align: right; font-weight:bold">Total Installments:</td>
+                <td colspan="3" style="text-align: right; font-weight:bold">Customer Total:</td>
                 <td style="font-weight:bold">@totalInstallmentSum.ToString("C")</td>
             </tr>
         </tfoot>
@@ -104,6 +104,7 @@ else
         }
         catch (Exception ex)
         {
+            // TO DO: Handle Error
             // Handle fetch errors appropriately
         }
         finally

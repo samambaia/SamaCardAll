@@ -73,6 +73,8 @@
 
     private List<Installment> GenerateInstallmentPlan(int installmentPlan, decimal installmentValue, DateTime purchaseDate)
     {
+        string installmentDisplay = string.Empty;
+
         // Calcular o intervalo de meses entre cada parcela
         int monthsInterval = 1;
 
@@ -95,6 +97,10 @@
                     DueDate = dueDate
                 };
             installmentPlanList.Add(installment);
+
+            installmentDisplay = i.ToString() + "/" + installmentPlan.ToString();
+
+            Console.WriteLine($"Installment Plan: {installmentDisplay}");
         }
 
         return installmentPlanList;

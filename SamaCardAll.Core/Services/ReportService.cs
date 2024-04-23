@@ -25,6 +25,7 @@ namespace SamaCardAll.Core.Services
             // Projection (Map to DTO)
             var results = await query.Select(i => new InvoiceDto
             {
+                DescriptionSpend = i.Spend.Expenses,
                 CustomerName = i.Spend.Customer.CustomerName,
                 CardName = i.Spend.Card.Bank,
                 InstallmentAmount = i.InstallmentValue,

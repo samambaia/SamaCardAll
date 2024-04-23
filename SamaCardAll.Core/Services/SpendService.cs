@@ -47,7 +47,13 @@ namespace SamaCardAll.Core.Services
         void ISpendService.Create(Spend spend)
         {
             // Define de ID
-            spend.IdSpend = _spends.Max(s => s.IdSpend) + 1;
+            if (_spends.Count > 0)
+            {
+                spend.IdSpend = _spends.Max(s => s.IdSpend) + 1;
+            }
+            else
+                spend.IdSpend = 1;
+
             spend.UserIdUser = 1;
             spend.CreatedDate = DateTime.Now;
 
@@ -65,20 +71,22 @@ namespace SamaCardAll.Core.Services
         // Create Installment List
         private List<Installments> GenerateInstallmentPlan(int spendId, int installmentPlan, decimal installmentValue, DateTime purchaseDate)
         {
+            string installmentDisplay = string.Empty;
+
             int maxId = 1;
             // Calculate Installment ID
-            if (_installmentsExist is not null)
+            if (_installmentsExist.Count > 0)
             {
                 maxId = _installmentsExist.Max(s => s.Id) + 1;
             }
 
-            // Calcular o intervalo de meses entre cada parcela
+            // Calculate the interval of months between each installment
             int monthsInterval = 1;
 
             decimal amount = 0;
             DateTime dueDate;
 
-            // Adicionar parcelas ao plano de parcelamento
+            // Add installments to the intallment plan
             for (int i = 1; i <= installmentPlan; i++)
             {
                 // Calcular o valor da parcela
@@ -98,6 +106,10 @@ namespace SamaCardAll.Core.Services
                     Active = 1
                 };
                 _installments.Add(installment);
+
+                installmentDisplay = i.ToString() + "/" + installmentPlan.ToString();
+
+                Console.WriteLine("Installment:" + installmentDisplay);
             }
 
             return _installments;

@@ -21,6 +21,10 @@ namespace SamaCardAll.Api.Controllers
         //    return Ok("Success!");
         //}
 
+        /*
+         * TO DO:Handle Error
+         */
+
         [HttpGet("{customerId}/{monthYear}")]
         public async Task<ActionResult<IEnumerable<InvoiceDto>>> GetInstallments(int? customerId, string? monthYear)
         {
@@ -28,6 +32,7 @@ namespace SamaCardAll.Api.Controllers
 
             var invoiceDtos = filteredInstallments.Select(i => new InvoiceDto
             {
+                DescriptionSpend = i.DescriptionSpend,
                 CustomerName = i.CustomerName,
                 CardName = i.CardName,
                 InstallmentAmount = i.InstallmentAmount,

@@ -29,11 +29,34 @@ namespace SamaCardAll.Core.Services
                 CustomerName = i.Spend.Customer.CustomerName,
                 CardName = i.Spend.Card.Bank,
                 InstallmentAmount = i.InstallmentValue,
-                MonthYear = i.MonthYear
+                MonthYear = i.MonthYear,
+                Installment = i.Installment
 
             }).ToListAsync();
 
             return results;
+        }
+
+        public async Task UpdateInstallments()
+        {
+            var spends = await _context.Spends.ToListAsync();
+            foreach (var spend in spends)
+            {
+                // Retrieve installments for the current spend
+                var installments = await _context.Installments
+                                                .Where(i => i.SpendIdSpend == spend.IdSpend)
+                                                .ToListAsync();
+
+                // Your logic to generate installment numbers (e.g., "01/05")
+                int counter = 1;
+                foreach (var installment in installments)
+                {
+                    installment.Installment = counter.ToString("00") + "/" + spend.InstallmentPlan.ToString("00");
+                    counter++;
+                }
+
+                await _context.SaveChangesAsync();
+            }
         }
     }
 }

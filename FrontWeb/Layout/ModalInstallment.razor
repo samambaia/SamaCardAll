@@ -15,6 +15,7 @@
                     <thead>
                         <tr>
                             <th>Month</th>
+                            <th>Installment</th>
                             <th>Value</th>
                         </tr>
                     </thead>
@@ -23,6 +24,7 @@
                         {
                             <tr>
                                 <td>@installment.DisplayDueDate</td>
+                                <td>@installment.InstallmentDisplay</td>
                                 <td>@installment.DisplayAmount</td>
                             </tr>
                         }
@@ -69,6 +71,7 @@
         public DateTime DueDate { get; set; }
         public string DisplayDueDate => DueDate.ToString("MM/yyyy") ?? "";
         public string DisplayAmount => Amount.ToString("C");
+        public string InstallmentDisplay { get; set; }
     }
 
     private List<Installment> GenerateInstallmentPlan(int installmentPlan, decimal installmentValue, DateTime purchaseDate)
@@ -90,15 +93,19 @@
             // Calcular a data da parcela
             dueDate = purchaseDate.AddMonths(i * monthsInterval);
 
+            //installmentDisplay = i.ToString() + "/" + installmentPlan.ToString();
+
+            // Format to show 00/00
+            installmentDisplay = string.Format("{0:00}/{1:00}", i, installmentPlan);
+
             // Criar uma instância de Installment e adicioná-la à lista
             Installment installment = new Installment
                 {
                     Amount = amount,
-                    DueDate = dueDate
+                    DueDate = dueDate,
+                    InstallmentDisplay = installmentDisplay
                 };
             installmentPlanList.Add(installment);
-
-            installmentDisplay = i.ToString() + "/" + installmentPlan.ToString();
 
             Console.WriteLine($"Installment Plan: {installmentDisplay}");
         }

@@ -8,5 +8,6 @@ namespace SamaCardAll.Core.Services
     public interface IReportService
     {
         Task<IEnumerable<InvoiceDto>> GetFilteredInstallments(int? customerId, string? monthYear);
+        Task UpdateInstallments();
     }
 }

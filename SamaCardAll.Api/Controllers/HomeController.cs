@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SamaCardAll.Core.DTO;
 using SamaCardAll.Core.Services;
+using SamaCardAll.Infra.Models;
 
 namespace SamaCardAll.Api.Controllers
 {
@@ -36,10 +37,29 @@ namespace SamaCardAll.Api.Controllers
                 CustomerName = i.CustomerName,
                 CardName = i.CardName,
                 InstallmentAmount = i.InstallmentAmount,
-                MonthYear = i.MonthYear
+                MonthYear = i.MonthYear,
+                Installment = i.Installment
             }).ToList();
 
             return Ok(invoiceDtos);
+        }
+
+        [HttpPut]
+        public ActionResult UpdateInstallments()
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    _reportService.UpdateInstallments();
+                    return NoContent();
+                }
+                catch (Exception ex)
+                {
+                    return StatusCode(500, $"Internal server error: {ex.Message}");
+                }
+            }
+            return BadRequest(ModelState);
         }
     }
 }

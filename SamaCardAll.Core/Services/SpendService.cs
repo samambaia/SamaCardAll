@@ -96,6 +96,8 @@ namespace SamaCardAll.Core.Services
                 dueDate = purchaseDate.AddMonths(i * monthsInterval);
                 string monthYear = dueDate.ToString("MM/yyyy");
 
+                installmentDisplay = i.ToString("00") + "/" + installmentPlan.ToString("00");
+
                 // Create a instance of Installment to Add the new
                 Installments installment = new Installments
                 {
@@ -103,11 +105,10 @@ namespace SamaCardAll.Core.Services
                     Id = maxId++,
                     InstallmentValue = amount,
                     MonthYear = monthYear,
-                    Active = 1
+                    Active = 1,
+                    Installment = installmentDisplay
                 };
                 _installments.Add(installment);
-
-                installmentDisplay = i.ToString() + "/" + installmentPlan.ToString();
 
                 Console.WriteLine("Installment:" + installmentDisplay);
             }

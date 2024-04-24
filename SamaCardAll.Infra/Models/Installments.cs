@@ -8,6 +8,7 @@ namespace SamaCardAll.Infra.Models
         public int Id { get; set; }
         public string MonthYear { get; set; }
         public decimal InstallmentValue { get; set; }
+        public string Installment { get; set; }
         public short Active { get; set; } = 1;
 
         //Spend Relationship

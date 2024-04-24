@@ -30,14 +30,19 @@
 <button class="btn btn-primary" @onclick="FetchInstallments">Filter</button>
 <hr />
 
+@* <hr />
+<button class="btn btn-warning" @onclick="UpdateInstallments">Update Installments</button>
+<hr />
+ *@
+
 @if (_installments != null && _installments.Any())
 {
     <table class="table">
         <thead>
             <tr> 
                 <th>Description Spend</th>
+                <th>Installment</th>
                 <th>Card</th>
-                <th>Month/Year</th>
                 <th>Amount</th>
             </tr> 
         </thead>
@@ -46,8 +51,8 @@
             {
                 <tr>
                     <td>@installment.DescriptionSpend</td>
+                    <td>@installment.Installment</td>
                     <td>@installment.CardName</td>
-                    <td>@installment.MonthYear</td>
                     <td>@installment.InstallmentAmount.ToString("C")</td>
                 </tr>
             }
@@ -110,6 +115,20 @@ else
         finally
         {
             isLoading = false;
+        }
+    }
+
+    // Don't use
+    private async Task UpdateInstallments()
+    {
+        isLoading = true;
+        try
+        {
+            var response = await HttpClient.PutAsync($"/api/Home", null);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erro:{ex.Message}");
         }
     }
 

@@ -12,6 +12,8 @@ namespace SamaCardAll.Core.Services
 
         private List<Installments> _installments = new List<Installments>();
 
+        private int MaxId = 0;
+
         public SpendService(AppDbContext context)
         {
             _context = context;
@@ -30,6 +32,9 @@ namespace SamaCardAll.Core.Services
                 .Include(s => s.Spend);
 
             _installmentsExist = q.ToList();
+
+            // Initialize Spend
+            MaxId = _context.Spends.Max(s => s.IdSpend);
         }
 
         public IEnumerable<Spend> GetSpends()
@@ -47,9 +52,9 @@ namespace SamaCardAll.Core.Services
         void ISpendService.Create(Spend spend)
         {
             // Define de ID
-            if (_spends.Count > 0)
+            if (MaxId > 0)
             {
-                spend.IdSpend = _spends.Max(s => s.IdSpend) + 1;
+                spend.IdSpend = ++MaxId;
             }
             else
                 spend.IdSpend = 1;

@@ -1,10 +1,22 @@
 ﻿
-<input type="text" class="form-control" @bind="SelectedMonthYear" @onchange="OnMonthYearChanged"
-       @bind:event="oninput" placeholder="01/2030" style="width: 100px" />
+<select class="form-select" @bind="SelectedMonthYear" @onchange="OnMonthYearChanged" @bind:event="oninput"
+        style="width: 200px">
+    <option value="">-- Select Month/Year --</option>
+    @if (MonthYearOptions != null)
+    {
+        @foreach (var monthYear in MonthYearOptions)
+        {
+            <option value="@monthYear">@monthYear</option>
+        }
+    }
+</select>
 
 @code {
     [Parameter]
     public string SelectedMonthYear { get; set; }
+
+    [Parameter]
+    public IEnumerable<string> MonthYearOptions { get; set; } = new List<string>();
 
     [Parameter]
     public EventCallback<string> SelectedMonthYearChanged { get; set; }

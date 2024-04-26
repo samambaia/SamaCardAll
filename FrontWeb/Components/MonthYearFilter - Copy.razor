@@ -1,0 +1,19 @@
+﻿
+<input type="text" class="form-control" @bind="SelectedMonthYear" @onchange="OnMonthYearChanged"
+       @bind:event="oninput" placeholder="01/2030" style="width: 100px" />
+
+@code {
+    [Parameter]
+    public string SelectedMonthYear { get; set; }
+
+    [Parameter]
+    public EventCallback<string> SelectedMonthYearChanged { get; set; }
+
+    private async Task OnMonthYearChanged(ChangeEventArgs e)
+    {
+        string newValue = e.Value?.ToString();
+
+        SelectedMonthYear = newValue; // Update bound property
+        await SelectedMonthYearChanged.InvokeAsync(newValue); // Notify parent
+    }
+}

@@ -61,5 +61,11 @@ namespace SamaCardAll.Api.Controllers
             }
             return BadRequest(ModelState);
         }
+
+        [HttpGet("monthyears")]
+        public async Task<IEnumerable<string>> GetDistinctMonthYears()
+        {
+            return await _reportService.GetDistinctInstallmentMonthYear();
+        }
     }
 }

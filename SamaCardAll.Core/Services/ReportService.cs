@@ -14,6 +14,14 @@ namespace SamaCardAll.Core.Services
             _context = context;
         }
 
+        public async Task<IEnumerable<string>> GetDistinctInstallmentMonthYear()
+        {
+            return await _context.Installments
+                .Select(i => i.MonthYear)
+                .Distinct()
+                .ToListAsync();
+        }
+
         public async Task<IEnumerable<InvoiceDto>> GetFilteredInstallments(int? customerId, string? monthYear)
         {
             var query = _context.Installments

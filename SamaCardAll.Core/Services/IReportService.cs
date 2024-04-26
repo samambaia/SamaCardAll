@@ -9,5 +9,6 @@ namespace SamaCardAll.Core.Services
     {
         Task<IEnumerable<InvoiceDto>> GetFilteredInstallments(int? customerId, string? monthYear);
         Task UpdateInstallments();
+        Task<IEnumerable<string>> GetDistinctInstallmentMonthYear();
     }
 }

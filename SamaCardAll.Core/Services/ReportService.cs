@@ -28,7 +28,8 @@ namespace SamaCardAll.Core.Services
                                 .Include(i => i.Spend)
                                 .Include(i => i.Spend.Customer)
                                 .Include(i => i.Spend.Card)
-                                .Where(i => i.MonthYear == WebUtility.UrlDecode(monthYear) && i.Spend.Customer.IdCustomer == customerId);
+                                .Where(i => i.MonthYear == WebUtility.UrlDecode(monthYear) && i.Spend.Customer.IdCustomer == customerId)
+                                .Where(i => i.Spend.Deleted == 0); //Filtered by Spends that doesn't have a Deleted flag
 
             // Projection (Map to DTO)
             var results = await query.Select(i => new InvoiceDto

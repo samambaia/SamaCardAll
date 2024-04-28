@@ -34,7 +34,7 @@ namespace SamaCardAll.Core.Services
             _installmentsExist = q.ToList();
 
             // Initialize Spend
-            MaxId = _context.Spends.Max(s => s.IdSpend);
+            MaxId = (_context.Spends != null && _context.Spends.Any()) ? _context.Spends.Max(s => s.IdSpend) : 0;
         }
 
         public IEnumerable<Spend> GetSpends()

@@ -16,10 +16,43 @@ namespace SamaCardAll.Core.Services
 
         public async Task<IEnumerable<string>> GetDistinctInstallmentMonthYear()
         {
-            return await _context.Installments
-                .Select(i => i.MonthYear)
-                .Distinct()
-                .ToListAsync();
+            var monthYears = _context.Installments
+                                 .Select(i => i.MonthYear)
+                                 .Distinct()
+                                 .ToList();
+
+
+            var monthYearData = monthYears.Select(my => new MonthYearData
+            {
+                SortValue = ConvertMonthYearToInt(my),
+                OriginalMonthYear = my
+            })
+            .ToArray();
+
+            Array.Sort(monthYearData, (x, y) => x.SortValue.CompareTo(y.SortValue));
+
+            return monthYearData.Select(data => data.OriginalMonthYear);
+
+            // Now you can access both the sorted order and original MonthYear values:
+            //foreach (var data in monthYearData)
+            //{
+            //    Console.WriteLine($"SortValue: {data.SortValue}  Original MonthYear: {data.OriginalMonthYear}");
+            //}
+
+        }
+
+        struct MonthYearData
+        {
+            public int SortValue { get; set; }
+            public string OriginalMonthYear { get; set; }
+        }
+
+        private int ConvertMonthYearToInt(string monthYear)
+        {
+            var parts = monthYear.Split('/');
+            int month = int.Parse(parts[0]);
+            int year = int.Parse(parts[1]);
+            return year * 100 + month;
         }
 
         public async Task<IEnumerable<InvoiceDto>> GetFilteredInstallments(int? customerId, string? monthYear)

@@ -14,6 +14,8 @@ namespace SamaCardAll
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+            var constr = builder.Configuration.GetConnectionString("DefaultConnection");
+
             // Enables controllers for API endpoints
             builder.Services.AddControllers(); 
 

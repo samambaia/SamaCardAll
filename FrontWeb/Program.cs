@@ -1,6 +1,7 @@
 using FrontWeb;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using Radzen;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -11,6 +12,8 @@ bool IsDevelopmentEnvironment = false;
 
 string API_BASE_URL_DEV = "https://localhost:44383/";
 string API_BASE_URL_PROD = "http://localhost:5000/";
+
+builder.Services.AddRadzenComponents();
 
 builder.Services.AddScoped<HttpClient>(sp =>
 {

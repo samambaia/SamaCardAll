@@ -2,91 +2,135 @@
 
 @using Radzen.Blazor
 @using Radzen.Blazor.Rendering
+@using SamaCardAll.Infra.Models
+@using System.Net
 
-@inject IJSRuntime JSRuntime;
+@inject IJSRuntime JSRuntime
+@inject NotificationService NotificationService
+@inject HttpClient HttpClient
 
-<h5>Welcome to SamaCard</h5>
+<h2>Welcome to SamaCard</h2>
 
-<div class="container">
-    <div class="row">
-        <div class="col-sm-12 col-lg-6 offset-lg-3 my-5">
-            <RadzenCard class="w-100 mb-4">
-                <RadzenCheckBox @bind-Value="@showDataLabels" Name="dataLabels"></RadzenCheckBox>
-                <RadzenLabel Text="Show Data Labels" Component="dataLabels" Style="margin-left: 8px; vertical-align: middle;" />
-            </RadzenCard>
-            <RadzenChart>
-                <RadzenDonutSeries Data="@revenue" CategoryProperty="Quarter" ValueProperty="Revenue" TotalAngle="180" StartAngle="180">
-                    <ChildContent>
-                        <RadzenSeriesDataLabels Visible="@showDataLabels" />
-                    </ChildContent>
-                    <TitleTemplate>
-                        <div class="rz-donut-content">
-                            <div>Revenue</div>
-                            <div>for 2024</div>
-                        </div>
-                    </TitleTemplate>
-                </RadzenDonutSeries>
-            </RadzenChart>
-        </div>
-    </div>
-</div>
+@* Custom Alert *@
+<RadzenAlert AlertStyle="AlertStyle.Warning" Shade="Shade.Lighter" @bind-Visible="visibleAlert" Close=@OnClose>
+    @MessageAlert
+</RadzenAlert>
 
-@code {
-    bool showDataLabels = false;
+<RadzenCard class="w-100 mb-4">
+    <RadzenLabel Text="Select Month/Year" Component="DropDownBindValue" Style="margin-right: 8px; vertical-align: middle;" />
+    <RadzenDropDown @bind-Value=@monthYear Data=@monthYearList Style="width: 100%; max-width: 200px;" Name="DropDownBindValue" Change="@OnChange" />
+    <hr />
+    <RadzenCheckBox @bind-Value="@showDataLabels" Name="dataLabels"></RadzenCheckBox>
+    <RadzenLabel Text="Show Data Labels" Component="dataLabels" Style="margin-left: 8px; vertical-align: middle;" />
+</RadzenCard>
 
-    class DataItem2
-    {
-        public string Quarter { get; set; }
-        public double Revenue { get; set; }
-    }
-
-    DataItem2[] revenue = new DataItem2[] {
-        new DataItem2
-        {
-            Quarter = "Q1",
-            Revenue = 30000
-        },
-        new DataItem2
-        {
-            Quarter = "Q2",
-            Revenue = 40000
-        },
-        new DataItem2
-        {
-            Quarter = "Q3",
-            Revenue = 50000
-        },
-        new DataItem2
-        {
-            Quarter = "Q4",
-            Revenue = 80000
-        },
-    };
-}
-
-<RadzenChart>
-    <RadzenColumnSeries Data=@revenue2 CategoryProperty="Quarter" ValueProperty="Revenue" />
-    <RadzenLegend Visible="false" />
+@* Chart to show total per Customer *@
+<RadzenChart Visible=true ColorScheme="ColorScheme.Monochrome">
+    <RadzenColumnSeries Data=@_customerTotal CategoryProperty="CustomerName" ValueProperty="InstallmentAmount">
+        <ChildContent>
+            <RadzenSeriesDataLabels Visible="@showDataLabels"/>
+        </ChildContent>
+        <TooltipTemplate Context="_customerTotal">
+            <div>
+                <span>@_customerTotal.CustomerName</span> in @_customerTotal.MonthYear:
+                <strong>@_customerTotal.InstallmentAmount.ToString("C")</strong>
+            </div>
+        </TooltipTemplate>
+    </RadzenColumnSeries>
+    <RadzenValueAxis FormatString="{0:C}">
+        <RadzenAxisTitle Text="Total in the Month" />
+    </RadzenValueAxis>
+    <RadzenCategoryAxis Visible=true TickDistance="100" LineType="LineType.Dotted" Stroke="red" Padding="20" Step="10">
+        <RadzenAxisTitle Text="Customer" />
+    </RadzenCategoryAxis>
+    <RadzenLegend Position="LegendPosition.Bottom" Visible=false/>
 </RadzenChart>
 
-<RadzenButton class="rz-border-radius-6" Click="@ShowAlert" Text="Attention" Icon="account_circle" />
+@code {
+    bool showDataLabels = true;
+
+    private string MessageAlert = string.Empty;
+
+    private string monthYear;
+    private string _monthYear;
+    private IEnumerable<string> monthYearList = new List<string>();
+    private IEnumerable<InvoiceDto> _customerTotal = new List<InvoiceDto>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await FetchData();
+    }
+
+    private async Task FetchData()
+    {
+        try
+        {
+            monthYearList = await HttpClient.GetFromJsonAsync<IEnumerable<string>>("/api/Home/distinct-monthYears");
+
+            _customerTotal = await GetCustomerTotalPerMonthYear(monthYear);
+        }
+        catch (Exception ex)
+        {
+            MessageAlert = $"Error fetching data: {ex.Message}";
+            visibleAlert = true;
+
+        }
+        finally
+        {
+            StateHasChanged();
+        }
+    }
+
+    void OnChange(object newMonthYear)
+    {
+        monthYear = newMonthYear.ToString();
+
+        FetchData();
+
+        // MessageAlert = "The Month/Year Selected was: " + monthYear;
+        // visibleAlert = true;
+    }
+
+    private async Task<IEnumerable<InvoiceDto>> GetCustomerTotalPerMonthYear(string monthYear)
+    {
+        if (monthYear is null)
+        {
+            monthYear = monthYearList.First();
+        }
+
+        try
+        {
+            string encodedMonthYear = WebUtility.UrlEncode(monthYear);
+            string url = $"/api/Home/{encodedMonthYear}";
+            return await HttpClient.GetFromJsonAsync<IEnumerable<InvoiceDto>>(url);
+        }
+        catch (Exception ex)
+        {
+            // TO DO: Handle Error
+            MessageAlert = $"Error fetching MonthYear options: {ex.Message}";
+            visibleAlert = true;
+            return null;
+        }
+    }
+}
+
+@* Test Button call a event *@
+<RadzenButton class="rz-border-radius-6" Click="@OnToggle" Text="Attention" Icon="account_circle" Visible="false" />
 
 @code {
-    class DataItem
-    {
-        public string Quarter { get; set; }
-        public double Revenue { get; set; }
-    }
-    DataItem[] revenue2 = new DataItem[]
-    {
-        new DataItem { Quarter = "Q1", Revenue = 234000 },
-        new DataItem { Quarter = "Q2", Revenue = 284000 },
-        new DataItem { Quarter = "Q3", Revenue = 274000 },
-        new DataItem { Quarter = "Q4", Revenue = 294000 }
-    };
 
-    async void ShowAlert()
+    bool visibleAlert = false;
+
+    string ToggleButtonText => visibleAlert ? "Hide alert" : "Show alert";
+
+    void OnToggle()
     {
-        await JSRuntime.InvokeVoidAsync("confirm", new object?[] { "Testing a Radzen Button" });
+        MessageAlert = "Toggle alert visibility and handle the Close event.";
+        visibleAlert = !visibleAlert;
+    }
+
+    void OnClose()
+    {
+        NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Info, Summary = "Closed", Detail = "Info" });
     }
 }

@@ -10,6 +10,5 @@ namespace SamaCardAll.Core.Services
         void Create(Card card);
         void Update(Card card);
         void Delete(int id);
-
     }
 }

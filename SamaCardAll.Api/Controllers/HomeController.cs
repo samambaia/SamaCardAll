@@ -62,10 +62,17 @@ namespace SamaCardAll.Api.Controllers
             return BadRequest(ModelState);
         }
 
-        [HttpGet("monthyears")]
+        [HttpGet("distinct-monthYears")]
         public async Task<IEnumerable<string>> GetDistinctMonthYears()
         {
             return await _reportService.GetDistinctInstallmentMonthYear();
+        }
+
+        [HttpGet("{monthYear}", Name = "TotalCustomerPerMonth")]
+        public async Task<ActionResult<IEnumerable<InvoiceDto>>> GetTotalCustomerPerMonth(string monthYear)
+        {
+            var customerTotals = await _reportService.GetTotalCustomerPerMonth(monthYear);
+            return Ok(customerTotals);
         }
     }
 }

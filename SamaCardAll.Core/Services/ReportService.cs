@@ -16,36 +16,30 @@ namespace SamaCardAll.Core.Services
 
         public async Task<IEnumerable<string>> GetDistinctInstallmentMonthYear()
         {
-            var monthYears = _context.Installments
+            var monthYears = await _context.Installments
                                  .Select(i => i.MonthYear)
                                  .Distinct()
-                                 .ToList();
+                                 .ToListAsync();
 
+            return monthYears.OrderBy(my => ConvertMonthYearToInt(my));
 
-            var monthYearData = monthYears.Select(my => new MonthYearData
-            {
-                SortValue = ConvertMonthYearToInt(my),
-                OriginalMonthYear = my
-            })
-            .ToArray();
-
-            Array.Sort(monthYearData, (x, y) => x.SortValue.CompareTo(y.SortValue));
-
-            return monthYearData.Select(data => data.OriginalMonthYear);
-
-            // Now you can access both the sorted order and original MonthYear values:
-            //foreach (var data in monthYearData)
+            //var monthYearData = monthYears.Select(my => new MonthYearData
             //{
-            //    Console.WriteLine($"SortValue: {data.SortValue}  Original MonthYear: {data.OriginalMonthYear}");
-            //}
+            //    SortValue = ConvertMonthYearToInt(my),
+            //    OriginalMonthYear = my
+            //})
+            //.ToArray();
 
+            //Array.Sort(monthYearData, (x, y) => x.SortValue.CompareTo(y.SortValue));
+
+            //return (Task<IEnumerable<string>>)monthYearData.Select(data => data.OriginalMonthYear);
         }
 
-        struct MonthYearData
-        {
-            public int SortValue { get; set; }
-            public string OriginalMonthYear { get; set; }
-        }
+        //struct MonthYearData
+        //{
+        //    public int SortValue { get; set; }
+        //    public string OriginalMonthYear { get; set; }
+        //}
 
         private int ConvertMonthYearToInt(string monthYear)
         {
@@ -79,6 +73,7 @@ namespace SamaCardAll.Core.Services
             return results;
         }
 
+        // Do not use! The Installment field was updated in the Installment table
         public async Task UpdateInstallments()
         {
             var spends = await _context.Spends.ToListAsync();
@@ -99,6 +94,31 @@ namespace SamaCardAll.Core.Services
 
                 await _context.SaveChangesAsync();
             }
+        }
+
+        public async Task<IEnumerable<InvoiceDto>> GetTotalCustomerPerMonth(string monthYear)
+        {
+            string decodedMonthYear = WebUtility.UrlDecode(monthYear);
+
+            var query = _context.Installments
+                                .Include(i => i.Spend.Customer)
+                                .Where(i => i.MonthYear == decodedMonthYear)
+                                .GroupBy(i => new { i.Spend.Customer.CustomerName, i.MonthYear })
+                                .Select(g => new
+                                {
+                                    g.Key.MonthYear,
+                                    g.Key.CustomerName,
+                                    InstallmentValues = g.Select(i => i.InstallmentValue)
+                                });
+
+            var result = await query.ToListAsync(); // Force execution on the client asynchronously
+
+            return result.Select(g => new InvoiceDto
+            {
+                MonthYear = g.MonthYear,
+                CustomerName = g.CustomerName,
+                InstallmentAmount = g.InstallmentValues.Sum()
+            });
         }
     }
 }

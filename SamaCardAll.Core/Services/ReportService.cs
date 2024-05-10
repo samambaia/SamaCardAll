@@ -41,7 +41,7 @@ namespace SamaCardAll.Core.Services
         //    public string OriginalMonthYear { get; set; }
         //}
 
-        private int ConvertMonthYearToInt(string monthYear)
+        static int ConvertMonthYearToInt(string monthYear)
         {
             var parts = monthYear.Split('/');
             int month = int.Parse(parts[0]);
@@ -118,6 +118,30 @@ namespace SamaCardAll.Core.Services
                 MonthYear = g.MonthYear,
                 CustomerName = g.CustomerName,
                 InstallmentAmount = g.InstallmentValues.Sum()
+            });
+        }
+
+        public async Task<IEnumerable<TotalCardMonthYearDTO>> GetTotalCardMonthYear(string monthYear)
+        {
+            string decodedMonthYear = WebUtility.UrlDecode (monthYear);
+            var query = _context.Installments
+                .Include(c => c.Spend.Card)
+                .Where(c => c.MonthYear == decodedMonthYear)
+                .GroupBy(c => new { c.Spend.Card.Bank, c.MonthYear })
+                .Select(d => new
+                {
+                    d.Key.MonthYear,
+                    d.Key.Bank,
+                    InstallmentTotal = d.Select(c => c.InstallmentValue)
+                });
+
+            var result = await query.ToListAsync();
+
+            return result.Select(g => new TotalCardMonthYearDTO
+            {
+                MonthYear = g.MonthYear,
+                CardName = g.Bank,
+                InstallmentAmount = g.InstallmentTotal.Sum()
             });
         }
     }

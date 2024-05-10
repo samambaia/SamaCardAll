@@ -68,11 +68,18 @@ namespace SamaCardAll.Api.Controllers
             return await _reportService.GetDistinctInstallmentMonthYear();
         }
 
-        [HttpGet("{monthYear}", Name = "TotalCustomerPerMonth")]
+        [HttpGet("customer/{monthYear}", Name = "TotalCustomerPerMonth")]
         public async Task<ActionResult<IEnumerable<InvoiceDto>>> GetTotalCustomerPerMonth(string monthYear)
         {
             var customerTotals = await _reportService.GetTotalCustomerPerMonth(monthYear);
             return Ok(customerTotals);
+        }
+
+        [HttpGet("card/{monthYear}", Name = "TotalCardPerMonth")]
+        public async Task<ActionResult<IEnumerable<TotalCardMonthYearDTO>>> GetTotalCardPerMonth(string monthYear)
+        {
+            var cardTotals = await _reportService.GetTotalCardMonthYear(monthYear);
+            return Ok(cardTotals);
         }
     }
 }

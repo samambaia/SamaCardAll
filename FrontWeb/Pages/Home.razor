@@ -40,14 +40,35 @@
     <RadzenValueAxis FormatString="{0:C}">
         <RadzenAxisTitle Text="Total in the Month" />
     </RadzenValueAxis>
-    <RadzenCategoryAxis Visible=true TickDistance="100" LineType="LineType.Dotted" Stroke="red" Padding="20" Step="10">
+    <RadzenCategoryAxis Visible=false TickDistance="100" LineType="LineType.Dotted" Stroke="red" Padding="20" Step="10">
         <RadzenAxisTitle Text="Customer" />
     </RadzenCategoryAxis>
     <RadzenLegend Position="LegendPosition.Bottom" Visible=false/>
 </RadzenChart>
 
+<hr />
+
+@* Chart to show total per Card (MOnth/Year) *@
+<RadzenChart Visible=true ColorScheme="ColorScheme.Divergent">
+    <RadzenDonutSeries Data="@_cardTotal" CategoryProperty="CardName" ValueProperty="InstallmentAmount" TotalAngle="360" StartAngle="360">
+        <ChildContent>
+            <RadzenSeriesDataLabels Visible="@showDataLabels" />
+        </ChildContent>
+        <TitleTemplate>
+            <div class="rz-donut-content">
+                <div>Total Expenses</div>
+                <div>for Card</div>
+            </div>
+        </TitleTemplate>
+    </RadzenDonutSeries>
+    <RadzenValueAxis FormatString="{0:C}">
+        <RadzenAxisTitle Text="Total in the Month" />
+    </RadzenValueAxis>
+</RadzenChart>
+
 @code {
     bool showDataLabels = true;
+    bool visibleAlert = false;
 
     private string MessageAlert = string.Empty;
 
@@ -55,6 +76,7 @@
     private string _monthYear;
     private IEnumerable<string> monthYearList = new List<string>();
     private IEnumerable<InvoiceDto> _customerTotal = new List<InvoiceDto>();
+    private IEnumerable<TotalCardMonthYearDTO> _cardTotal = new List<TotalCardMonthYearDTO>();
 
     protected override async Task OnInitializedAsync()
     {
@@ -65,9 +87,12 @@
     {
         try
         {
+            // Get the list of Month/Years from Installment table (Distinct)
             monthYearList = await HttpClient.GetFromJsonAsync<IEnumerable<string>>("/api/Home/distinct-monthYears");
 
             _customerTotal = await GetCustomerTotalPerMonthYear(monthYear);
+
+            _cardTotal = await GetCardTotalPerMonthYear(monthYear);
         }
         catch (Exception ex)
         {
@@ -101,7 +126,7 @@
         try
         {
             string encodedMonthYear = WebUtility.UrlEncode(monthYear);
-            string url = $"/api/Home/{encodedMonthYear}";
+            string url = $"/api/Home/customer/{encodedMonthYear}";
             return await HttpClient.GetFromJsonAsync<IEnumerable<InvoiceDto>>(url);
         }
         catch (Exception ex)
@@ -112,14 +137,36 @@
             return null;
         }
     }
+
+    private async Task<IEnumerable<TotalCardMonthYearDTO>> GetCardTotalPerMonthYear(string monthYear)
+    {
+        if (monthYear is null)
+        {
+            monthYear = monthYearList.First();
+        }
+
+        try
+        {
+            string encodedMonthYear = WebUtility.UrlEncode(monthYear);
+            string url = $"/api/Home/card/{encodedMonthYear}";
+            return await HttpClient.GetFromJsonAsync<IEnumerable<TotalCardMonthYearDTO>>(url);
+        }
+        catch (Exception ex)
+        {
+            // TO DO: Handle Error
+            MessageAlert = $"Error fetching MonthYear options: {ex.Message}";
+            visibleAlert = true;
+            return null;
+        }
+    }
+
+
 }
 
 @* Test Button call a event *@
 <RadzenButton class="rz-border-radius-6" Click="@OnToggle" Text="Attention" Icon="account_circle" Visible="false" />
 
 @code {
-
-    bool visibleAlert = false;
 
     string ToggleButtonText => visibleAlert ? "Hide alert" : "Show alert";
 

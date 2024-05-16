@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SamaCardAll.Core.DTO;
 using SamaCardAll.Infra;
+using SamaCardAll.Infra.Models;
 using System.Net;
 
 namespace SamaCardAll.Core.Services
@@ -22,24 +23,7 @@ namespace SamaCardAll.Core.Services
                                  .ToListAsync();
 
             return monthYears.OrderBy(my => ConvertMonthYearToInt(my));
-
-            //var monthYearData = monthYears.Select(my => new MonthYearData
-            //{
-            //    SortValue = ConvertMonthYearToInt(my),
-            //    OriginalMonthYear = my
-            //})
-            //.ToArray();
-
-            //Array.Sort(monthYearData, (x, y) => x.SortValue.CompareTo(y.SortValue));
-
-            //return (Task<IEnumerable<string>>)monthYearData.Select(data => data.OriginalMonthYear);
         }
-
-        //struct MonthYearData
-        //{
-        //    public int SortValue { get; set; }
-        //    public string OriginalMonthYear { get; set; }
-        //}
 
         static int ConvertMonthYearToInt(string monthYear)
         {
@@ -49,17 +33,38 @@ namespace SamaCardAll.Core.Services
             return year * 100 + month;
         }
 
+        /*
+            * The method GetFilteredInstallments is used to retrieve the installments for a specific customer and month/year.
+            * The method receives the customer ID and the month/year as parameters.
+            * The month/year parameter is URL encoded, so it is decoded before being used.
+            * The method retrieves the installments from the database using the GetInstallments method.
+            * The GetInstallments method returns an IQueryable<Installments> object that includes the related Spend, Customer, and Card entities.
+            * The method then maps the installments to a list of InvoiceDto objects using the MapToInvoiceDto method.
+            * Finally, the method returns the list of InvoiceDto objects.
+        */
         public async Task<IEnumerable<InvoiceDto>> GetFilteredInstallments(int? customerId, string? monthYear)
         {
-            var query = _context.Installments
-                                .Include(i => i.Spend)
-                                .Include(i => i.Spend.Customer)
-                                .Include(i => i.Spend.Card)
-                                .Where(i => i.MonthYear == WebUtility.UrlDecode(monthYear) && i.Spend.Customer.IdCustomer == customerId)
-                                .Where(i => i.Spend.Deleted == 0); //Filtered by Spends that doesn't have a Deleted flag
+            monthYear = WebUtility.UrlDecode(monthYear);
 
-            // Projection (Map to DTO)
-            var results = await query.Select(i => new InvoiceDto
+            var installments = GetInstallments(customerId, monthYear);
+
+            var results = MapToInvoiceDto(installments);
+
+            return results;
+        }
+
+        private IQueryable<Installments> GetInstallments(int? customerId, string? monthYear)
+        {
+            return _context.Installments
+                            .Include(i => i.Spend)
+                            .Include(i => i.Spend.Customer)
+                            .Include(i => i.Spend.Card)
+                            .Where(i => i.MonthYear == monthYear && i.Spend.Customer.IdCustomer == customerId && i.Spend.Deleted == 0);
+        }
+
+        private static List<InvoiceDto> MapToInvoiceDto(IQueryable<Installments> installments)
+        {
+            return installments.Select(i => new InvoiceDto
             {
                 DescriptionSpend = i.Spend.Expenses,
                 CustomerName = i.Spend.Customer.CustomerName,
@@ -67,13 +72,10 @@ namespace SamaCardAll.Core.Services
                 InstallmentAmount = i.InstallmentValue,
                 MonthYear = i.MonthYear,
                 Installment = i.Installment
-
-            }).ToListAsync();
-
-            return results;
+            }).ToList();
         }
 
-        // Do not use! The Installment field was updated in the Installment table
+        // Do not use! The Installment field was updated on the Installment table
         public async Task UpdateInstallments()
         {
             var spends = await _context.Spends.ToListAsync();
@@ -84,7 +86,7 @@ namespace SamaCardAll.Core.Services
                                                 .Where(i => i.SpendIdSpend == spend.IdSpend)
                                                 .ToListAsync();
 
-                // Your logic to generate installment numbers (e.g., "01/05")
+                // Logic to generate installment numbers (e.g., "01/05")
                 int counter = 1;
                 foreach (var installment in installments)
                 {

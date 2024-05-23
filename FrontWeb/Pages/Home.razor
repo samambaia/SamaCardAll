@@ -80,6 +80,9 @@
 
     protected override async Task OnInitializedAsync()
     {
+        // Retrieve the current Month/Year
+        monthYear = DateTime.Now.ToString("MM/yyyy");
+
         await FetchData();
     }
 
@@ -118,7 +121,13 @@
 
     private async Task<IEnumerable<InvoiceDto>> GetCustomerTotalPerMonthYear(string monthYear)
     {
-        if (monthYear is null)
+
+        if (monthYearList == null || !monthYearList.Any())
+        {
+            // Retrieve the current Month/Year
+            monthYear = DateTime.Now.ToString("MM/yyyy");
+        }
+        else if (string.IsNullOrEmpty(monthYear))
         {
             monthYear = monthYearList.First();
         }
@@ -140,7 +149,12 @@
 
     private async Task<IEnumerable<TotalCardMonthYearDTO>> GetCardTotalPerMonthYear(string monthYear)
     {
-        if (monthYear is null)
+        if (monthYearList == null || !monthYearList.Any())
+        {
+            // Retrieve the current Month/Year
+            monthYear = DateTime.Now.ToString("MM/yyyy");
+        }
+        else if (string.IsNullOrEmpty(monthYear))
         {
             monthYear = monthYearList.First();
         }

@@ -1,10 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SamaCardAll.Infra.Models;
 
 public class Card
 {
     [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int IdCard { get; set; }
     [Required]
     public string? Bank { get; set; }

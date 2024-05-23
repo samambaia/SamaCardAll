@@ -1,10 +1,13 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SamaCardAll.Infra.Models
 {
     public class Installments
     {
+
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         public string MonthYear { get; set; }
         public decimal InstallmentValue { get; set; }

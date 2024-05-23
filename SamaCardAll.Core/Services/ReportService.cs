@@ -104,7 +104,7 @@ namespace SamaCardAll.Core.Services
 
             var query = _context.Installments
                                 .Include(i => i.Spend.Customer)
-                                .Where(i => i.MonthYear == decodedMonthYear)
+                                .Where(i => i.MonthYear == decodedMonthYear && i.Spend.Deleted == 0)
                                 .GroupBy(i => new { i.Spend.Customer.CustomerName, i.MonthYear })
                                 .Select(g => new
                                 {
@@ -128,7 +128,7 @@ namespace SamaCardAll.Core.Services
             string decodedMonthYear = WebUtility.UrlDecode (monthYear);
             var query = _context.Installments
                 .Include(c => c.Spend.Card)
-                .Where(c => c.MonthYear == decodedMonthYear)
+                .Where(c => c.MonthYear == decodedMonthYear && c.Spend.Deleted == 0)
                 .GroupBy(c => new { c.Spend.Card.Bank, c.MonthYear })
                 .Select(d => new
                 {

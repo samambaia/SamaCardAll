@@ -51,13 +51,13 @@ namespace SamaCardAll.Core.Services
 
         void ISpendService.Create(Spend spend)
         {
-            // Define de ID
-            if (MaxId > 0)
-            {
-                spend.IdSpend = ++MaxId;
-            }
-            else
-                spend.IdSpend = 1;
+            //// Define de ID
+            //if (MaxId > 0)
+            //{
+            //    spend.IdSpend = ++MaxId;
+            //}
+            //else
+            //    spend.IdSpend = 1;
 
             spend.UserIdUser = 1;
             spend.CreatedDate = DateTime.Now;
@@ -107,7 +107,7 @@ namespace SamaCardAll.Core.Services
                 Installments installment = new Installments
                 {
                     SpendIdSpend = spendId,
-                    Id = maxId++,
+                    //Id = maxId++,
                     InstallmentValue = amount,
                     MonthYear = monthYear,
                     Active = 1,

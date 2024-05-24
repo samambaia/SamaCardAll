@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using SamaCardAll.Infra.DTO;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SamaCardAll.Infra.Models;
@@ -18,6 +19,5 @@ public class Card
     [Required]
     public string? Brand { get; set; } = "Mastercard";
     // 1 = Active, 0 = Inactive
-    public short Active {  get; set; }
-
+    public short Active { get; set; } = 1;
 }

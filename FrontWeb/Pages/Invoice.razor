@@ -1,35 +1,37 @@
-﻿@page "/invoice" 
+﻿@page "/invoice"
 
 @using FrontWeb.Components
 @using SamaCardAll.Infra.Models
 @using System.Net
+@using Radzen.Blazor
+@using Radzen.Blazor.Rendering
 
 @inject HttpClient HttpClient
 
-<h5>Invoice</h5>
-<h2>List of Spends for Customer/Month</h2>
+<h3 class="radzen-heading">Invoice</h3>
+<h5 class="radzen-subheading">List of Spends for Customer/Month</h5>
 
 <div class="form-group">
-    <label class="col-form-label">Customer</label>
-    <select @bind="customerId" class="form-select" style="width: 300px">
-        <option value="">-- Select Customer --</option>
-        @if (_customers != null)
-        {
-            @foreach (var customer in _customers)
-            {
-                <option value="@customer.IdCustomer">@customer.CustomerName</option>
-            }
-        }
-    </select>
-</div>
-<div class="form-group">
-    <label class="col-form-label">Month/Year</label>
-    <MonthYearFilter @bind-SelectedMonthYear="monthYear" MonthYearOptions="monthYearList" />
-</div>
+    <div class="row">
+        <div class="col">
+            <label class="col-form-label">Customer</label>
+            <br />
+            <RadzenDropDown @bind-Value="customerId" TValue="int?" Data="@_customers" TextProperty="CustomerName" ValueProperty="IdCustomer" Style="width: 300px">
+                <RadzenDropDownItem TValue="string" Text="-- Select Customer --" Value=""></RadzenDropDownItem>
+            </RadzenDropDown>
+        </div>
+        <div class="col">
+            <label class="col-form-label">Month/Year</label>
+            <br />
+            <RadzenDropDown @bind-Value="monthYear" TValue="string" Data="@monthYearList" Style="width: 200px">
+                <RadzenDropDownItem TValue="string" Text="-- Select Month/Year --" Value=""></RadzenDropDownItem>
+            </RadzenDropDown>
+        </div>
+    </div>
+    <br />
+    <RadzenButton class="btn btn-primary" Text="Filter" Click="@FetchInstallments"></RadzenButton>
 
-<hr />
-<button class="btn btn-primary" @onclick="FetchInstallments">Filter</button>
-<hr />
+</div>
 
 @* <hr />
 <button class="btn btn-warning" @onclick="UpdateInstallments">Update Installments</button>
@@ -38,39 +40,53 @@
 
 @if (_installments != null && _installments.Any())
 {
-    <table class="table">
-        <thead>
-            <tr> 
-                <th>Description Spend</th>
-                <th>Installment</th>
-                <th>Card</th>
-                <th>Amount</th>
-            </tr> 
-        </thead>
-        <tbody>
-            @foreach (var installment in _installments)
-            {
-                <tr>
-                    <td>@installment.DescriptionSpend</td>
-                    <td>@installment.Installment</td>
-                    <td>@installment.CardName</td>
-                    <td>@installment.InstallmentAmount.ToString("C")</td>
-                </tr>
-            }
-        </tbody>
-        <tfoot>
+    <br />
+    <RadzenDataGrid TItem="InvoiceDto" Data="@_installments" Style="width: 100%; align-items:center; line-height:15px; outline-color:darkcyan">
+        <Columns>
+            <RadzenDataGridColumn TItem="InvoiceDto" Property="DescriptionSpend" Title="Description Spend">
+                <HeaderTemplate>
+                    <strong style="font-size:medium">Description Spend</strong>
+                </HeaderTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="InvoiceDto" Property="Installment" Title="Installment">
+                <HeaderTemplate>
+                    <strong style="font-size:medium">Installment</strong>
+                </HeaderTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="InvoiceDto" Property="CardName" Title="Card">
+                <HeaderTemplate>
+                    <strong style="font-size:medium">Card</strong>
+                </HeaderTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="InvoiceDto" Property="InstallmentAmount" Title="Amount">
+                <HeaderTemplate>
+                    <strong style="font-size:medium">Amount</strong>
+                </HeaderTemplate>
+                <Template Context="data">
+                    @data.InstallmentAmount.ToString("C")
+                </Template>
+            </RadzenDataGridColumn>
+        </Columns>
+        <FooterTemplate>
             <tr>
-                <td colspan="3" style="text-align: right; font-weight:bold">Customer Total:</td>
-                <td style="font-weight:bold">@totalInstallmentSum.ToString("C")</td>
+                <td colspan="2" style="height: 15px;"></td>
             </tr>
-        </tfoot>
-    </table>
+            <tr style="font-weight:bold; font-size:medium; border-top: 1px solid gray; border-bottom: 1px solid gray; color: gray;">
+                <td>Customer Total:</td>
+                <td>&nbsp;</td> <!-- Add a space between the two <td> elements -->
+                <td>@totalInstallmentSum.ToString("C")</td>
+            </tr>
+            <tr>
+                <td colspan="2" style="height: 15px;"></td>
+            </tr>
+        </FooterTemplate>
+    </RadzenDataGrid>
 }
-else if (isLoading) 
+else if (isLoading)
 {
-    <p class="loading-progress">Loading installments...</p> 
+    <RadzenProgressBar Style="width: 100%" />
 }
-else 
+else
 {
     <p class="alert">No installments found matching the filters...</p>
 }
@@ -110,7 +126,7 @@ else
     private bool isLoading = true;
 
     private async Task FetchInstallments()
-    { 
+    {
         isLoading = true; // Show loading indicator
         try
         {

@@ -9,7 +9,8 @@
 
 <h3>Cards</h3>
 
-<button class="btn btn-primary" @onclick="() => OpenModal()">New Card</button>
+<RadzenButton Shade="Shade.Darker" Click=@(args => OpenModal()) Text="New Card" ButtonStyle="ButtonStyle.Primary" />
+<p />
 
 <RadzenDataGrid TItem="Card" Data="@_cards" PagerPosition="PagerPosition.Bottom" AllowPaging="true" PageSize="5" PagerHorizontalAlign="HorizontalAlign.Center" AllowSorting="true">
     <Columns>
@@ -68,7 +69,7 @@
     {
         var allCards = await HttpClient.GetFromJsonAsync<List<Card>>("/api/Card");
 
-        _cards = allCards; //.Skip((currentPage - 1) * recordsPerPage).Take(recordsPerPage).ToList();
+        _cards = allCards;
 
         Console.WriteLine($"LoadCards: _cards.Count = {_cards.Count}");
         StateHasChanged();

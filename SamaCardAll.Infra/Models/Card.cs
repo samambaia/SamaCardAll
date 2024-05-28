@@ -1,5 +1,4 @@
-﻿using SamaCardAll.Infra.DTO;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SamaCardAll.Infra.Models;

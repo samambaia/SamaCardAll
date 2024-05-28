@@ -1,35 +1,29 @@
 ﻿@using SamaCardAll.Infra.Models
+@using Radzen.Blazor
+@using Radzen.Blazor.Rendering
 
 @inject IJSRuntime JSRuntime;
 
-<div class="modal" tabindex="-1" role="dialog" style="display:@(isVisible ? "block" : "none"); overflow-y: auto;">
-    <div class="modal-dialog" role="document">
+<div class="modal" tabindex="-1" role="dialog" style="display:@(isVisible ? "block" : "none"); overflow-y: auto; width: 600px; margin: 0 auto; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+    <div class="modal-dialog" role="document" style="display:flex; flex-direction: column; justify-content: center; align-items: center;">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Installment Plan</h5>
-                <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close" @onclick="@(() => Hide())">
-                </button>
+                <RadzenButton Shade="Shade.Darker" Click=@(args => Hide()) Icon="close" ButtonStyle="ButtonStyle.Secondary" />
             </div>
             <div class="modal-body">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Month</th>
-                            <th>Installment</th>
-                            <th>Value</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var installment in installmentPlanList)
-                        {
-                            <tr>
-                                <td>@installment.DisplayDueDate</td>
-                                <td>@installment.InstallmentDisplay</td>
-                                <td>@installment.DisplayAmount</td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
+                <RadzenDataGrid TItem="Installment" Data="@installmentPlanList" PagerPosition="PagerPosition.Bottom" AllowPaging="true" PageSize="8" PagerHorizontalAlign="HorizontalAlign.Center" AllowSorting="true">
+                    <Columns>
+                        <RadzenDataGridColumn TItem="Installment" Property="DisplayDueDate" Title="Month"/>
+                        <RadzenDataGridColumn TItem="Installment" Property="InstallmentDisplay" Title="Installment" />
+
+                        <RadzenDataGridColumn TItem="Installment" Property="DisplayAmount" Title="Amount">
+                            <Template Context="installmentPlanList">
+                                @installmentPlanList.Amount.ToString("C2")
+                            </Template>
+                        </RadzenDataGridColumn>
+                    </Columns>
+                </RadzenDataGrid>
             </div>
         </div>
     </div>

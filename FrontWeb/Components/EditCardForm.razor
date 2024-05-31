@@ -1,9 +1,10 @@
 ﻿@using SamaCardAll.Infra.Models
+@using FrontWeb.Components
 @using Radzen.Blazor
 @using Radzen.Blazor.Rendering
 
 <RadzenTemplateForm TItem="Card" Data=@card Submit=HandleValidSubmit>
-    <RadzenCard class="my-5 mx-auto" Style="max-width: 400px;">
+    <RadzenCard class="my-2 mx-auto" Style="max-width: 400px;">
         <div class="row">
             <div class="col">
                 <RadzenText TextStyle="TextStyle.Subtitle2">Bank</RadzenText>
@@ -70,7 +71,7 @@
         Discover
     }
 
-    private String TitleModal = "New Card";
+    // private String TitleModal = "New Card";
 
     private void HandleValidSubmit()
     {

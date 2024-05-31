@@ -1,6 +1,7 @@
 ﻿@page "/customers"
 
 @using SamaCardAll.Infra.Models
+@using FrontWeb.Components
 @using System.Text.Json
 @using Radzen.Blazor
 @using Radzen.Blazor.Rendering
@@ -42,20 +43,29 @@
 
 <ModalDialog @ref="@modalDialog" Title=@TitleModal>
     <EditForm Model="customer" OnValidSubmit="HandleValidSubmit">
-        <div class="form-group">
-            <label for="customerName">Customer Name:</label>
-            <InputText id="Name" class="form-control" @bind-Value="customer.CustomerName" />
-        </div>
-        <div class="form-group">
-            <label for="customerActive" class="col-form-label">Active:</label>
-            <input type="checkbox" id="customerActive" class="form-check-inline" checked="@(customer.Active == 1)" @onchange="ToggleActive" />
-        </div>
-
-        <p />
-        <button type="submit" class="btn btn-primary" @onclick="HandleValidSubmit">Save</button>
+        <RadzenCard class="my-2 mx-auto" Style="max-width: 400px;">
+            <div class="col">
+                <RadzenText TextStyle="TextStyle.Subtitle2">Customer Name</RadzenText>
+                <RadzenTextBox @bind-Value="customer.CustomerName" Style="width: 350px" />
+                <br />
+                <br />
+                <RadzenText TextStyle="TextStyle.Subtitle2">Active</RadzenText>
+                <RadzenCheckBox @bind-Value="IsCardActive" />
+            </div>
+        </RadzenCard>
     </EditForm>
+    <div class="col-md-12 d-flex align-items-end justify-content-left mt-4">
+        <RadzenButton ButtonType="ButtonType.Submit" Icon="save" Text="Save" Click="@(() => HandleValidSubmit())" />
+    </div>
 </ModalDialog>
 
+@code {
+    private bool IsCardActive
+    {
+        get => customer.Active == 1;
+        set => customer.Active = value ? (short)1 : (short)0;
+    }
+}
 
 @code {
     [Parameter]

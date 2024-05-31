@@ -14,10 +14,26 @@
             <div class="modal-body">
                 <RadzenDataGrid TItem="Installment" Data="@installmentPlanList" PagerPosition="PagerPosition.Bottom" AllowPaging="true" PageSize="8" PagerHorizontalAlign="HorizontalAlign.Center" AllowSorting="true">
                     <Columns>
-                        <RadzenDataGridColumn TItem="Installment" Property="DisplayDueDate" Title="Month"/>
-                        <RadzenDataGridColumn TItem="Installment" Property="InstallmentDisplay" Title="Installment" />
-
+                        <RadzenDataGridColumn TItem="Installment" Property="DisplayDueDate" Title="Month">
+                            <HeaderTemplate>
+                                <strong style="font-size:medium">Month</strong>
+                            </HeaderTemplate>
+                            <Template Context="installmentPlanList">
+                                @installmentPlanList.DisplayDueDate
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn TItem="Installment" Property="InstallmentDisplay" Title="Installment">
+                            <HeaderTemplate>
+                                <strong style="font-size:medium">Installment</strong>
+                            </HeaderTemplate>
+                            <Template Context="installmentPlanList">
+                                @installmentPlanList.InstallmentDisplay
+                            </Template>
+                        </RadzenDataGridColumn>
                         <RadzenDataGridColumn TItem="Installment" Property="DisplayAmount" Title="Amount">
+                            <HeaderTemplate>
+                                <strong style="font-size:medium">Amount</strong>
+                            </HeaderTemplate>
                             <Template Context="installmentPlanList">
                                 @installmentPlanList.Amount.ToString("C2")
                             </Template>

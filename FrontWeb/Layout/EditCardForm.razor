@@ -1,34 +1,56 @@
 ﻿@using SamaCardAll.Infra.Models
-@using Microsoft.AspNetCore.Components.Forms
+@using Radzen.Blazor
+@using Radzen.Blazor.Rendering
 
-<EditForm Model="card" OnValidSubmit="HandleValidSubmit">
-    <div class="form-group">
-        <label for="Bank">Bank:</label>
-        <InputText id="Bank" class="form-control" @bind-Value="card.Bank" />
-    </div>
-    <div class="form-group">
-        <label for="Number">Number:</label>
-        <InputText id="Number" class="form-control" @bind-Value="card.Number" style="width: 300px" />
-    </div>
-    <div class="form-group">
-        <label for="Expiration">Expiration:</label>
-        <ExpirationMask @bind-Value="card.Expiration" />
-     </div>
-    <div class="form-group">
-        <label for="Brand">Brand:</label>
-        <InputSelect id="Brand" class="form-select" @bind-Value="card.Brand" style="width: 200px;">
-            <option value="Visa">Visa</option>
-            <option value="Mastercard">Mastercard</option>
-        </InputSelect>
-    </div>
-    <div class="form-group">
-        <label for="cardActive" class="col-form-label">Active:</label>
-        <input type="checkbox" id="cardActive" class="form-check-inline" checked="@(card.Active )" @onchange="ToggleActive" />
-    </div>
+<RadzenTemplateForm TItem="Card" Data=@card Submit=HandleValidSubmit>
+    <RadzenCard class="my-5 mx-auto" Style="max-width: 400px;">
+        <div class="row">
+            <div class="col">
+                <RadzenText TextStyle="TextStyle.Subtitle2">Bank</RadzenText>
+                <RadzenTextBox @bind-Value="card.Bank" Style="width: 300px" />
+            </div>
+            <div class="col">
+                <br />
+                <RadzenText TextStyle="TextStyle.Subtitle2">Number</RadzenText>
+                <RadzenTextBox @bind-Value="card.Number" Style="width: 300px" />
+            </div>
+        </div>
+        <div class="col">
+            <br />
+            <RadzenText TextStyle="TextStyle.Subtitle2">Expiration</RadzenText>
+            <RadzenMask @bind-Value="card.Expiration" Mask="**/**" CharacterPattern="[0-9]" Placeholder="01/28" Style="width: 80px" />
+        </div>
+        <div class="col">
+            <br />
+            <RadzenText TextStyle="TextStyle.Subtitle2">Brand</RadzenText>
+            <RadzenDropDown TValue="string" @bind-Value="card.Brand" Data="brands" Style="width: 200px;" />
+        </div>
+        <br />
+        <div class="col">
+            <RadzenText TextStyle="TextStyle.Subtitle2">Active</RadzenText>
+            <RadzenCheckBox @bind-Value="IsCardActive" />
+        </div>
+    </RadzenCard>
+</RadzenTemplateForm>
 
-    <hr />
-    <button type="submit" class="btn btn-primary">Save</button>
-</EditForm>
+<div class="col-md-12 d-flex align-items-end justify-content-left mt-4">
+    <RadzenButton ButtonType="ButtonType.Submit" Icon="save" Text="Save" Click="@(() => HandleValidSubmit())" />
+</div>
+
+@code {
+    // Using in Brand DropDown
+    private List<string> brands = new List<string>
+    {
+        "Mastercard",
+        "Visa"
+    };
+
+    private bool IsCardActive
+    {
+        get => card.Active == 1;
+        set => card.Active = value ? (short)1 : (short)0;
+    }
+}
 
 @code {
     [Parameter]
@@ -37,23 +59,28 @@
     [Parameter]
     public EventCallback OnValidSubmit { get; set; }
 
+    [Parameter]
+    public ModalDialog modalDialog { get; set; }
+
+    public enum CardBrand
+    {
+        Visa,
+        MasterCard,
+        AmericanExpress,
+        Discover
+    }
+
+    private String TitleModal = "New Card";
+
     private void HandleValidSubmit()
     {
         // Pass the event upwards to the parent component
         OnValidSubmit.InvokeAsync();
     }
 
-    private void ToggleActive(ChangeEventArgs args)
+    private void ToggleActive(bool isChecked)
     {
-        bool isChecked = (bool)args.Value;
-        if (isChecked)
-        {
-            card.Active = 1; // Set to 1 when checked
-        }
-        else
-        {
-            card.Active = 0; // Set to 0 when unchecked
-        }
+        card.Active = isChecked ? (short)1 : (short)0;
     }
 
     protected override void OnParametersSet()

@@ -8,29 +8,30 @@
 
 @inject HttpClient HttpClient
 
-<h3 class="radzen-heading">Invoice</h3>
+<h2 class="radzen-heading">Invoice</h2>
 <h5 class="radzen-subheading">List of Spends for Customer/Month</h5>
 
 <div class="form-group">
-    <div class="row">
-        <div class="col">
-            <label class="col-form-label">Customer</label>
-            <br />
-            <RadzenDropDown @bind-Value="customerId" TValue="int?" Data="@_customers" TextProperty="CustomerName" ValueProperty="IdCustomer" Style="width: 300px">
-                <RadzenDropDownItem TValue="string" Text="-- Select Customer --" Value=""></RadzenDropDownItem>
-            </RadzenDropDown>
+    <RadzenCard>
+        <div class="row">
+            <div class="col">
+                <label class="col-form-label">Customer</label>
+                <br />
+                <RadzenDropDown @bind-Value="customerId" TValue="int?" Data="@_customers" TextProperty="CustomerName" ValueProperty="IdCustomer" Style="width: 300px">
+                    <RadzenDropDownItem TValue="string" Text="-- Select Customer --" Value=""></RadzenDropDownItem>
+                </RadzenDropDown>
+            </div>
+            <div class="col">
+                <label class="col-form-label">Month/Year</label>
+                <br />
+                <RadzenDropDown @bind-Value="monthYear" TValue="string" Data="@monthYearList" Style="width: 200px">
+                    <RadzenDropDownItem TValue="string" Text="-- Select Month/Year --" Value=""></RadzenDropDownItem>
+                </RadzenDropDown>
+            </div>
         </div>
-        <div class="col">
-            <label class="col-form-label">Month/Year</label>
-            <br />
-            <RadzenDropDown @bind-Value="monthYear" TValue="string" Data="@monthYearList" Style="width: 200px">
-                <RadzenDropDownItem TValue="string" Text="-- Select Month/Year --" Value=""></RadzenDropDownItem>
-            </RadzenDropDown>
-        </div>
-    </div>
-    <br />
-    <RadzenButton class="btn btn-primary" Text="Filter" Click="@FetchInstallments"></RadzenButton>
-
+        <br />
+        <RadzenButton class="btn btn-primary" Text="Filter" Click="@FetchInstallments"></RadzenButton>
+    </RadzenCard>
 </div>
 
 @* <hr />
@@ -43,12 +44,12 @@
     <br />
     <RadzenDataGrid TItem="InvoiceDto" Data="@_installments" Style="width: 100%; align-items:center; line-height:15px; outline-color:darkcyan">
         <Columns>
-            <RadzenDataGridColumn TItem="InvoiceDto" Property="DescriptionSpend" Title="Description Spend">
+            <RadzenDataGridColumn TItem="InvoiceDto" Property="DescriptionSpend" Title="Description Spend" Width="350px">
                 <HeaderTemplate>
                     <strong style="font-size:medium">Description Spend</strong>
                 </HeaderTemplate>
             </RadzenDataGridColumn>
-            <RadzenDataGridColumn TItem="InvoiceDto" Property="Installment" Title="Installment">
+            <RadzenDataGridColumn TItem="InvoiceDto" Property="Installment" Title="Installment" Width="150px">
                 <HeaderTemplate>
                     <strong style="font-size:medium">Installment</strong>
                 </HeaderTemplate>

@@ -15,16 +15,23 @@
 
 <RadzenDataGrid TItem="Customer" Data="@_customers" PagerPosition="PagerPosition.Bottom" AllowPaging="true" PageSize="5" PagerHorizontalAlign="HorizontalAlign.Center" AllowSorting="true">
     <Columns>
-        <RadzenDataGridColumn TItem="Customer" Property="CustomerName" Title="Customer" />
+        <RadzenDataGridColumn TItem="Customer" Property="CustomerName" Title="Customer">
+            <HeaderTemplate>
+                <strong style="font-size:medium">Customer</strong>
+            </HeaderTemplate>
+        </RadzenDataGridColumn>
         <RadzenDataGridColumn TItem="Customer" Property="Active" Title="Active">
+            <HeaderTemplate>
+                <strong style="font-size:medium">Active</strong>
+            </HeaderTemplate>
             <Template Context="customer">
                 <RadzenCheckBox Value="customer.Active ==1" Name="Active" TriState="false" Disabled="false" ReadOnly="true" />
             </Template>
         </RadzenDataGridColumn>
-        <RadzenDataGridColumn TItem="Customer" Title="Actions">
+        <RadzenDataGridColumn TItem="Customer">
             <Template Context="customer">
                 <RadzenButton Click=@(args => Edit(customer)) Icon="edit" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Medium" />
-                <RadzenButton Click=@(args => Delete(customer)) Icon="delete" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Medium" />       
+                <RadzenButton Click=@(args => Delete(customer)) Icon="delete" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Medium" />
             </Template>
         </RadzenDataGridColumn>
     </Columns>

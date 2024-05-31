@@ -14,16 +14,36 @@
 
 <RadzenDataGrid TItem="Card" Data="@_cards" PagerPosition="PagerPosition.Bottom" AllowPaging="true" PageSize="5" PagerHorizontalAlign="HorizontalAlign.Center" AllowSorting="true">
     <Columns>
-        <RadzenDataGridColumn TItem="Card" Property="Bank" Title="Bank" />
-        <RadzenDataGridColumn TItem="Card" Property="Number" Title="Number" />
-        <RadzenDataGridColumn TItem="Card" Property="Expiration" Title="Expiration" />
-        <RadzenDataGridColumn TItem="Card" Property="Brand" Title="Brand" />
+        <RadzenDataGridColumn TItem="Card" Property="Bank" Title="Bank" Width="250px">
+            <HeaderTemplate>
+                <strong style="font-size:medium">Bank</strong>
+            </HeaderTemplate>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn TItem="Card" Property="Number" Title="Number">
+            <HeaderTemplate>
+                <strong style="font-size:medium">Number</strong>
+            </HeaderTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="Card" Property="Expiration" Title="Expiration">
+            <HeaderTemplate>
+                <strong style="font-size:medium">Expiration</strong>
+            </HeaderTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="Card" Property="Brand" Title="Brand">
+            <HeaderTemplate>
+                <strong style="font-size:medium">Brand</strong>
+            </HeaderTemplate>
+        </RadzenDataGridColumn>
         <RadzenDataGridColumn TItem="Card" Property="Active" Title="Active">
+            <HeaderTemplate>
+                <strong style="font-size:medium">Active</strong>
+            </HeaderTemplate>
             <Template Context="card">
                 <RadzenCheckBox Value="card.Active == 1" Name="Active" TriState="false" Disabled="false" ReadOnly="true" />
             </Template>
         </RadzenDataGridColumn>
-        <RadzenDataGridColumn TItem="Card" Property="Actions" Title="Actions">
+        <RadzenDataGridColumn TItem="Card" Property="Actions">
             <Template Context="card">
                 <RadzenButton Click="@(args => Edit(card))" Icon="edit" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Medium" />
                 <RadzenButton Click="@(args => Delete(card))" Icon="delete" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Medium" />
@@ -35,7 +55,7 @@
 <ErrorMessage ErrorVisible="@errorVisible" ErrorMessage="@errorMessage" />
 
 <ModalDialog @ref="@modalDialog" Title=@TitleModal>
-    <EditCardForm card="card" OnValidSubmit="HandleValidSubmit"/>
+    <EditCardForm card="card" OnValidSubmit="HandleValidSubmit" />
 </ModalDialog>
 
 @code {
@@ -111,8 +131,7 @@
 
         if (response.IsSuccessStatusCode)
         {
-            _cards = await HttpClient.GetFromJsonAsync<List<Card>>("/api/Card"); // Refresh the card list
-
+            // _cards = await HttpClient.GetFromJsonAsync<List<Card>>("/api/Card"); // Refresh the card list
             LoadCards();
             StateHasChanged();
 

@@ -15,16 +15,30 @@
 
 <RadzenDataGrid TItem="Spend" Data="@_spends" PagerPosition="PagerPosition.Bottom" AllowPaging="true" PageSize="8" PagerHorizontalAlign="HorizontalAlign.Center" AllowSorting="true">
     <Columns>
-        <RadzenDataGridColumn TItem="Spend" Property="Expenses" Title="Expense"/>
+        <RadzenDataGridColumn TItem="Spend" Property="Expenses" Title="Expense" Width="300px">
+            <HeaderTemplate>
+                <strong style="font-size:medium">Expense</strong>
+            </HeaderTemplate>
+        </RadzenDataGridColumn>
         <RadzenDataGridColumn TItem="Spend" Property="Spend.Amount" Title="Amount">
+            <HeaderTemplate>
+                <strong style="font-size:medium">Amount</strong>
+            </HeaderTemplate>
             <Template Context="spend">
                 @spend.Amount.ToString("C2")
             </Template>
         </RadzenDataGridColumn>
-        <RadzenDataGridColumn TItem="Spend" Property="Spend.Card.Bank" Title="Card Bank" />
-        <RadzenDataGridColumn TItem="Spend" Property="Spend.Customer.CustomerName" Title="Customer Name"/>
-
-        <RadzenDataGridColumn TItem="Spend" Property="Actions" Title="Actions">
+        <RadzenDataGridColumn TItem="Spend" Property="Spend.Card.Bank" Title="Card Bank">
+            <HeaderTemplate>
+                <strong style="font-size:medium">Card Bank</strong>
+            </HeaderTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="Spend" Property="Spend.Customer.CustomerName" Title="Customer Name">
+            <HeaderTemplate>
+                <strong style="font-size:medium">Customer Name</strong>
+            </HeaderTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="Spend" Property="Actions">
             <Template Context="spend">
                 <RadzenButton Click=@(args => Edit(spend)) Icon="edit" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Medium" />
                 <RadzenButton Click=@(args => Delete(spend)) Icon="delete" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Medium" />

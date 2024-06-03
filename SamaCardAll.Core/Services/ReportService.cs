@@ -125,7 +125,7 @@ namespace SamaCardAll.Core.Services
 
         public async Task<IEnumerable<TotalCardMonthYearDTO>> GetTotalCardMonthYear(string monthYear)
         {
-            string decodedMonthYear = WebUtility.UrlDecode (monthYear);
+            string decodedMonthYear = WebUtility.UrlDecode(monthYear);
             var query = _context.Installments
                 .Include(c => c.Spend.Card)
                 .Where(c => c.MonthYear == decodedMonthYear && c.Spend.Deleted == 0)
@@ -147,14 +147,15 @@ namespace SamaCardAll.Core.Services
             });
         }
 
-        public async Task<decimal> SummarizeSpends(string monthYear)
+        public async Task<List<Decimal>> SummarizeSpends(string monthYear)
         {
             string decodedMonthYear = WebUtility.UrlDecode(monthYear);
 
             var totalSpends = await _context.Installments
                                             .Include(i => i.Spend)
-                                            .Where(i => i.MonthYear == decodedMonthYear && i.Spend.Deleted == 0)
-                                            .SumAsync(i => i.InstallmentValue);
+                                            .Where(i => i.MonthYear == decodedMonthYear && i.Spend != null && i.Spend.Deleted == 0)
+                                            .Select(i => i.InstallmentValue)
+                                            .ToListAsync();
 
             return totalSpends;
         }

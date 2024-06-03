@@ -114,12 +114,19 @@ namespace SamaCardAll.Api.Controllers
         }
 
         [HttpGet("summarize/{monthYear}")]
-        public async Task<ActionResult<decimal>> SummarizeSpends(string monthYear)
+        public async Task<ActionResult<float>> SummarizeSpends(string monthYear)
         {
             try
             {
                 var totalSpends = await _reportService.SummarizeSpends(monthYear);
-                return Ok(totalSpends);
+
+                // Convert the totalSpends to double or float
+                var totalSpendsDouble = totalSpends.Select(s => (double)s).Sum();
+
+                // Convert the result back to decimal
+                var totalSpendsDecimal = (decimal)totalSpendsDouble;
+
+                return Ok(totalSpendsDecimal);
             }
             catch (Exception ex)
             {

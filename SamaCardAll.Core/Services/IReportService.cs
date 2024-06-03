@@ -12,6 +12,6 @@ namespace SamaCardAll.Core.Services
         Task<IEnumerable<string>> GetDistinctInstallmentMonthYear();
         Task<IEnumerable<InvoiceDto>> GetTotalCustomerPerMonth(string monthYear);
         Task<IEnumerable<TotalCardMonthYearDTO>> GetTotalCardMonthYear(string monthYear);
-        Task<decimal> SummarizeSpends(string monthYear);
+        Task<List<decimal>> SummarizeSpends(string monthYear);
     }
 }

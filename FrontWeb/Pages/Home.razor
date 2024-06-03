@@ -1,4 +1,4 @@
-﻿@page "/" 
+﻿@page "/"
 
 @using Radzen.Blazor
 @using Radzen.Blazor.Rendering
@@ -16,24 +16,26 @@
     @MessageAlert
 </RadzenAlert>
 
-<RadzenCard class="w-100 mb-4">
-    <RadzenLabel Text="Select Month/Year" Component="DropDownBindValue" Style="margin-right: 8px; vertical-align: middle;" />
-    <RadzenDropDown @bind-Value=@monthYear Data=@monthYearList Style="width: 100%; max-width: 200px;" Name="DropDownBindValue" Change="@OnChange" />
-    <hr />
-    <RadzenCheckBox @bind-Value="@showDataLabels" Name="dataLabels"></RadzenCheckBox>
-    <RadzenLabel Text="Show Data Labels" Component="dataLabels" Style="margin-left: 8px; vertical-align: middle;" />
-</RadzenCard>
+
+<div class="d-flex">
+    <RadzenCard class="w-100 mb-4" Style="text-align: center;">
+        <RadzenLabel Text="Select Month/Year" Component="DropDownBindValue" Style="margin-right: 8px; vertical-align: middle;" />
+        <RadzenDropDown @bind-Value=@monthYear Data=@monthYearList Style="width: 100%; max-width: 200px; margin-right: 20px" Name="DropDownBindValue" Change="@OnChange" />
+        <RadzenCheckBox @bind-Value="@showDataLabels" Name="dataLabels"></RadzenCheckBox>
+        <RadzenLabel Text="Show Data Labels" Component="dataLabels" Style="margin-left: 8px; vertical-align: middle;" />
+    </RadzenCard>
+</div>
 
 <RadzenCard class="w-100 mb-4" Style="text-align: center;">
-    <RadzenLabel Text="Total Spends" Component="TotalSpends" Style="margin-right: 8px; vertical-align: middle;" />
-    <RadzenLabel Text="@totalSpends.ToString("C2")" Component="TotalSpendsValue" Style="margin-right: 8px; vertical-align: middle; font-weight: bold;" />
+    <RadzenLabel Text="Total Spends" Component="TotalSpends" Style="margin-right: 8px; vertical-align: middle; font-size: 24px; color: #FF0000;" />
+    <RadzenLabel Text="@totalSpends.ToString("C2")" Component="TotalSpendsValue" Style="margin-right: 8px; vertical-align: middle; font-size: 36px; font-weight: bold; color: #0000FF;" />
 </RadzenCard>
 
 @* Chart to show total per Customer *@
 <RadzenChart Visible=true ColorScheme="ColorScheme.Monochrome">
     <RadzenColumnSeries Data=@_customerTotal CategoryProperty="CustomerName" ValueProperty="InstallmentAmount">
         <ChildContent>
-            <RadzenSeriesDataLabels Visible="@showDataLabels"/>
+            <RadzenSeriesDataLabels Visible="@showDataLabels" />
         </ChildContent>
         <TooltipTemplate Context="_customerTotal">
             <div>
@@ -48,7 +50,7 @@
     <RadzenCategoryAxis Visible=false TickDistance="100" LineType="LineType.Dotted" Stroke="red" Padding="20" Step="10">
         <RadzenAxisTitle Text="Customer" />
     </RadzenCategoryAxis>
-    <RadzenLegend Position="LegendPosition.Bottom" Visible=false/>
+    <RadzenLegend Position="LegendPosition.Bottom" Visible=false />
 </RadzenChart>
 
 <hr />
@@ -90,7 +92,6 @@
         monthYear = DateTime.Now.ToString("MM/yyyy");
 
         await FetchData();
-        await SummarizeSpends();
     }
 
     private async Task FetchData()
@@ -103,6 +104,8 @@
             _customerTotal = await GetCustomerTotalPerMonthYear(monthYear);
 
             _cardTotal = await GetCardTotalPerMonthYear(monthYear);
+
+            await SummarizeSpends();
         }
         catch (Exception ex)
         {
@@ -116,11 +119,26 @@
         }
     }
 
+    /*
+     * Summarize the total spends for the selected Month/Year
+     */
     private async Task SummarizeSpends()
     {
+        if (monthYearList == null || !monthYearList.Any())
+        {
+            // Retrieve the current Month/Year
+            monthYear = DateTime.Now.ToString("MM/yyyy");
+        }
+        else if (string.IsNullOrEmpty(monthYear))
+        {
+            monthYear = monthYearList.First();
+        }
+
         try
         {
-            totalSpends = await HttpClient.GetFromJsonAsync<Decimal>("/api/Home/summarize/{monthYear}");
+            string encodedMonthYear = WebUtility.UrlEncode(monthYear);
+            string url = $"/api/Home/summarize/{encodedMonthYear}";
+            totalSpends = await HttpClient.GetFromJsonAsync<Decimal>(url);
         }
         catch (Exception ex)
         {
@@ -196,5 +214,24 @@
             visibleAlert = true;
             return null;
         }
+    }
+}
+
+@* Test Button call a event *@
+<RadzenButton class="rz-border-radius-6" Click="@OnToggle" Text="Attention" Icon="account_circle" Visible="false" />
+
+@code {
+
+    string ToggleButtonText => visibleAlert ? "Hide alert" : "Show alert";
+
+    void OnToggle()
+    {
+        MessageAlert = "Toggle alert visibility and handle the Close event.";
+        visibleAlert = !visibleAlert;
+    }
+
+    void OnClose()
+    {
+        NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Info, Summary = "Closed", Detail = "Info" });
     }
 }

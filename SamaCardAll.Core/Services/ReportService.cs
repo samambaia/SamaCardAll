@@ -146,5 +146,17 @@ namespace SamaCardAll.Core.Services
                 InstallmentAmount = g.InstallmentTotal.Sum()
             });
         }
+
+        public async Task<decimal> SummarizeSpends(string monthYear)
+        {
+            string decodedMonthYear = WebUtility.UrlDecode(monthYear);
+
+            var totalSpends = await _context.Installments
+                                            .Include(i => i.Spend)
+                                            .Where(i => i.MonthYear == decodedMonthYear && i.Spend.Deleted == 0)
+                                            .SumAsync(i => i.InstallmentValue);
+
+            return totalSpends;
+        }
     }
 }

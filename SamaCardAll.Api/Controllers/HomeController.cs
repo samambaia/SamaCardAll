@@ -112,5 +112,19 @@ namespace SamaCardAll.Api.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+
+        [HttpGet("summarize/{monthYear}")]
+        public async Task<ActionResult<decimal>> SummarizeSpends(string monthYear)
+        {
+            try
+            {
+                var totalSpends = await _reportService.SummarizeSpends(monthYear);
+                return Ok(totalSpends);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
     }
 }

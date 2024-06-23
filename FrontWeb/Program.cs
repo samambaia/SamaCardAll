@@ -10,7 +10,7 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 // If I want run in Dev environment, set for true
 bool IsDevelopmentEnvironment = true;
 
-string API_BASE_URL_DEV = "https://localhost:44383/";
+string API_BASE_URL_DEV = "http://localhost:44383/";
 string API_BASE_URL_PROD = "http://localhost:5000/";
 
 builder.Services.AddRadzenComponents();

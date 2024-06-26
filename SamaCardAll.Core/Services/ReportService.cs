@@ -3,16 +3,19 @@ using SamaCardAll.Core.DTO;
 using SamaCardAll.Infra;
 using SamaCardAll.Infra.Models;
 using System.Net;
+using Microsoft.Extensions.Logging;
 
 namespace SamaCardAll.Core.Services
 {
     public class ReportService : IReportService
     {
         private readonly AppDbContext _context;
+        private readonly ILogger<ReportService> _logger;
 
-        public ReportService(AppDbContext context)
+        public ReportService(AppDbContext context, ILogger<ReportService> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         public async Task<IEnumerable<string>> GetDistinctInstallmentMonthYear()
@@ -149,15 +152,26 @@ namespace SamaCardAll.Core.Services
 
         public async Task<List<Decimal>> SummarizeSpends(string monthYear)
         {
-            string decodedMonthYear = WebUtility.UrlDecode(monthYear);
+            try
+            {
+                _logger.LogInformation("SummarizeSpends called with monthYear: {monthYear}", monthYear);
+                string decodedMonthYear = WebUtility.UrlDecode(monthYear);
+                _logger.LogInformation("Decoded monthYear: {decodedMonthYear}", decodedMonthYear);
 
-            var totalSpends = await _context.Installments
-                                            .Include(i => i.Spend)
-                                            .Where(i => i.MonthYear == decodedMonthYear && i.Spend != null && i.Spend.Deleted == 0)
-                                            .Select(i => i.InstallmentValue)
-                                            .ToListAsync();
+                var totalSpends = await _context.Installments
+                                                .Include(i => i.Spend)
+                                                .Where(i => i.MonthYear == decodedMonthYear && i.Spend != null && i.Spend.Deleted == 0)
+                                                .Select(i => i.InstallmentValue)
+                                                .ToListAsync();
 
-            return totalSpends;
+                _logger.LogInformation("Total spends: {totalSpends}", totalSpends);
+                return totalSpends;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred in SummarizeSpends for {monthYear}", monthYear);
+                throw;
+            }
         }
     }
 }

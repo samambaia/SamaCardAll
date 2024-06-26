@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SamaCardAll.Core.DTO;
 using SamaCardAll.Core.Services;
-using SamaCardAll.Infra.Models;
 
 namespace SamaCardAll.Api.Controllers
 {
@@ -10,10 +9,12 @@ namespace SamaCardAll.Api.Controllers
     public class HomeController : ControllerBase
     {
         private readonly IReportService _reportService;
+        private readonly ILogger<HomeController> _logger;
 
-        public HomeController(IReportService reportService)
+        public HomeController(IReportService reportService, ILogger<HomeController> logger)
         {
             _reportService = reportService;
+            _logger = logger;
         }
 
         /*
@@ -116,6 +117,8 @@ namespace SamaCardAll.Api.Controllers
         [HttpGet("summarize/{monthYear}")]
         public async Task<ActionResult<float>> SummarizeSpends(string monthYear)
         {
+            _logger.LogInformation("SummarizeSpends called with monthYear: {monthYear}", monthYear);
+
             try
             {
                 var totalSpends = await _reportService.SummarizeSpends(monthYear);
@@ -130,6 +133,7 @@ namespace SamaCardAll.Api.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "An error occurred in SummarizeSpends for {monthYear}", monthYear);
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }

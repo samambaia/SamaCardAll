@@ -7,20 +7,25 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
-// If I want run in Dev environment, set for true
-bool IsDevelopmentEnvironment = true;
+// Load configuration from appsettings.json
+builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 
-string API_BASE_URL_DEV = "http://localhost:44383/";
-string API_BASE_URL_PROD = "http://localhost:5000/";
+// If I want run in Dev environment, set for true
+bool IsDevelopmentEnvironment = builder.HostEnvironment.IsDevelopment();
+
+//string API_BASE_URL_DEV = "http://localhost:44383/";
+//string API_BASE_URL_PROD = "http://localhost:5000/";
 
 builder.Services.AddRadzenComponents();
 
 builder.Services.AddScoped<HttpClient>(sp =>
 {
     //var configuration = sp.GetRequiredService<IConfiguration>();
-    //var apiBaseUrl = configuration.GetValue<string>(IsDevelopmentEnvironment ? "API_BASE_URL_DEV" : "API_BASE_URL_PROD");
+    var configuration = builder.Configuration;
 
-    var apiBaseUrl = (IsDevelopmentEnvironment ? API_BASE_URL_DEV : API_BASE_URL_PROD);
+    var apiBaseUrl = configuration.GetValue<string>($"AppSettings:API_BASE_URL_{(IsDevelopmentEnvironment ? "DEV" : "PROD")}");
+
+    //var apiBaseUrl = (IsDevelopmentEnvironment ? API_BASE_URL_DEV : API_BASE_URL_PROD);
 
     if (string.IsNullOrEmpty(apiBaseUrl))
     {
@@ -34,19 +39,5 @@ builder.Services.AddScoped<HttpClient>(sp =>
 
     return httpClient;
 });
-
-//builder.Services.AddScoped(sp =>
-//{
-//    // URL base da sua API
-//    var apiBaseUrl = "http://localhost:5000/"; 
-
-//    // Configuração do HttpClient com a URL da API
-//    var httpClient = new HttpClient
-//    {
-//        BaseAddress = new Uri(apiBaseUrl)
-//    };
-
-//    return httpClient;
-//});
 
 await builder.Build().RunAsync();

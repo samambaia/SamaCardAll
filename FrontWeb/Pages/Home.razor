@@ -78,9 +78,10 @@
     bool visibleAlert = false;
 
     private string MessageAlert = string.Empty;
+    private string url = string.Empty;
+    private string encodedMonthYear = string.Empty;
 
     private string monthYear;
-    private string _monthYear;
     private IEnumerable<string> monthYearList = new List<string>();
     private IEnumerable<InvoiceDto> _customerTotal = new List<InvoiceDto>();
     private IEnumerable<TotalCardMonthYearDTO> _cardTotal = new List<TotalCardMonthYearDTO>();
@@ -99,7 +100,8 @@
         try
         {
             // Get the list of Month/Years from Installment table (Distinct)
-            monthYearList = await HttpClient.GetFromJsonAsync<IEnumerable<string>>("/api/Home/distinct-monthYears");
+            url = "/api/Home/distinct-monthYears";
+            monthYearList = await HttpClient.GetFromJsonAsync<IEnumerable<string>>(url);
 
             _customerTotal = await GetCustomerTotalPerMonthYear(monthYear);
 
@@ -136,8 +138,8 @@
 
         try
         {
-            string encodedMonthYear = WebUtility.UrlEncode(monthYear);
-            string url = $"/api/Home/summarize/{encodedMonthYear}";
+            encodedMonthYear = WebUtility.UrlEncode(monthYear);
+            url = $"/api/Home/summarize/{encodedMonthYear}";
             totalSpends = await HttpClient.GetFromJsonAsync<Decimal>(url);
         }
         catch (Exception ex)
@@ -176,8 +178,8 @@
 
         try
         {
-            string encodedMonthYear = WebUtility.UrlEncode(monthYear);
-            string url = $"/api/Home/customer/{encodedMonthYear}";
+            encodedMonthYear = WebUtility.UrlEncode(monthYear);
+            url = $"/api/Home/customer/{encodedMonthYear}";
             return await HttpClient.GetFromJsonAsync<IEnumerable<InvoiceDto>>(url);
         }
         catch (Exception ex)
@@ -203,8 +205,8 @@
 
         try
         {
-            string encodedMonthYear = WebUtility.UrlEncode(monthYear);
-            string url = $"/api/Home/card/{encodedMonthYear}";
+            encodedMonthYear = WebUtility.UrlEncode(monthYear);
+            url = $"/api/Home/card/{encodedMonthYear}";
             return await HttpClient.GetFromJsonAsync<IEnumerable<TotalCardMonthYearDTO>>(url);
         }
         catch (Exception ex)

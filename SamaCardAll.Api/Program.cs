@@ -1,7 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using SamaCardAll.Core.Services;
 using SamaCardAll.Infra;
 

@@ -1,8 +1,11 @@
 ﻿@page "/"
 
+@using FrontWeb.DTO
+@using Microsoft.CSharp.RuntimeBinder
 @using Radzen.Blazor
 @using Radzen.Blazor.Rendering
 @using SamaCardAll.Infra.Models
+@using FrontWeb.Components
 @using System.Net
 
 @inject IJSRuntime JSRuntime
@@ -56,9 +59,9 @@
 <hr />
 
 @* Chart to show total per Card (MOnth/Year) *@
-<RadzenChart Visible=true ColorScheme="ColorScheme.Divergent">
+<RadzenChart Visible=true ColorScheme="ColorScheme.Divergent" LegendClick="OnCardSeriesClick">
     <RadzenDonutSeries Data="@_cardTotal" CategoryProperty="CardName" ValueProperty="InstallmentAmount" TotalAngle="360" StartAngle="360">
-        <ChildContent>
+        <ChildContent >
             <RadzenSeriesDataLabels Visible="@showDataLabels" />
         </ChildContent>
         <TitleTemplate>
@@ -73,9 +76,48 @@
     </RadzenValueAxis>
 </RadzenChart>
 
+@* Add the modal component to your Razor page *@
+<ModalDialog @ref="@modalDialog" Title=@TitleModal>
+    <ChildContent>
+        <RadzenDataGrid Data="@_cardDetails" AllowPaging="false" AllowSorting="true">
+            <Columns>
+                <RadzenDataGridColumn TItem="DetailedCardDTO" Property="DescriptionSpend">
+                    <HeaderTemplate>
+                        <strong style="font-size:medium">Spend</strong>
+                    </HeaderTemplate>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="DetailedCardDTO" Property="CustomerName">
+                    <HeaderTemplate>
+                        <strong style="font-size:medium">Customer</strong>
+                    </HeaderTemplate>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="DetailedCardDTO" Property="InstallmentAmount">
+                    <HeaderTemplate>
+                        <strong style="font-size:medium">Amount</strong>
+                    </HeaderTemplate>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="DetailedCardDTO" Property="Installment">
+                    <HeaderTemplate>
+                        <strong style="font-size:medium">Installment</strong>
+                    </HeaderTemplate>
+                </RadzenDataGridColumn>
+            </Columns>
+        </RadzenDataGrid>
+    </ChildContent>
+</ModalDialog>
+
 @code {
     bool showDataLabels = true;
     bool visibleAlert = false;
+
+    // Detail Modal
+    [Parameter]
+    public ModalDialog modalDialog { get; set; }
+
+    private string TitleModal = "Card Details";
+    bool showModal = false;
+    string selectedCardName;
+    decimal selectedInstallmentAmount;
 
     private string MessageAlert = string.Empty;
     private string url = string.Empty;
@@ -85,7 +127,28 @@
     private IEnumerable<string> monthYearList = new List<string>();
     private IEnumerable<InvoiceDto> _customerTotal = new List<InvoiceDto>();
     private IEnumerable<TotalCardMonthYearDTO> _cardTotal = new List<TotalCardMonthYearDTO>();
+    private IEnumerable<DetailedCardDTO> _cardDetails = new List<DetailedCardDTO>();
     private decimal totalSpends;
+
+    private void OpenModal() => modalDialog.Open();
+
+    private void CloseModal() => modalDialog.Close();
+
+    private async Task OnCardSeriesClick(object data)
+    {
+        var cardData = (TotalCardMonthYearDTO)data.GetType().GetProperty("Data").GetValue(data);
+
+        if (cardData != null)
+        {
+            _cardDetails = await GetCardDetails(cardData.IdCard, monthYear);
+            OpenModal();
+        }
+        else
+        {
+            MessageAlert = "Error extracting IdCard";
+            visibleAlert = true;
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -122,8 +185,8 @@
     }
 
     /*
-     * Summarize the total spends for the selected Month/Year
-     */
+    * Summarize the total spends for the selected Month/Year
+    */
     private async Task SummarizeSpends()
     {
         if (monthYearList == null || !monthYearList.Any())
@@ -213,6 +276,34 @@
         {
             // TO DO: Handle Error
             MessageAlert = $"Error fetching MonthYear options: {ex.Message}";
+            visibleAlert = true;
+            return null;
+        }
+    }
+
+    private async Task<IEnumerable<DetailedCardDTO>> GetCardDetails(int idCard, string monthYear)
+    {
+        if (monthYearList == null || !monthYearList.Any())
+        {
+            // Retrieve the current Month/Year
+            monthYear = DateTime.Now.ToString("MM/yyyy");
+        }
+        else if (string.IsNullOrEmpty(monthYear))
+        {
+            monthYear = monthYearList.First();
+        }
+
+        try
+        {
+            encodedMonthYear = WebUtility.UrlEncode(monthYear);
+            url = $"/api/Home/detailed-card/{idCard}/{encodedMonthYear}";
+            return await HttpClient.GetFromJsonAsync<IEnumerable<DetailedCardDTO>>(url);
+
+        }
+        catch (Exception ex)
+        {
+            // TO DO: Handle Error
+            MessageAlert = $"Error fetching Card Details: {ex.Message}";
             visibleAlert = true;
             return null;
         }

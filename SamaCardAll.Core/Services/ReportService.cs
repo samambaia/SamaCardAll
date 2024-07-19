@@ -53,7 +53,7 @@ namespace SamaCardAll.Core.Services
 
             var results = MapToInvoiceDto(installments);
 
-            return results;
+            return await Task.FromResult(results);
         }
 
         private IQueryable<Installments> GetInstallments(int? customerId, string? monthYear)
@@ -132,10 +132,11 @@ namespace SamaCardAll.Core.Services
             var query = _context.Installments
                 .Include(c => c.Spend.Card)
                 .Where(c => c.MonthYear == decodedMonthYear && c.Spend.Deleted == 0)
-                .GroupBy(c => new { c.Spend.Card.Bank, c.MonthYear })
+                .GroupBy(c => new { c.Spend.Card.IdCard, c.Spend.Card.Bank, c.MonthYear })
                 .Select(d => new
                 {
                     d.Key.MonthYear,
+                    d.Key.IdCard,
                     d.Key.Bank,
                     InstallmentTotal = d.Select(c => c.InstallmentValue)
                 });
@@ -146,7 +147,8 @@ namespace SamaCardAll.Core.Services
             {
                 MonthYear = g.MonthYear,
                 CardName = g.Bank,
-                InstallmentAmount = g.InstallmentTotal.Sum()
+                InstallmentAmount = g.InstallmentTotal.Sum(),
+                IdCard = g.IdCard
             });
         }
 
@@ -170,6 +172,40 @@ namespace SamaCardAll.Core.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred in SummarizeSpends for {monthYear}", monthYear);
+                throw;
+            }
+        }
+
+        public Task<List<DetailedCardDTO>> DetailedCard(int? cardId, string? monthYear)
+        {
+            try
+            {
+                _logger.LogInformation("List spends by Card and MonthYear: {cardId} - {monthYear}", cardId, monthYear);
+                string decodedMonthYear = WebUtility.UrlDecode(monthYear);
+                _logger.LogInformation("Decoded monthYear: {decodedMonthYear}", decodedMonthYear);
+
+                var query = _context.Installments
+                                    .Include(i => i.Spend)
+                                    .Include(i => i.Spend.Customer)
+                                    .Include(i => i.Spend.Card)
+                                    .Where(i => i.Spend.Card.IdCard == cardId && i.MonthYear == decodedMonthYear && i.Spend.Deleted == 0)
+                                    .Select(i => new DetailedCardDTO
+                                    {
+                                        IdCard = i.Spend.Card.IdCard,
+                                        CardName = i.Spend.Card.Bank,
+                                        DescriptionSpend = i.Spend.Expenses,
+                                        CustomerName = i.Spend.Customer.CustomerName,
+                                        InstallmentAmount = i.InstallmentValue,
+                                        MonthYear = i.MonthYear,
+                                        Installment = i.Installment
+                                    });
+
+                _logger.LogInformation("Query: {query}", query.ToQueryString());
+                return query.ToListAsync();
+            }
+            catch (Exception)
+            {
+                _logger.LogError("An error occurred in DetailedCard for {cardId} - {monthYear}", cardId, monthYear);
                 throw;
             }
         }

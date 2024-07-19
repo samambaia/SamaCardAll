@@ -13,5 +13,6 @@ namespace SamaCardAll.Core.Services
         Task<IEnumerable<InvoiceDto>> GetTotalCustomerPerMonth(string monthYear);
         Task<IEnumerable<TotalCardMonthYearDTO>> GetTotalCardMonthYear(string monthYear);
         Task<List<decimal>> SummarizeSpends(string monthYear);
+        Task<List<DetailedCardDTO>> DetailedCard(int? cardId, string? monthYear);
     }
 }

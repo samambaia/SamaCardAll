@@ -137,5 +137,21 @@ namespace SamaCardAll.Api.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+
+        [HttpGet("detailed-card/{cardId}/{monthYear}")]
+        public async Task<ActionResult<IEnumerable<DetailedCardDTO>>> DetailedCard(int? cardId, string? monthYear)
+        {
+            _logger.LogInformation("DetailedCard called with cardId: {cardId} and monthYear: {monthYear}", cardId, monthYear);
+
+            try
+            {
+                var detailedCards = await _reportService.DetailedCard(cardId, monthYear);
+                return Ok(detailedCards);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
     }
 }

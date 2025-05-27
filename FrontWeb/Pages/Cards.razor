@@ -13,7 +13,7 @@
 <RadzenButton Shade="Shade.Darker" Click=@(args => OpenModal()) Text="New Card" ButtonStyle="ButtonStyle.Primary" />
 <p />
 
-<RadzenDataGrid TItem="Card" Data="@_cards" PagerPosition="PagerPosition.Bottom" AllowPaging="true" PageSize="5" PagerHorizontalAlign="HorizontalAlign.Center" AllowSorting="true">
+<RadzenDataGrid TItem="Card" Data="@cards" PagerPosition="PagerPosition.Bottom" AllowPaging="true" PageSize="5" PagerHorizontalAlign="HorizontalAlign.Center" AllowSorting="true">
     <Columns>
         <RadzenDataGridColumn TItem="Card" Property="Bank" Title="Bank" Width="250px">
             <HeaderTemplate>
@@ -70,14 +70,14 @@
     [Parameter]
     public EditCardForm editCardForm { get; set; }
 
-    private int i;
+    // private int i;
 
     // Using the ErrorMessage Component
     private bool errorVisible { get; set; }
     private string errorMessage { get; set; }
 
     private Card card = new Card();
-    private List<Card> _cards = new List<Card>();
+    private List<Card> cards = new List<Card>();
 
     private String TitleModal = "New Card";
 
@@ -90,9 +90,9 @@
     {
         var allCards = await HttpClient.GetFromJsonAsync<List<Card>>("/api/Card");
 
-        _cards = allCards;
+        cards = allCards;
 
-        Console.WriteLine($"LoadCards: _cards.Count = {_cards.Count}");
+        Console.WriteLine($"LoadCards: _cards.Count = {cards.Count}");
         StateHasChanged();
     }
 
@@ -101,11 +101,11 @@
         if (await Save())
         {
             await OnValidSubmit.InvokeAsync();
-            modalDialog.Close();
+            await modalDialog.Close();
         }
     }
 
-    private void OpenModal(Card cardToEdit = null)
+    private async Task OpenModal(Card cardToEdit = null)
     {
         if (cardToEdit != null)
         {
@@ -118,7 +118,7 @@
             TitleModal = "New Card";
         }
 
-        modalDialog.Open();
+        await modalDialog.Open();
     }
 
     private async Task<bool> Save()
@@ -133,7 +133,7 @@
         if (response.IsSuccessStatusCode)
         {
             // _cards = await HttpClient.GetFromJsonAsync<List<Card>>("/api/Card"); // Refresh the card list
-            LoadCards();
+            await LoadCards();
             StateHasChanged();
 
             return true; // Return true indicating successful save
@@ -145,14 +145,14 @@
         }
     }
 
-    private void Edit(Card card)
+    private async Task Edit(Card card)
     {
-        OpenModal(card);
+        await OpenModal(card);
     }
 
     private async Task Delete(Card card)
     {
-        var confirmDelete = await JSRuntime.InvokeAsync<bool>("confirm", new object?[] { "Are you sure you want to delete this card?" });
+        var confirmDelete = await JSRuntime.InvokeAsync<bool>("confirm", new object[] { "Are you sure you want to delete this card?" });
 
         if (confirmDelete)
         {
@@ -162,7 +162,7 @@
                 if (response.IsSuccessStatusCode)
                 {
                     // Remove the card from the list and update List
-                    _cards.Remove(card);
+                    cards.Remove(card);
                     StateHasChanged();
                 }
                 else

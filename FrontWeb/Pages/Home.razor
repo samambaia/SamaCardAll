@@ -1,5 +1,4 @@
 ﻿@page "/"
-
 @using FrontWeb.DTO
 @using Microsoft.CSharp.RuntimeBinder
 @using Radzen.Blazor
@@ -107,6 +106,28 @@
 </ModalDialog>
 
 @code {
+    private async Task OpenModalAsync() => await modalDialog.Open();
+
+    private async Task CloseModalAsync() => await modalDialog.Close();
+
+    private async Task OnCardSeriesClick(object data)
+    {
+        var cardData = (TotalCardMonthYearDTO)data.GetType().GetProperty("Data").GetValue(data);
+
+        if (cardData != null)
+        {
+            _cardDetails = await GetCardDetails(cardData.IdCard, monthYear);
+            await OpenModalAsync();
+        }
+        else
+        {
+            MessageAlert = "Error extracting IdCard";
+            visibleAlert = true;
+        }
+    }
+}
+
+@code {
     bool showDataLabels = true;
     bool visibleAlert = false;
 
@@ -130,25 +151,9 @@
     private IEnumerable<DetailedCardDTO> _cardDetails = new List<DetailedCardDTO>();
     private decimal totalSpends;
 
-    private void OpenModal() => modalDialog.Open();
+    private async Task OpenModal() => await modalDialog.Open();
 
-    private void CloseModal() => modalDialog.Close();
-
-    private async Task OnCardSeriesClick(object data)
-    {
-        var cardData = (TotalCardMonthYearDTO)data.GetType().GetProperty("Data").GetValue(data);
-
-        if (cardData != null)
-        {
-            _cardDetails = await GetCardDetails(cardData.IdCard, monthYear);
-            OpenModal();
-        }
-        else
-        {
-            MessageAlert = "Error extracting IdCard";
-            visibleAlert = true;
-        }
-    }
+    private async Task CloseModal() => await modalDialog.Close();
 
     protected override async Task OnInitializedAsync()
     {
@@ -216,11 +221,11 @@
         }
     }
 
-    void OnChange(object newMonthYear)
+    async Task OnChange(object newMonthYear)
     {
         monthYear = newMonthYear.ToString();
 
-        FetchData();
+        await FetchData();
 
         // MessageAlert = "The Month/Year Selected was: " + monthYear;
         // visibleAlert = true;

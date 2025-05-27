@@ -97,12 +97,12 @@
         if (await Save())
         {
             await OnValidSubmit.InvokeAsync();
-            modalDialog.Close();
+            await modalDialog.Close();
         }
         //modalDialog.Close();
     }
 
-    private void OpenModal(Spend spendToEdit = null)
+    private async Task OpenModal(Spend spendToEdit = null)
     {
         if (spendToEdit != null)
         {
@@ -119,7 +119,7 @@
             TitleModal = "New Spend";
         }
 
-        modalDialog.Open();
+        await modalDialog.Open();
     }
 
     private async Task<bool> Save()
@@ -157,14 +157,14 @@
 
     }
 
-    private void Edit(Spend spend)
+    private async Task Edit(Spend spend)
     {
-        OpenModal(spend);
+        await OpenModal(spend);
     }
 
     private async Task Delete(Spend spend)
     {
-        var confirmDelete = await JSRuntime.InvokeAsync<bool>("confirm", new object?[] { "Are you sure you want to delete this Spend?" });
+        var confirmDelete = await JSRuntime.InvokeAsync<bool>("confirm", new object[] { "Are you sure you want to delete this Spend?" });
 
         if (confirmDelete)
         {
@@ -173,18 +173,21 @@
                 var response = await HttpClient.DeleteAsync($"/api/Spend/{spend.IdSpend}");
                 if (response.IsSuccessStatusCode)
                 {
-                    // Remove the spend from the list
-                    _spends.Remove(spend);
+                    // Remove the spend from the list by Id to ensure correct removal and force UI update
+                    var toRemove = _spends.FirstOrDefault(s => s.IdSpend == spend.IdSpend);
+                    if (toRemove != null)
+                    {
+                        _spends.Remove(toRemove);
+                    }
                     StateHasChanged();
                 }
                 else
                 {
                     // Extract error message from response body
                     var errorContent = await response.Content.ReadAsStringAsync();
-                    int startIndex = errorContent.IndexOf("SQLite Error");
-                    var errorSubstring = errorContent.Substring(startIndex, 48);
-                    errorMessage = $"Error: {errorSubstring}";
+                    errorMessage = $"Error: {ExtractErrorMessage(errorContent)}";
                     errorVisible = true;
+
                 }
             }
             catch (Exception ex)
@@ -194,5 +197,19 @@
                 errorMessage = $"Error: {ex.Message}";
             }
         }
+    }
+
+    private string ExtractErrorMessage(string errorContent)
+    {
+        if (string.IsNullOrEmpty(errorContent))
+            return "Unknown error.";
+
+        int startIndex = errorContent.IndexOf("SQLite Error");
+        if (startIndex >= 0 && errorContent.Length >= startIndex + 48)
+        {
+            return errorContent.Substring(startIndex, 48);
+        }
+        // Fallback: return first 100 chars or full message
+        return errorContent.Length > 100 ? errorContent.Substring(0, 100) : errorContent;
     }
 }

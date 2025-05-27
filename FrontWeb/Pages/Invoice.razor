@@ -99,7 +99,7 @@ else
 
     private decimal totalInstallmentSum = 0;
 
-    private async Task HandleMonthYearChange(string newMonthYear)
+    private void HandleMonthYearChange(string newMonthYear)
     {
         monthYear = newMonthYear;
     }
@@ -116,6 +116,16 @@ else
 
             monthYearList = await HttpClient.GetFromJsonAsync<IEnumerable<string>>("/api/Home/distinct-monthYears");
 
+            // Set current month/year if available in the list
+            var currentMonthYear = DateTime.Now.ToString("MM/yyyy");
+            if (monthYearList.Contains(currentMonthYear))
+            {
+                monthYear = currentMonthYear;
+            }
+            else
+            {
+                monthYear = monthYearList.FirstOrDefault();
+            }
         }
         catch (Exception ex)
         {

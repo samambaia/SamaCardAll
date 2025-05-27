@@ -1,6 +1,6 @@
 ﻿using SamaCardAll.Infra.Models;
 
-namespace SamaCardAll.Core.Services
+namespace SamaCardAll.Core.Interfaces
 {
     public interface ISpendService
     {

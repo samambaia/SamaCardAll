@@ -1,4 +1,5 @@
-﻿using SamaCardAll.Infra;
+﻿using SamaCardAll.Core.Interfaces;
+using SamaCardAll.Infra;
 using SamaCardAll.Infra.Models;
 
 namespace SamaCardAll.Core.Services

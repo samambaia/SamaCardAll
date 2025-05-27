@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SamaCardAll.Core.Interfaces;
 using SamaCardAll.Infra;
 using SamaCardAll.Infra.Models;
 

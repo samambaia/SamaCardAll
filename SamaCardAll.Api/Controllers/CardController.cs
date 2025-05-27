@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using SamaCardAll.Core.Services;
+using SamaCardAll.Core.Interfaces;
 using SamaCardAll.Infra.Models;
 
 namespace SamaCardAll.Api.Controllers
@@ -21,7 +21,7 @@ namespace SamaCardAll.Api.Controllers
         {
             try
             {
-                IEnumerable<Card> cards = _cardService.GetCards();
+                var cards = _cardService.GetCardsAsync();
                 return Ok(cards);
             }
             catch (Exception ex)
@@ -35,7 +35,7 @@ namespace SamaCardAll.Api.Controllers
         {
             try
             {
-                IEnumerable<Card> cards = _cardService.GetActiveCards();
+                var cards = _cardService.GetActiveCardsAsync();
                 return Ok(cards);
             }
             catch (Exception ex)
@@ -47,7 +47,7 @@ namespace SamaCardAll.Api.Controllers
         [HttpGet("{id}")]
         public IActionResult GetById(int id)
         {
-            var card = _cardService.GetById(id);
+            var card = _cardService.GetByIdAsync(id);
             if (card == null)
             {
                 return NotFound();
@@ -62,7 +62,7 @@ namespace SamaCardAll.Api.Controllers
             {
                 try
                 {
-                    _cardService.Create(card);
+                    _cardService.CreateAsync(card);
                     return CreatedAtAction(nameof(GetById), new { id = card.IdCard }, card);
                 }
                 catch (Exception ex)
@@ -85,7 +85,7 @@ namespace SamaCardAll.Api.Controllers
             {
                 try
                 {
-                    _cardService.Update(card);
+                    _cardService.UpdateAsync(card);
                     return NoContent();
                 }
                 catch (Exception ex)
@@ -101,7 +101,7 @@ namespace SamaCardAll.Api.Controllers
         {
             try
             {
-                _cardService.Delete(id);
+                _cardService.DeleteAsync(id);
                 return NoContent();
             }
             catch (Exception ex)

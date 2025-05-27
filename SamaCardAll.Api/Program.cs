@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using SamaCardAll.Core.Interfaces;
 using SamaCardAll.Core.Services;
 using SamaCardAll.Infra;
 

@@ -1,42 +1,25 @@
-﻿using SamaCardAll.Infra;
+﻿using SamaCardAll.Core.Interfaces;
+using SamaCardAll.Infra;
 using SamaCardAll.Infra.Models;
+using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace SamaCardAll.Core.Services
 {
     public class CardService : ICardService
     {
-
         private readonly AppDbContext _context;
         private readonly List<Card> _cards;
 
         public CardService(AppDbContext context)
         {
             _context = context;
-
             _cards = _context.Cards.ToList();
         }
-
-        public IEnumerable<Card> GetCards()
+        
+        public async Task UpdateAsync(Card card)
         {
-            return _cards;
-        }
-
-        public Card GetById(int id)
-        {
-            return _cards.FirstOrDefault(s => s.IdCard == id);
-        }
-
-        public void Create(Card card)
-        {
-            card.IdCard = _cards.Max(s => s.IdCard) + 1; 
-
-            _context.Add(card);
-            _context.SaveChanges();
-        }
-
-        public void Update(Card card)
-        {
-            var existingCard = _cards.FirstOrDefault(s => s.IdCard == card.IdCard);
+            var existingCard = await _context.Cards.FirstOrDefaultAsync(s => s.IdCard == card.IdCard);
 
             if (existingCard != null)
             {
@@ -46,24 +29,42 @@ namespace SamaCardAll.Core.Services
                 existingCard.Expiration = card.Expiration;
                 existingCard.Active = card.Active;
 
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
             }
         }
 
-        public void Delete(int id)
+        public async Task DeleteAsync(int id)
         {
-            var cardToRemove = _cards.FirstOrDefault(s => s.IdCard == id);
+            var cardToRemove = await _context.Cards.FirstOrDefaultAsync(s => s.IdCard == id);
 
             if (cardToRemove != null)
             {
-                _context.Remove(cardToRemove);
-                _context.SaveChanges();
+                _context.Cards.Remove(cardToRemove);
+                await _context.SaveChangesAsync();
             }
         }
 
-        public IEnumerable<Card> GetActiveCards()
+        public async Task<IEnumerable<Card>> GetActiveCardsAsync()
         {
-            return (IEnumerable<Card>)_cards.Select(c => c.Active == 0);
+            return await _context.Cards.Where(c => c.Active == 1).ToListAsync();
+        }
+
+        public async Task<IEnumerable<Card>> GetCardsAsync()
+        {
+            return await _context.Cards.ToListAsync();
+        }
+
+        public async Task<Card> GetByIdAsync(int id)
+        {
+            return await _context.Cards.FirstOrDefaultAsync(s => s.IdCard == id)
+                ?? throw new InvalidOperationException($"Card with ID {id} not found.");
+        }
+
+        public async Task CreateAsync(Card card)
+        {
+            card.IdCard = await _context.Cards.MaxAsync(s => s.IdCard) + 1;
+            await _context.AddAsync(card);
+            await _context.SaveChangesAsync();
         }
     }
 }

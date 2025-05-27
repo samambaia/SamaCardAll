@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SamaCardAll.Core.DTO;
-using SamaCardAll.Core.Services;
+using SamaCardAll.Core.Interfaces;
 
 namespace SamaCardAll.Api.Controllers
 {

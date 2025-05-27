@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using SamaCardAll.Core.Services;
+using SamaCardAll.Core.Interfaces;
 using SamaCardAll.Infra.Models;
 
 namespace SamaCardAll.Api.Controllers

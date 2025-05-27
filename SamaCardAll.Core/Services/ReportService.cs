@@ -4,6 +4,7 @@ using SamaCardAll.Infra;
 using SamaCardAll.Infra.Models;
 using System.Net;
 using Microsoft.Extensions.Logging;
+using SamaCardAll.Core.Interfaces;
 
 namespace SamaCardAll.Core.Services
 {

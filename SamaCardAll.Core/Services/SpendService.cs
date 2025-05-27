@@ -8,57 +8,39 @@ namespace SamaCardAll.Core.Services
     public class SpendService : ISpendService
     {
         private readonly AppDbContext _context;
-        private readonly List<Spend> _spends;
         private readonly List<Installments> _installmentsExist;
+        private readonly List<Installments> _installments = new();
 
-        private List<Installments> _installments = new List<Installments>();
-
-        private int MaxId = 0;
+        private readonly int MaxId = 0;
 
         public SpendService(AppDbContext context)
         {
             _context = context;
-
-            // Initialize Spend
-            var query = _context.Spends
-                .Where(s => s.Deleted == 0) // Filter only non Deleted Records
-                .Include(s => s.Card)
-                .Include(s => s.Customer)
-                .Include(s => s.User);
-
-            _spends = query.ToList();
 
             // Initialize Installment
             var q = _context.Installments
                 .Include(s => s.Spend);
 
             _installmentsExist = q.ToList();
-
-            // Initialize Spend
-            MaxId = (_context.Spends != null && _context.Spends.Any()) ? _context.Spends.Max(s => s.IdSpend) : 0;
         }
 
-        public IEnumerable<Spend> GetSpends()
+        public async Task<IEnumerable<Spend>> GetSpendsAsync()
         {
             // Return IQueryable to enable further querying
-            return _spends;
+            return await _context.Spends.ToListAsync();
         }
 
-        Spend ISpendService.GetById(int id)
+        public async Task<Spend> GetByIdAsync(int id)
         {
             // Search for an expense by ID in the expense list
-            return _spends.FirstOrDefault(s => s.IdSpend == id);
+            return await _context.Spends.FirstOrDefaultAsync(s => s.IdSpend == id)
+                ?? throw new InvalidOperationException($"Spend with id {id} not found.");
         }
 
-        void ISpendService.Create(Spend spend)
+        public async Task CreateAsync(Spend spend)
         {
             // Define de ID
-            if (MaxId > 0)
-            {
-                spend.IdSpend = ++MaxId;
-            }
-            else
-                spend.IdSpend = 1;
+            spend.IdSpend = await _context.Spends.AnyAsync() ? await _context.Spends.MaxAsync(s => s.IdSpend) + 1 : 1;
 
             spend.UserIdUser = 1;
             spend.CreatedDate = DateTime.Now;
@@ -74,7 +56,48 @@ namespace SamaCardAll.Core.Services
             _context.SaveChanges();
         }
 
-        // Create Installment List
+        public async Task UpdateAsync(Spend spend)
+        {
+            // Busca o gasto pelo ID na lista de gastos
+            var existingSpend = await _context.Spends.FirstOrDefaultAsync(s => s.IdSpend == spend.IdSpend);
+
+            if (existingSpend != null)
+            {
+                // Atualiza os campos do gasto existente com os valores do novo gasto
+                existingSpend.Expenses = spend.Expenses;
+                existingSpend.Amount = spend.Amount;
+                existingSpend.Date = spend.Date;
+                existingSpend.InstallmentPlan = spend.InstallmentPlan;
+                existingSpend.InstallmentValue = spend.InstallmentValue;
+                existingSpend.Deleted = spend.Deleted;
+                existingSpend.CreatedDate = spend.CreatedDate;
+                existingSpend.CardIdCard = spend.CardIdCard;
+                existingSpend.CustomerIdCustomer = spend.CustomerIdCustomer;
+                existingSpend.UserIdUser = spend.UserIdUser;
+
+                _context.SaveChanges();
+            }
+        }
+
+        public async Task DeleteAsync(int id)
+        {
+            // Remove o gasto com o ID especificado da lista de gastos
+            var spendToRemove = await _context.Spends.FirstOrDefaultAsync(s => s.IdSpend == id);
+            if (spendToRemove != null)
+            {
+                spendToRemove.Deleted = 1;
+
+                //_context.Remove(spendToRemove); Logical Delete
+                _context.SaveChanges();
+            }
+        }
+
+        /*
+         * 
+         * Private Methods
+         * 
+         */
+
         private List<Installments> GenerateInstallmentPlan(int spendId, int installmentPlan, decimal installmentValue, DateTime purchaseDate)
         {
             string installmentDisplay = string.Empty;
@@ -105,10 +128,9 @@ namespace SamaCardAll.Core.Services
                 installmentDisplay = i.ToString("00") + "/" + installmentPlan.ToString("00");
 
                 // Create a instance of Installment to Add the new
-                Installments installment = new Installments
+                Installments installment = new()
                 {
                     SpendIdSpend = spendId,
-                    //Id = maxId++,
                     InstallmentValue = amount,
                     MonthYear = monthYear,
                     Active = 1,
@@ -120,42 +142,6 @@ namespace SamaCardAll.Core.Services
             }
 
             return _installments;
-        }
-
-        void ISpendService.Update(Spend spend)
-        {
-            // Busca o gasto pelo ID na lista de gastos
-            var existingSpend = _spends.FirstOrDefault(s => s.IdSpend == spend.IdSpend);
-
-            if (existingSpend != null)
-            {
-                // Atualiza os campos do gasto existente com os valores do novo gasto
-                existingSpend.Expenses = spend.Expenses;
-                existingSpend.Amount = spend.Amount;
-                existingSpend.Date = spend.Date;
-                existingSpend.InstallmentPlan = spend.InstallmentPlan;
-                existingSpend.InstallmentValue = spend.InstallmentValue;
-                existingSpend.Deleted = spend.Deleted;
-                existingSpend.CreatedDate = spend.CreatedDate;
-                existingSpend.CardIdCard = spend.CardIdCard;
-                existingSpend.CustomerIdCustomer = spend.CustomerIdCustomer;
-                existingSpend.UserIdUser = spend.UserIdUser;
-
-                _context.SaveChanges();
-            }
-        }
-
-        void ISpendService.Delete(int id)
-        {
-            // Remove o gasto com o ID especificado da lista de gastos
-            var spendToRemove = _spends.FirstOrDefault(s => s.IdSpend == id);
-            if (spendToRemove != null)
-            {
-                spendToRemove.Deleted = 1;
-
-                //_context.Remove(spendToRemove); Logical Delete
-                _context.SaveChanges();
-            }
         }
     }
 }

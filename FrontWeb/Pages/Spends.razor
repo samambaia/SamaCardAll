@@ -21,6 +21,14 @@
                 <strong style="font-size:medium">Expense</strong>
             </HeaderTemplate>
         </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="Spend" Property="Date" Title="Date Purchase">
+            <HeaderTemplate>
+                <strong style="font-size:medium">Date Purchase</strong>
+            </HeaderTemplate>
+            <Template Context="spend">
+                @spend.Date.ToString("dd/MM/yyyy")
+            </Template>
+        </RadzenDataGridColumn>
         <RadzenDataGridColumn TItem="Spend" Property="Spend.Amount" Title="Amount">
             <HeaderTemplate>
                 <strong style="font-size:medium">Amount</strong>
@@ -86,9 +94,13 @@
         // Loading all spends
         var allSpends = await HttpClient.GetFromJsonAsync<List<Spend>>("/api/Spend?include=card,customer");
 
-        _spends = allSpends;
+        // Initialize Spend - order by Date descending (most recent first)
+        _spends = allSpends
+            .Where(s => s.Deleted == 0)
+            .OrderByDescending(s => s.Date).ToList();
 
-        Console.WriteLine($"LoadSpends: _spends.Count = {_spends.Count}");
+        //Console.WriteLine($"LoadSpends: _spends.Count = {_spends.Count}");
+
         StateHasChanged();
     }
 

@@ -28,7 +28,7 @@ namespace SamaCardAll.Core.Services
 
         public async Task CreateAsync(Customer customer)
         {
-            customer.IdCustomer = await _context.Customers.MaxAsync(c => c.IdCustomer) + 1;
+            customer.IdCustomer = await _context.Customers.AnyAsync() ? await _context.Customers.MaxAsync(c => c.IdCustomer) + 1 : 1;
 
             _context.Add(customer);
             _context.SaveChanges();

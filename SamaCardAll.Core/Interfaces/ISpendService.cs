@@ -4,10 +4,10 @@ namespace SamaCardAll.Core.Interfaces
 {
     public interface ISpendService
     {
-        IEnumerable<Spend> GetSpends();
-        Spend GetById(int id);
-        void Create(Spend spend);
-        void Update(Spend spend);
-        void Delete(int id);
+        Task<IEnumerable<Spend>> GetSpendsAsync();
+        Task<Spend> GetByIdAsync(int id);
+        Task CreateAsync(Spend spend);
+        Task UpdateAsync(Spend spend);
+        Task DeleteAsync(int id);
     }
 }

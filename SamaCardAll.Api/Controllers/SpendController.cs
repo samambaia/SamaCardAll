@@ -20,7 +20,7 @@ namespace SamaCardAll.Api.Controllers
         {
             try
             {
-                IEnumerable<Spend> spends = _spendService.GetSpends();
+                var spends = _spendService.GetSpendsAsync();
                 return Ok(spends);
             }
             catch (Exception ex)
@@ -36,7 +36,7 @@ namespace SamaCardAll.Api.Controllers
             {
                 try
                 {
-                    _spendService.Create(spend);
+                    _spendService.CreateAsync(spend);
                     int spendId = spend.IdSpend;
                     return CreatedAtAction(nameof(GetById), new { id = spend.IdSpend }, spend);
                 }
@@ -60,7 +60,7 @@ namespace SamaCardAll.Api.Controllers
             {
                 try
                 {
-                    _spendService.Update(spend);
+                    _spendService.UpdateAsync(spend);
                     return NoContent();
                 }
                 catch (Exception ex)
@@ -76,7 +76,7 @@ namespace SamaCardAll.Api.Controllers
         {
             try
             {
-                _spendService.Delete(id);
+                _spendService.DeleteAsync(id);
                 return NoContent();
             }
             catch (Exception ex)
@@ -88,7 +88,7 @@ namespace SamaCardAll.Api.Controllers
         [HttpGet("{id}")]
         public IActionResult GetById(int id)
         {
-            var spend = _spendService.GetById(id);
+            var spend = _spendService.GetByIdAsync(id);
             if (spend == null)
             {
                 return NotFound();

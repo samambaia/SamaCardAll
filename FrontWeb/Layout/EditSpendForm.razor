@@ -156,10 +156,22 @@
     protected override async Task OnInitializedAsync()
     {
         // Loading all Customers
-        _customers = await HttpClient.GetFromJsonAsync<List<Customer>>("/api/Customer");
-
+        var allCustomers = await HttpClient.GetFromJsonAsync<List<Customer>>("/api/Customer");
         // Loading all Cards
-        _cards = await HttpClient.GetFromJsonAsync<List<Card>>("/api/Card");
+        var allCards = await HttpClient.GetFromJsonAsync<List<Card>>("/api/Card");
+
+        if (spend != null && spend.IdSpend != 0)
+        {
+            // Edit mode: show all customers and cards (including inactive)
+            _customers = allCustomers;
+            _cards = allCards;
+        }
+        else
+        {
+            // New Spend: only show active customers and cards
+            _customers = allCustomers.Where(c => c.Active == 1).ToList();
+            _cards = allCards.Where(c => c.Active == 1).ToList();
+        }
 
         Amount = 0;
         InstallmentValue = 0;

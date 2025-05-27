@@ -9,12 +9,10 @@ namespace SamaCardAll.Core.Services
     public class CardService : ICardService
     {
         private readonly AppDbContext _context;
-        private readonly List<Card> _cards;
 
         public CardService(AppDbContext context)
         {
             _context = context;
-            _cards = _context.Cards.ToList();
         }
         
         public async Task UpdateAsync(Card card)

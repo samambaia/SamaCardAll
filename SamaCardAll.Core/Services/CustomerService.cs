@@ -1,4 +1,5 @@
-﻿using SamaCardAll.Core.Interfaces;
+﻿using Microsoft.EntityFrameworkCore;
+using SamaCardAll.Core.Interfaces;
 using SamaCardAll.Infra;
 using SamaCardAll.Infra.Models;
 
@@ -8,37 +9,34 @@ namespace SamaCardAll.Core.Services
     {
 
         private readonly AppDbContext _context;
-        private readonly List<Customer> _customers;
 
         public CustomerService(AppDbContext context)
         {
             _context = context;
-
-            // Initialize Customer
-            _customers = _context.Customers.ToList();
         }
 
-        IEnumerable<Customer> ICustomerService.GetCustomers()
+        public async Task<IEnumerable<Customer>> GetCustomersAsync()
         {
-            return _customers;
+            return await _context.Customers.ToListAsync();
         }
 
-        Customer ICustomerService.GetById(int id)
+        public async Task<Customer> GetByIdAsync(int id)
         {
-            return _customers.FirstOrDefault(s => s.IdCustomer == id);
+            return await _context.Customers.FirstOrDefaultAsync(s => s.IdCustomer == id)
+                ?? throw new InvalidOperationException($"Customer with id {id} not found.");
         }
 
-        void ICustomerService.Create(Customer customer)
+        public async Task CreateAsync(Customer customer)
         {
-            customer.IdCustomer = _customers.Max(c => c.IdCustomer) + 1;
+            customer.IdCustomer = await _context.Customers.MaxAsync(c => c.IdCustomer) + 1;
 
             _context.Add(customer);
             _context.SaveChanges();
         }
 
-        void ICustomerService.Update(Customer customer)
+        public async Task UpdateAsync(Customer customer)
         {
-            var existingCustomer = _customers.FirstOrDefault(s => s.IdCustomer == customer.IdCustomer);
+            var existingCustomer = await _context.Customers.FirstOrDefaultAsync(s => s.IdCustomer == customer.IdCustomer);
 
             if (existingCustomer != null)
             {
@@ -49,9 +47,9 @@ namespace SamaCardAll.Core.Services
             }
         }
 
-        void ICustomerService.Delete(int id)
+        public async Task DeleteAsync(int id)
         {
-            var customerToRemove = _customers.FirstOrDefault(s => s.IdCustomer == id);
+            var customerToRemove = await _context.Customers.FirstOrDefaultAsync(s => s.IdCustomer == id);
 
             if (customerToRemove != null)
             {

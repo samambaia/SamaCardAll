@@ -21,7 +21,7 @@ namespace SamaCardAll.Api.Controllers
         {
             try
             {
-                IEnumerable<Customer> customers = _customerService.GetCustomers();
+                var customers = _customerService.GetCustomersAsync();
                 return Ok(customers);
             }
             catch (Exception ex)
@@ -33,7 +33,7 @@ namespace SamaCardAll.Api.Controllers
         [HttpGet("{id}")]
         public IActionResult GetById(int id)
         {
-            var customer = _customerService.GetById(id);
+            var customer = _customerService.GetByIdAsync(id);
             if (customer == null)
             {
                 return NotFound();
@@ -48,7 +48,7 @@ namespace SamaCardAll.Api.Controllers
             {
                 try
                 {
-                    _customerService.Create(customer);
+                    _customerService.CreateAsync(customer);
                     return CreatedAtAction(nameof(GetById), new { id = customer.IdCustomer }, customer);
                 }
                 catch (Exception ex)
@@ -71,7 +71,7 @@ namespace SamaCardAll.Api.Controllers
             {
                 try
                 {
-                    _customerService.Update(customer);
+                    _customerService.UpdateAsync(customer);
                     return NoContent();
                 }
                 catch (Exception ex)
@@ -87,7 +87,7 @@ namespace SamaCardAll.Api.Controllers
         {
             try
             {
-                _customerService.Delete(id);
+                _customerService.DeleteAsync(id);
                 return NoContent();
             }
             catch (Exception ex)
@@ -99,13 +99,6 @@ namespace SamaCardAll.Api.Controllers
                 else
                     return StatusCode(500, $"Internal server error: {ex.Message}");
             }
-        }
-    }
-
-    public class ForeignKeyException : Exception
-    {
-        public ForeignKeyException(string message) : base(message)
-        {
         }
     }
 }

@@ -46,7 +46,7 @@ namespace SamaCardAll.Core.Services
             * The method then maps the installments to a list of InvoiceDto objects using the MapToInvoiceDto method.
             * Finally, the method returns the list of InvoiceDto objects.
         */
-        public async Task<IEnumerable<InvoiceDto>> GetFilteredInstallments(int? customerId, string? monthYear)
+        public async Task<IEnumerable<InvoiceDto>> GetFilteredInstallments(int? customerId, string monthYear)
         {
             monthYear = WebUtility.UrlDecode(monthYear);
 
@@ -57,13 +57,15 @@ namespace SamaCardAll.Core.Services
             return await Task.FromResult(results);
         }
 
-        private IQueryable<Installments> GetInstallments(int? customerId, string? monthYear)
+        private IQueryable<Installments> GetInstallments(int? customerId, string monthYear)
         {
-            return _context.Installments
+            var result = _context.Installments
                             .Include(i => i.Spend)
                             .Include(i => i.Spend.Customer)
                             .Include(i => i.Spend.Card)
                             .Where(i => i.MonthYear == monthYear && i.Spend.Customer.IdCustomer == customerId && i.Spend.Deleted == 0);
+
+            return result;
         }
 
         private static List<InvoiceDto> MapToInvoiceDto(IQueryable<Installments> installments)

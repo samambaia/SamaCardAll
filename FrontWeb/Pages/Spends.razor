@@ -149,7 +149,7 @@
                 {
                     // Refresh the spend list
                     _spends = await HttpClient.GetFromJsonAsync<List<Spend>>("/api/Spend?include=card,customer");
-                    StateHasChanged();
+                    await LoadSpends();
                     return true; // Return true indicating successful save
                 }
                 else

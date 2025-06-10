@@ -2,7 +2,7 @@
 
 namespace SamaCardAll.Core.Interfaces
 {
-    public interface IReportService
+    public interface IReportRepository
     {
         Task<List<InvoiceDto>> GetFilteredInstallments(int? customerId, string monthYear);
         Task UpdateInstallments();

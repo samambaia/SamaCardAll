@@ -139,7 +139,7 @@ namespace SamaCardAll.Api.Controllers
         }
 
         [HttpGet("detailed-card/{cardId}/{monthYear}")]
-        public async Task<ActionResult<IEnumerable<DetailedCardDTO>>> DetailedCard(int? cardId, string? monthYear)
+        public async Task<ActionResult<IEnumerable<CardVO>>> DetailedCard(int? cardId, string? monthYear)
         {
             _logger.LogInformation("DetailedCard called with cardId: {cardId} and monthYear: {monthYear}", cardId, monthYear);
 

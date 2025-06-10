@@ -2,7 +2,7 @@
 
 namespace SamaCardAll.Core.Interfaces
 {
-    public interface ISpendService
+    public interface ISpendRepository
     {
         Task<List<SpendVO>> GetSpendsAsync();
         Task<SpendVO> GetByIdAsync(int id);

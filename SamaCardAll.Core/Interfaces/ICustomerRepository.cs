@@ -2,7 +2,7 @@
 
 namespace SamaCardAll.Core.Interfaces
 {
-    public interface ICustomerService
+    public interface ICustomerRepository
     {
         Task<List<CustomerVO>> GetCustomersAsync();
         Task<CustomerVO> GetByIdAsync(int id);

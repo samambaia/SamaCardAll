@@ -179,7 +179,7 @@ namespace SamaCardAll.Core.Services
             }
         }
 
-        public Task<List<DetailedCardDTO>> DetailedCard(int? cardId, string? monthYear)
+        public Task<List<CardVO>> DetailedCard(int? cardId, string? monthYear)
         {
             try
             {
@@ -192,7 +192,7 @@ namespace SamaCardAll.Core.Services
                                     .Include(i => i.Spend.Customer)
                                     .Include(i => i.Spend.Card)
                                     .Where(i => i.Spend.Card.IdCard == cardId && i.MonthYear == decodedMonthYear && i.Spend.Deleted == 0)
-                                    .Select(i => new DetailedCardDTO
+                                    .Select(i => new CardVO
                                     {
                                         IdCard = i.Spend.Card.IdCard,
                                         CardName = i.Spend.Card.Bank,

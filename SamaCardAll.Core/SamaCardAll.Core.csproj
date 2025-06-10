@@ -16,8 +16,4 @@
     <PackageReference Include="Microsoft.OpenApi" Version="1.6.14" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\SamaCardAll.Infra\SamaCardAll.Infra.csproj" />
-  </ItemGroup>
-
 </Project>

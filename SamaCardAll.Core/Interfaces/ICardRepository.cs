@@ -2,7 +2,7 @@
 
 namespace SamaCardAll.Core.Interfaces
 {
-    public interface ICardService
+    public interface ICardRepository
     {
         Task<List<CardVO>> GetCardsAsync();
         Task<List<CardVO>> GetActiveCardsAsync();

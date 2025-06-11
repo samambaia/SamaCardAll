@@ -1,61 +1,41 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SamaCardAll.Core.Interfaces;
-using SamaCardAll.Infra;
-using SamaCardAll.Infra.Models;
+using SamaCardAll.Core.VO;
 
 namespace SamaCardAll.Core.Services
 {
     public class CustomerService : ICustomerService
     {
+        private readonly ICustomerRepository customerRepository;
 
-        private readonly AppDbContext _context;
-
-        public CustomerService(AppDbContext context)
+        public CustomerService(ICustomerRepository repository)
         {
-            _context = context;
+            customerRepository = repository;
         }
 
-        public async Task<IEnumerable<Customer>> GetCustomersAsync()
+        public async Task<List<CustomerVO>> GetCustomersAsync()
         {
-            return await _context.Customers.ToListAsync();
+            return await customerRepository.GetCustomersAsync();
         }
 
-        public async Task<Customer> GetByIdAsync(int id)
+        public async Task<CustomerVO> GetByIdAsync(int id)
         {
-            return await _context.Customers.FirstOrDefaultAsync(s => s.IdCustomer == id)
-                ?? throw new InvalidOperationException($"Customer with id {id} not found.");
+            return await customerRepository.GetByIdAsync(id);
         }
 
-        public async Task CreateAsync(Customer customer)
+        public async Task CreateAsync(CustomerVO customer)
         {
-            customer.IdCustomer = await _context.Customers.AnyAsync() ? await _context.Customers.MaxAsync(c => c.IdCustomer) + 1 : 1;
-
-            _context.Add(customer);
-            _context.SaveChanges();
+            await customerRepository.CreateAsync(customer);
         }
 
-        public async Task UpdateAsync(Customer customer)
+        public async Task<bool> UpdateAsync(CustomerVO customer)
         {
-            var existingCustomer = await _context.Customers.FirstOrDefaultAsync(s => s.IdCustomer == customer.IdCustomer);
-
-            if (existingCustomer != null)
-            {
-                existingCustomer.CustomerName = customer.CustomerName;
-                existingCustomer.Active = customer.Active;
-
-                _context.SaveChanges();
-            }
+            return await customerRepository.UpdateAsync(customer);
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task<bool> DeleteAsync(int id)
         {
-            var customerToRemove = await _context.Customers.FirstOrDefaultAsync(s => s.IdCustomer == id);
-
-            if (customerToRemove != null)
-            {
-                _context.Remove(customerToRemove);
-                _context.SaveChanges();
-            }
+            return await customerRepository.DeleteAsync(id);
         }
     }
 }

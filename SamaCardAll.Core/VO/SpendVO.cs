@@ -1,6 +1,4 @@
-﻿using SamaCardAll.Core.DTO;
-
-namespace SamaCardAll.Core.VO
+﻿namespace SamaCardAll.Core.VO
 {
     public record SpendVO(
         int IdSpend,

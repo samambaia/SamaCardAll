@@ -1,7 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using SamaCardAll.Core.DTO;
-using SamaCardAll.Infra;
-using SamaCardAll.Infra.Models;
+using SamaCardAll.Core.VO;
 using System.Net;
 using Microsoft.Extensions.Logging;
 using SamaCardAll.Core.Interfaces;
@@ -10,9 +8,6 @@ namespace SamaCardAll.Core.Services
 {
     public class ReportService : IReportService
     {
-        private readonly AppDbContext _context;
-        private readonly ILogger<ReportService> _logger;
-
         public ReportService(AppDbContext context, ILogger<ReportService> logger)
         {
             _context = context;
@@ -29,7 +24,7 @@ namespace SamaCardAll.Core.Services
             return monthYears.OrderBy(my => ConvertMonthYearToInt(my));
         }
 
-        static int ConvertMonthYearToInt(string monthYear)
+        private static int ConvertMonthYearToInt(string monthYear)
         {
             var parts = monthYear.Split('/');
             int month = int.Parse(parts[0]);
@@ -46,7 +41,7 @@ namespace SamaCardAll.Core.Services
             * The method then maps the installments to a list of InvoiceDto objects using the MapToInvoiceDto method.
             * Finally, the method returns the list of InvoiceDto objects.
         */
-        public async Task<IEnumerable<InvoiceDto>> GetFilteredInstallments(int? customerId, string monthYear)
+        public async Task<IEnumerable<InvoiceVO>> GetFilteredInstallments(int? customerId, string monthYear)
         {
             monthYear = WebUtility.UrlDecode(monthYear);
 
@@ -55,30 +50,6 @@ namespace SamaCardAll.Core.Services
             var results = MapToInvoiceDto(installments);
 
             return await Task.FromResult(results);
-        }
-
-        private IQueryable<Installments> GetInstallments(int? customerId, string monthYear)
-        {
-            var result = _context.Installments
-                            .Include(i => i.Spend)
-                            .Include(i => i.Spend.Customer)
-                            .Include(i => i.Spend.Card)
-                            .Where(i => i.MonthYear == monthYear && i.Spend.Customer.IdCustomer == customerId && i.Spend.Deleted == 0);
-
-            return result;
-        }
-
-        private static List<InvoiceDto> MapToInvoiceDto(IQueryable<Installments> installments)
-        {
-            return installments.Select(i => new InvoiceDto
-            {
-                DescriptionSpend = i.Spend.Expenses,
-                CustomerName = i.Spend.Customer.CustomerName,
-                CardName = i.Spend.Card.Bank,
-                InstallmentAmount = i.InstallmentValue,
-                MonthYear = i.MonthYear,
-                Installment = i.Installment
-            }).ToList();
         }
 
         // Do not use! The Installment field was updated on the Installment table
@@ -104,7 +75,7 @@ namespace SamaCardAll.Core.Services
             }
         }
 
-        public async Task<IEnumerable<InvoiceDto>> GetTotalCustomerPerMonth(string monthYear)
+        public async Task<IEnumerable<InvoiceVO>> GetTotalCustomerPerMonth(string monthYear)
         {
             string decodedMonthYear = WebUtility.UrlDecode(monthYear);
 
@@ -203,7 +174,6 @@ namespace SamaCardAll.Core.Services
                                         Installment = i.Installment
                                     });
 
-                _logger.LogInformation("Query: {query}", query.ToQueryString());
                 return query.ToListAsync();
             }
             catch (Exception)

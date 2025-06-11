@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using SamaCardAll.Core.DTO;
+﻿using Microsoft.EntityFrameworkCore;
 using SamaCardAll.Core.Interfaces;
+using SamaCardAll.Core.VO;
+using SamaCardAll.Infra.Mapping;
 using SamaCardAll.Infra.Models;
 
 namespace SamaCardAll.Infra.Repository
@@ -51,37 +47,35 @@ namespace SamaCardAll.Infra.Repository
         public async Task<CardVO> GetByIdAsync(int id)
         {
             var getCard = await _context.Cards.FindAsync(id);
+            return getCard.ToVO();
 
-            return getCard != null 
-                ? new CardVO(IdCard: getCard.IdCard, Bank: getCard.Bank, Number: getCard.Number, Expiration: getCard.Expiration, Brand: getCard.Brand, Active: getCard.Active) 
-                : throw new InvalidOperationException($"Card with ID {id} not found.");
         }
 
         public async Task<List<CardVO>> GetCardsAsync()
         {
             var getCards = await _context.Cards.ToListAsync();
 
-            return getCards.Select(c => new CardVO(IdCard: c.IdCard, Bank: c.Bank, Number: c.Number, Expiration: c.Expiration, Brand: c.Brand, Active: c.Active)).ToList();
+            return [.. getCards.Select(c => c.ToVO())];
         }
 
         public async Task<bool> UpdateAsync(CardVO card)
         {
             var existingCard = await _context.Cards.FindAsync(card.IdCard);
 
-            bool result;
-            if (existingCard == null)
-                throw new InvalidOperationException($"Card with ID {card.IdCard} not found.");
+            if (existingCard != null)
+            {
+                existingCard.Bank = card.Bank;
+                existingCard.Number = card.Number;
+                existingCard.Expiration = card.Expiration;
+                existingCard.Brand = card.Brand;
+                existingCard.Active = card.Active;
+                await _context.SaveChangesAsync();
+
+                return true;
+
+            }
             else
-                result = true;
-
-            existingCard.Bank = card.Bank;
-            existingCard.Number = card.Number;
-            existingCard.Expiration = card.Expiration;
-            existingCard.Brand = card.Brand;
-            existingCard.Active = card.Active;
-            await _context.SaveChangesAsync();
-
-            return result;
+                return false;
         }
     }
 }

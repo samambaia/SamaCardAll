@@ -1,4 +1,4 @@
-﻿using SamaCardAll.Core.DTO;
+﻿using SamaCardAll.Core.VO;
 
 namespace SamaCardAll.Core.Interfaces
 {

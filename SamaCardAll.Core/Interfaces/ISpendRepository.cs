@@ -7,7 +7,7 @@ namespace SamaCardAll.Core.Interfaces
         Task<List<SpendVO>> GetSpendsAsync();
         Task<SpendVO> GetByIdAsync(int id);
         Task CreateAsync(SpendVO spend);
-        Task UpdateAsync(SpendVO spend);
-        Task DeleteAsync(int id);
+        Task<bool> UpdateAsync(SpendVO spend);
+        Task<bool> DeleteAsync(int id);
     }
 }

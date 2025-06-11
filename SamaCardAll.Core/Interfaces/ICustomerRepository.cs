@@ -7,7 +7,7 @@ namespace SamaCardAll.Core.Interfaces
         Task<List<CustomerVO>> GetCustomersAsync();
         Task<CustomerVO> GetByIdAsync(int id);
         Task CreateAsync(CustomerVO customer);
-        Task UpdateAsync(CustomerVO customer);
-        Task DeleteAsync(int id);
+        Task<bool> UpdateAsync(CustomerVO customer);
+        Task<bool> DeleteAsync(int id);
     }
 }

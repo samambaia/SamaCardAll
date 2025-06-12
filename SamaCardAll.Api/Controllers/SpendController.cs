@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SamaCardAll.Core.Interfaces;
-using SamaCardAll.Infra.Models;
+using SamaCardAll.Core.VO;
 
 namespace SamaCardAll.Api.Controllers
 {
@@ -30,7 +30,7 @@ namespace SamaCardAll.Api.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create(Spend spend)
+        public IActionResult Create(SpendVO spend)
         {
             if (ModelState.IsValid)
             {
@@ -48,27 +48,21 @@ namespace SamaCardAll.Api.Controllers
             return BadRequest(ModelState);
         }
 
-        [HttpPut("{idSpend}")]
-        public IActionResult Update(int idSpend, Spend spend)
+        [HttpPut]
+        public async Task<IActionResult> Update([FromBody] SpendVO spend)
         {
-            if (idSpend != spend.IdSpend)
-            {
-                return BadRequest("ID mismatch");
-            }
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-            if (ModelState.IsValid)
+            try
             {
-                try
-                {
-                    _spendService.UpdateAsync(spend);
-                    return NoContent();
-                }
-                catch (Exception ex)
-                {
-                    return StatusCode(500, $"Internal server error: {ex.Message}");
-                }
+                await _spendService.UpdateAsync(spend);
+                return NoContent();
             }
-            return BadRequest(ModelState);
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
 
         [HttpDelete("{id}")]

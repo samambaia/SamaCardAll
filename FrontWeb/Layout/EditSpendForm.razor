@@ -1,4 +1,4 @@
-﻿@using SamaCardAll.Infra.Models
+﻿@using SamaCardAll.Core.VO
 @using FrontWeb.Components
 @using Microsoft.AspNetCore.Components.Forms
 @using System.Globalization
@@ -82,7 +82,7 @@
 @code {
 
     [Parameter]
-    public Spend spend { get; set; }
+    public SpendVO spend { get; init; };
 
     [Parameter]
     public EventCallback OnValidSubmit { get; set; }
@@ -93,8 +93,8 @@
     [Parameter]
     public decimal pAmount { get; set; }
 
-    private List<Customer> _customers = new List<Customer>();
-    private List<Card> _cards = new List<Card>();
+    private List<CustomerVO> _customers = new List<CustomerVO>();
+    private List<CardVO> _cards = new List<CardVO>();
     private List<ModalInstallment.Installment> _installments = new List<ModalInstallment.Installment>();
 
     // Calculate InstallmentValue
@@ -156,9 +156,9 @@
     protected override async Task OnInitializedAsync()
     {
         // Loading all Customers
-        var allCustomers = await HttpClient.GetFromJsonAsync<List<Customer>>("/api/Customer");
+        var allCustomers = await HttpClient.GetFromJsonAsync<List<CustomerVO>>("/api/Customer");
         // Loading all Cards
-        var allCards = await HttpClient.GetFromJsonAsync<List<Card>>("/api/Card");
+        var allCards = await HttpClient.GetFromJsonAsync<List<CardVO>>("/api/Card");
 
         if (spend != null && spend.IdSpend != 0)
         {

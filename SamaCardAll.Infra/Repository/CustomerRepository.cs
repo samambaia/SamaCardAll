@@ -52,7 +52,7 @@ namespace SamaCardAll.Infra.Repository
         {
             var customers = await _context.Customers.ToListAsync();
 
-            return [.. customers.Select(c => c.ToVO()];
+            return [.. customers.Select(c => c.ToVO())];
         }
 
         public async Task<bool> UpdateAsync(CustomerVO customer)

@@ -1,8 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
-using SamaCardAll.Core.Interfaces;
+﻿using SamaCardAll.Core.Interfaces;
 using SamaCardAll.Core.VO;
-using SamaCardAll.Infra;
-using SamaCardAll.Infra.Models;
 
 namespace SamaCardAll.Core.Services
 {
@@ -17,7 +14,8 @@ namespace SamaCardAll.Core.Services
 
         public async Task<List<SpendVO>> GetSpendsAsync()
         {
-            return await spendRepository.GetSpendsAsync();
+            var result = await spendRepository.GetSpendsAsync();
+            return result;
         }
 
         public async Task<SpendVO> GetByIdAsync(int id)

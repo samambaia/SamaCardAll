@@ -1,4 +1,4 @@
-using FrontWeb;
+﻿using FrontWeb;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Radzen;
@@ -10,28 +10,31 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddRadzenComponents();
 
+
 // Load configuration from appsettings.json
 var httpClient = new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) };
-var appSettingsJson = await httpClient.GetStringAsync("appsettings.json");
-var appSettings = JsonSerializer.Deserialize<AppSettings>(appSettingsJson);
 
-// Determine the environment and set the API base URL accordingly
-var isDevelopment = builder.Configuration.GetValue<bool>("IsDevelopment");
-var apiBaseUrl = isDevelopment ? appSettings.Environment_DEV.ApiBaseUrl : appSettings.Environment_PROD.ApiBaseUrl;
-builder.Services.AddScoped(sp => new HttpClient
-{
-    BaseAddress = new Uri(apiBaseUrl)
-});
+// Load appsettings.json manually
+using var configStream = await httpClient.GetStreamAsync("appsettings.json");
+using var jsonDoc = await JsonDocument.ParseAsync(configStream);
+var root = jsonDoc.RootElement;
+
+// Detect environment from launchsettings.json
+var envName = builder.HostEnvironment.Environment ?? "Development"; // "Development", "Production", etc.
+Console.WriteLine($"[INFO] Ambiente detectado: {envName}");
+
+var configKey = envName == "Development" ? "DEV" : "PROD";
+
+// 🔧 Reads API URL based on environment
+var apiBaseUrl = root
+    .GetProperty("ApiSettings")
+    .GetProperty(configKey)
+    .GetProperty("BaseUrl")
+    .GetString();
+
+Console.WriteLine($"[DEBUG] API URL configurada: {apiBaseUrl}");
+
+// Register HttpClient with this URL
+builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(apiBaseUrl!) });
 
 await builder.Build().RunAsync();
-
-public class EnvironmentConfig
-{
-    public string ApiBaseUrl { get; set; }
-}
-public class AppSettings
-{
-    public bool IsDevelopment { get; set; }
-    public EnvironmentConfig Environment_DEV { get; set; }
-    public EnvironmentConfig Environment_PROD { get; set; }
-}

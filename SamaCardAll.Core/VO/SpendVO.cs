@@ -15,5 +15,11 @@
         CardVO Card,
         int UserIdUser,
         UserVO User
-    );
+    )
+    {         
+        public SpendVO() : this(0, string.Empty, 0, DateTime.MinValue, 0, 0, 0, DateTime.MinValue, 0, null!, 0, null!, 0, null!) 
+        { 
+
+        } 
+    }
 }

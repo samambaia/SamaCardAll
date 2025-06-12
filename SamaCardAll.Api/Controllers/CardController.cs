@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SamaCardAll.Core.Interfaces;
-using SamaCardAll.Infra.Models;
+using SamaCardAll.Core.VO;
 
 namespace SamaCardAll.Api.Controllers
 {
@@ -56,7 +56,7 @@ namespace SamaCardAll.Api.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create(Card card)
+        public IActionResult Create(CardVO card)
         {
             if (ModelState.IsValid)
             {
@@ -74,7 +74,7 @@ namespace SamaCardAll.Api.Controllers
         }
 
         [HttpPut("{id}")]
-        public IActionResult Update(int id, Card card)
+        public IActionResult Update(int id, CardVO card)
         {
             if (id != card.IdCard)
             {

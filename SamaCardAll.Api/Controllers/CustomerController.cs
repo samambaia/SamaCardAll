@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SamaCardAll.Core.Interfaces;
-using SamaCardAll.Infra.Models;
+using SamaCardAll.Core.VO;
 
 namespace SamaCardAll.Api.Controllers
 {
@@ -42,7 +42,7 @@ namespace SamaCardAll.Api.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create(Customer customer)
+        public IActionResult Create(CustomerVO customer)
         {
             if (ModelState.IsValid)
             {
@@ -59,14 +59,9 @@ namespace SamaCardAll.Api.Controllers
             return BadRequest(ModelState);
         }
 
-        [HttpPut("{id}")]
-        public IActionResult Update(int id, Customer customer)
+        [HttpPut]
+        public IActionResult Update([FromBody] CustomerVO customer)
         {
-            if (id != customer.IdCustomer)
-            {
-                return BadRequest("ID mismatch");
-            }
-
             if (ModelState.IsValid)
             {
                 try

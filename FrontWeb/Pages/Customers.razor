@@ -1,6 +1,6 @@
 ﻿@page "/customers"
 
-@using SamaCardAll.Infra.Models
+@using FrontWeb.DTO
 @using FrontWeb.Components
 @using System.Text.Json
 @using Radzen.Blazor
@@ -14,14 +14,14 @@
 <RadzenButton Shade="Shade.Darker" Click=@(args => OpenModal()) Text="New Customer" ButtonStyle="ButtonStyle.Primary" />
 <p />
 
-<RadzenDataGrid TItem="Customer" Data="@customers" PagerPosition="PagerPosition.Bottom" AllowPaging="true" PageSize="5" PagerHorizontalAlign="HorizontalAlign.Center" AllowSorting="true">
+<RadzenDataGrid TItem="CustomerDTO" Data="@customers" PagerPosition="PagerPosition.Bottom" AllowPaging="true" PageSize="5" PagerHorizontalAlign="HorizontalAlign.Center" AllowSorting="true">
     <Columns>
-        <RadzenDataGridColumn TItem="Customer" Property="CustomerName" Title="Customer">
+        <RadzenDataGridColumn TItem="CustomerDTO" Property="CustomerName" Title="Customer">
             <HeaderTemplate>
                 <strong style="font-size:medium">Customer</strong>
             </HeaderTemplate>
         </RadzenDataGridColumn>
-        <RadzenDataGridColumn TItem="Customer" Property="Active" Title="Active">
+        <RadzenDataGridColumn TItem="CustomerDTO" Property="Active" Title="Active">
             <HeaderTemplate>
                 <strong style="font-size:medium">Active</strong>
             </HeaderTemplate>
@@ -29,7 +29,7 @@
                 <RadzenCheckBox Value="customer.Active ==1" Name="Active" TriState="false" Disabled="false" ReadOnly="true" />
             </Template>
         </RadzenDataGridColumn>
-        <RadzenDataGridColumn TItem="Customer">
+        <RadzenDataGridColumn TItem="CustomerDTO">
             <Template Context="customer">
                 <RadzenButton Click=@(args => Edit(customer)) Icon="edit" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Medium" />
                 <RadzenButton Click=@(args => Delete(customer)) Icon="delete" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Medium" />
@@ -78,15 +78,15 @@
     private bool errorVisible { get; set; }
     private string errorMessage { get; set; }
 
-    private Customer customer = new Customer();
+    private CustomerDTO customer = new CustomerDTO();
 
-    private List<Customer> customers = new List<Customer>();
+    private List<CustomerDTO> customers = new List<CustomerDTO>();
 
     private String TitleModal = "New Customer";
 
     protected override async Task OnInitializedAsync()
     {
-        customers = await HttpClient.GetFromJsonAsync<List<Customer>>("/api/Customer");
+        customers = await HttpClient.GetFromJsonAsync<List<CustomerDTO>>("/api/Customer");
     }
 
     private async void HandleValidSubmit()
@@ -98,7 +98,7 @@
         }
     }
 
-    private async Task OpenModal(Customer customerToEdit = null)
+    private async Task OpenModal(CustomerDTO customerToEdit = null)
     {
         if (customerToEdit != null)
         {
@@ -107,7 +107,7 @@
         }
         else
         {
-            this.customer = new Customer();
+            this.customer = new CustomerDTO();
             TitleModal = "New Customer";
         }
 
@@ -120,12 +120,12 @@
             return false;
 
         var response = customer.IdCustomer == 0
-            ? await HttpClient.PostAsJsonAsync<Customer>($"/api/Customer/", customer) // New customer, use POST
-            : await HttpClient.PutAsJsonAsync<Customer>($"/api/Customer/{customer.IdCustomer}", customer); // Existing customer, use PUT for update
+            ? await HttpClient.PostAsJsonAsync<CustomerDTO>($"/api/Customer/", customer) // New customer, use POST
+            : await HttpClient.PutAsJsonAsync<CustomerDTO>($"/api/Customer/{customer.IdCustomer}", customer); // Existing customer, use PUT for update
 
         if (response.IsSuccessStatusCode)
         {
-            customers = await HttpClient.GetFromJsonAsync<List<Customer>>("/api/Customer"); // Refresh the customer list
+            customers = await HttpClient.GetFromJsonAsync<List<CustomerDTO>>("/api/Customer"); // Refresh the customer list
             StateHasChanged();
             return true; // Return true indicating successful save
         }
@@ -136,12 +136,12 @@
         }
     }
 
-    private async Task Edit(Customer customer)
+    private async Task Edit(CustomerDTO customer)
     {
         await OpenModal(customer);
     }
 
-    private async Task Delete(Customer customer)
+    private async Task Delete(CustomerDTO customer)
     {
         var confirmDelete = await JSRuntime.InvokeAsync<bool>("confirm", new object[] { "Are you sure you want to delete this Customer?" });
 

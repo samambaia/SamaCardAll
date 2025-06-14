@@ -1,22 +1,22 @@
-﻿@using SamaCardAll.Core.VO
+﻿@using FrontWeb.DTO
 @using FrontWeb.Components
 @using Microsoft.AspNetCore.Components.Forms
 @using System.Globalization
 
 @inject HttpClient HttpClient
 
-<EditForm Model="spend" OnValidSubmit="HandleValidSubmit">
+<EditForm Model="spendModel" OnValidSubmit="HandleValidSubmit">
     <div class="form-group">
         <label for="Expenses">Expenses:</label>
-        <InputText id="Expenses" class="form-control" @bind-Value="spend.Expenses" />
+        <InputText id="Expenses" class="form-control" @bind-Value="spendModel.Expenses" />
     </div>
     <div class="form-group">
         <label for="IdCustomer">Customer:</label>
-        <InputSelect id="IdCustomer" class="form-select" @bind-Value="spend.CustomerIdCustomer" style="width: 300px">
+        <InputSelect id="IdCustomer" class="form-select" @bind-Value="spendModel.Customer.IdCustomer" style="width: 300px">
             @foreach (var customer in _customers)
             {
-                // If it is a NEW Spend, filter by Active Customer
-                @if (spend.IdSpend == 0)
+                // If it's a NEW Spend, filter by Active Customer
+                @if (spendModel.IdSpend == 0)
                 {
                     @if (customer.Active == 1)
                     {
@@ -32,11 +32,11 @@
     </div>
     <div class="form-group">
         <label for="Bank">Card:</label>
-        <InputSelect id="Bank" class="form-select" @bind-Value="spend.CardIdCard" style="width: 300px">
+        <InputSelect id="Bank" class="form-select" @bind-Value="spendModel.Card.IdCard" style="width: 300px">
             @foreach (var card in _cards)
             {
                 // If it is a NEW Spend, filter by Active Card
-                @if (spend.IdSpend == 0)
+                @if (spendModel.IdSpend == 0)
                 {
                     @if (card.Active == 1)
                     {
@@ -52,15 +52,15 @@
     </div>
     <div class="form-group">
         <label for="Date">Date Purchase:</label>
-        <InputDate id="Date" class="form-control" @bind-Value="spend.Date" style="width: 200px" />
+        <InputDate id="Date" class="form-control" @bind-Value="spendModel.Date" style="width: 200px" />
     </div>
     <div class="form-group">
         <label for="Amount">Amount:</label>
-        <InputText id="Amount" class="form-control" @bind-Value="formattedAmount" Format="C2" Culture="pt-BR" @oninput="UpdateAmount" @onblur="FormatAndCalculate" readonly=@(spend.IdSpend != 0) style="width: 200px" />
+        <InputText id="Amount" class="form-control" @bind-Value="Amountformatted" Format="C2" Culture="pt-BR" @oninput="UpdateAmount" @onblur="FormatAndCalculate" readonly=@(spendModel.IdSpend != 0) style="width: 200px" />
     </div>
     <div class="form-group">
         <label for="InstallmentPlan">Installment Plan:</label>
-        <InputNumber id="InstallmentPlan" class="form-control" @bind-Value="spend.InstallmentPlan" @oninput="UpdateInstallmentPlan" readonly=@(spend.IdSpend != 0) Min="1" Max="60" style="width: 100px" />
+        <InputNumber id="InstallmentPlan" class="form-control" @bind-Value="spendModel.InstallmentPlan" @oninput="UpdateInstallmentPlan" readonly=@(spendModel.IdSpend != 0) Min="1" Max="60" style="width: 100px" />
     </div>
 
     <div class="form-group">
@@ -82,85 +82,63 @@
 @code {
 
     [Parameter]
-    public SpendVO spend { get; init; };
+    public SpendDTO pSpend { get; set; }
 
     [Parameter]
     public EventCallback OnValidSubmit { get; set; }
 
-    [Parameter]
-    public decimal pInstallmentValue { get; set; }
+    private List<CustomerDTO> _customers = new();
+    private List<CardDTO> _cards = new();
+    private List<ModalInstallment.Installment> _installments = new();
 
-    [Parameter]
-    public decimal pAmount { get; set; }
-
-    private List<CustomerVO> _customers = new List<CustomerVO>();
-    private List<CardVO> _cards = new List<CardVO>();
-    private List<ModalInstallment.Installment> _installments = new List<ModalInstallment.Installment>();
+    // Model for SpendDTO
+    private SpendDTO spendModel = new SpendDTO();
 
     // Calculate InstallmentValue
-    private decimal Amount { get; set; } = 0;
+    private decimal Amount { get; set; }
+    private string Amountformatted = "0";
+    private string AmountNoFormat = "0";
+
+    // InstallmentValue is now a calculated property based on spendModel
+    public decimal InstallmentValue
+    {
+        get => spendModel.InstallmentValue; // Get from model
+        set => spendModel.InstallmentValue = value; // Set to model
+    }
+
     private int InstallmentPlan { get; set; } = 1;
 
     // Format InstallmentValue
-    private decimal InstallmentValue { get; set; }
     public string FormattedInstallmentValue
     {
-        get { return InstallmentValue.ToString("C2"); }
-        set { InstallmentValue = decimal.Parse(value); }
+        get { return spendModel.InstallmentValue.ToString("C2", CultureInfo.GetCultureInfo("pt-BR")); } // Use CultureInfo for currency format
+        set { /* Not directly setting via string, conversion happens in CalculateInstallmentValue */ }
     }
 
-    private string formattedAmount = "0";
-    private string AmountNoFormat = "0";
-
-    private void CalculateInstallmentValue()
-    {
-        if (decimal.TryParse(AmountNoFormat, out decimal parsedAmount))
-        {
-            Amount = parsedAmount;
-
-            // Calculate the InstallmentValue based on the provided Amount and InstallmentPlan
-            InstallmentValue = Amount / InstallmentPlan;
-
-            spend.Amount = Amount;
-            spend.InstallmentValue = InstallmentValue;
-        }
-    }
-
-    private void UpdateAmount(ChangeEventArgs e)
-    {
-        AmountNoFormat = (e.Value.ToString() == string.Empty? "0" : e.Value.ToString());
-
-        formattedAmount = AmountNoFormat;
-        Amount = Convert.ToDecimal(AmountNoFormat); // Update formattedAmount when the input value changes
-        CalculateInstallmentValue(); // Recalculate InstallmentValue
-    }
-
-    private void UpdateInstallmentPlan(ChangeEventArgs e)
-    {
-        if (e.Value != null && !string.IsNullOrEmpty(e.Value.ToString()) && Convert.ToInt32(e.Value) > 0)
-        {
-            InstallmentPlan = Convert.ToInt32(e.Value);
-            CalculateInstallmentValue();
-        }
-    }
-
-    private void FormatAndCalculate(FocusEventArgs e)
-    {
-        // Format the amount when focus leaves the input field
-        formattedAmount = (AmountNoFormat == "0" ? formattedAmount : decimal.Parse(AmountNoFormat).ToString("C2")); // Assuming you want to format as currency
-
-        // Calculate InstallmentValue based on the formatted amount
-        CalculateInstallmentValue();
-    }
 
     protected override async Task OnInitializedAsync()
     {
-        // Loading all Customers
-        var allCustomers = await HttpClient.GetFromJsonAsync<List<CustomerVO>>("/api/Customer");
-        // Loading all Cards
-        var allCards = await HttpClient.GetFromJsonAsync<List<CardVO>>("/api/Card");
 
-        if (spend != null && spend.IdSpend != 0)
+        if (pSpend != null && pSpend.IdSpend != 0)
+        {
+            spendModel = pSpend;
+
+        }
+        else
+        {
+            // Se pSpend é nulo ou 0, um novo SpendDTO já foi criado pela linha 'private SpendDTO spendModel = new SpendDTO();'
+            // e seu construtor já definiu os valores padrão.
+            // Apenas para garantir que não haja referências nulas para Customer e Card caso não estejam no construtor de SpendDTO
+            if (spendModel.Customer == null) spendModel.Customer = new CustomerDTO();
+            if (spendModel.Card == null) spendModel.Card = new CardDTO();
+            if (spendModel.User == null) spendModel.User = new UserDTO(); // If UserDTO is used as well
+        }
+
+        // Loading all Customers and Cards
+        var allCustomers = await HttpClient.GetFromJsonAsync<List<CustomerDTO>>("/api/Customer");
+        var allCards = await HttpClient.GetFromJsonAsync<List<CardDTO>>("/api/Card");
+
+        if (spendModel.IdSpend != 0)
         {
             // Edit mode: show all customers and cards (including inactive)
             _customers = allCustomers;
@@ -173,38 +151,95 @@
             _cards = allCards.Where(c => c.Active == 1).ToList();
         }
 
-        Amount = 0;
-        InstallmentValue = 0;
+        // Inicializa Amountformatted e AmountNoFormat com base no spendModel.Amount
+        // Importante para o modo de edição, onde spendModel.Amount já pode ter um valor.
+        Amount = spendModel.Amount;
+        AmountNoFormat = spendModel.Amount.ToString(CultureInfo.InvariantCulture); // Use InvariantCulture for internal string representation
+        Amountformatted = spendModel.Amount.ToString("C2", CultureInfo.GetCultureInfo("pt-BR"));
+
+        // Garante que o InstallmentPlan do spendModel é usado
+        // InstallmentPlan = spendModel.InstallmentPlan; // This is redundant if InputNumber is bound to spendModel.InstallmentPlan directly
+        // InstallmentValue = spendModel.InstallmentValue; // This is also redundant if FormattedInstallmentValue uses spendModel.InstallmentValue directly
+
+        // Chame calculate para atualizar valores baseados no modelo inicial
+        CalculateInstallmentValue();
+    }
+
+    private void CalculateInstallmentValue()
+    {
+        // Garanta que você está usando as propriedades do spendModel
+        if (decimal.TryParse(AmountNoFormat, out decimal parsedAmount))
+        {
+            spendModel.Amount = parsedAmount; // Atualiza o Amount no modelo
+
+            // Calcular o InstallmentValue baseado no Amount e InstallmentPlan do modelo
+            if (spendModel.InstallmentPlan > 0) // Evitar divisão por zero
+            {
+                spendModel.InstallmentValue = spendModel.Amount / spendModel.InstallmentPlan;
+            }
+            else
+            {
+                spendModel.InstallmentValue = spendModel.Amount; // Se plano for 0 ou inválido, valor da parcela é o total
+            }
+        }
+        else
+        {
+            // Lide com casos onde AmountNoFormat não pode ser convertido para decimal
+            spendModel.Amount = 0;
+            spendModel.InstallmentValue = 0;
+        }
+    }
+
+    private void UpdateAmount(ChangeEventArgs e)
+    {
+        AmountNoFormat = e.Value?.ToString() ?? "0";
+        Amountformatted = AmountNoFormat; // Assume que o usuário ainda está digitando, não formata ainda
+        CalculateInstallmentValue(); // Recalcula InstallmentValue
+    }
+
+    private void UpdateInstallmentPlan(ChangeEventArgs e)
+    {
+        if (e.Value != null && int.TryParse(e.Value.ToString(), out int parsedInstallmentPlan) && parsedInstallmentPlan > 0)
+        {
+            spendModel.InstallmentPlan = parsedInstallmentPlan; // Atualiza o InstallmentPlan no modelo
+            CalculateInstallmentValue();
+        }
+        else
+        {
+            spendModel.InstallmentPlan = 1; // Padrão se entrada inválida ou vazia
+            CalculateInstallmentValue();
+        }
+    }
+
+    private void FormatAndCalculate(FocusEventArgs e)
+    {
+        // Formata o valor quando o foco sai do campo
+        if (decimal.TryParse(AmountNoFormat, out decimal parsedAmount))
+        {
+            Amountformatted = parsedAmount.ToString("C2", CultureInfo.GetCultureInfo("pt-BR"));
+        }
+        else
+        {
+            Amountformatted = (0M).ToString("C2", CultureInfo.GetCultureInfo("pt-BR")); // Se for inválido, mostra 0 formatado
+        }
+        CalculateInstallmentValue();
     }
 
     private void HandleValidSubmit()
     {
         // Pass the event upwards to the parent component
-        OnValidSubmit.InvokeAsync();
+        OnValidSubmit.InvokeAsync(spendModel);
     }
 
     protected override void OnParametersSet()
     {
-        if (spend == null)
+        if (pSpend != null)
         {
-            throw new InvalidOperationException("EditForm requires a Model parameter");
+            spendModel = pSpend;
         }
         else
         {
-            if (spend.IdSpend != 0)
-            {
-                AmountNoFormat = pAmount.ToString();
-                formattedAmount = pAmount.ToString("C");
-                InstallmentValue = pInstallmentValue;
-                InstallmentPlan = spend.InstallmentPlan;
-            }
-            else
-            {
-                AmountNoFormat = "0";
-                formattedAmount = "0";
-                InstallmentValue = 0;
-                InstallmentPlan = 1;
-            }
+            spendModel = new SpendDTO();
         }
     }
 
@@ -215,6 +250,9 @@
     // Função para exibir o plano de parcelamento
     private void ShowInstallmentPlan()
     {
-        modalInstallment.ShowInstallmentPlan(spend);
+        if (spendModel != null)
+            modalInstallment.ShowInstallmentPlan(spendModel);
+        else
+            throw new InvalidOperationException("Cannot show installment plan without a valid SpendDTO.");
     }
 }

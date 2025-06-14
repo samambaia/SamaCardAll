@@ -16,11 +16,11 @@ namespace SamaCardAll.Api.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetAll()
+        public async Task<IActionResult> GetAll()
         {
             try
             {
-                var spends = _spendService.GetSpendsAsync();
+                var spends = await _spendService.GetSpendsAsync();
                 return Ok(spends);
             }
             catch (Exception ex)
@@ -30,13 +30,13 @@ namespace SamaCardAll.Api.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create(SpendVO spend)
+        public async Task<IActionResult> Create(SpendVO spend)
         {
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _spendService.CreateAsync(spend);
+                    await _spendService.CreateAsync(spend);
                     int spendId = spend.IdSpend;
                     return CreatedAtAction(nameof(GetById), new { id = spend.IdSpend }, spend);
                 }
@@ -66,11 +66,11 @@ namespace SamaCardAll.Api.Controllers
         }
 
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
             try
             {
-                _spendService.DeleteAsync(id);
+                await _spendService.DeleteAsync(id);
                 return NoContent();
             }
             catch (Exception ex)
@@ -80,9 +80,9 @@ namespace SamaCardAll.Api.Controllers
         }
 
         [HttpGet("{id}")]
-        public IActionResult GetById(int id)
+        public async Task<IActionResult> GetById(int id)
         {
-            var spend = _spendService.GetByIdAsync(id);
+            var spend = await _spendService.GetByIdAsync(id);
             if (spend == null)
             {
                 return NotFound();

@@ -1,4 +1,4 @@
-﻿@using SamaCardAll.Infra.Models
+﻿@using FrontWeb.DTO
 @using Radzen.Blazor
 @using Radzen.Blazor.Rendering
 
@@ -65,7 +65,7 @@
     private List<Installment> installmentPlanList = new List<Installment>();
 
     // Method to show the Installment List
-    public void ShowInstallmentPlan(Spend spend)
+    public void ShowInstallmentPlan(SpendDTO spend)
     {
         installmentPlanList = new List<Installment>();
 

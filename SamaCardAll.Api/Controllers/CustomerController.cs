@@ -17,11 +17,11 @@ namespace SamaCardAll.Api.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetAll()
+        public async Task<IActionResult> GetAll()
         {
             try
             {
-                var customers = _customerService.GetCustomersAsync();
+                var customers = await _customerService.GetCustomersAsync();
                 return Ok(customers);
             }
             catch (Exception ex)
@@ -31,9 +31,9 @@ namespace SamaCardAll.Api.Controllers
         }
 
         [HttpGet("{id}")]
-        public IActionResult GetById(int id)
+        public async Task<IActionResult> GetById(int id)
         {
-            var customer = _customerService.GetByIdAsync(id);
+            var customer = await _customerService.GetByIdAsync(id);
             if (customer == null)
             {
                 return NotFound();
@@ -42,13 +42,13 @@ namespace SamaCardAll.Api.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create(CustomerVO customer)
+        public async Task<IActionResult> Create(CustomerVO customer)
         {
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _customerService.CreateAsync(customer);
+                    await _customerService.CreateAsync(customer);
                     return CreatedAtAction(nameof(GetById), new { id = customer.IdCustomer }, customer);
                 }
                 catch (Exception ex)
@@ -60,13 +60,13 @@ namespace SamaCardAll.Api.Controllers
         }
 
         [HttpPut]
-        public IActionResult Update([FromBody] CustomerVO customer)
+        public async Task<IActionResult> Update([FromBody] CustomerVO customer)
         {
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _customerService.UpdateAsync(customer);
+                    await _customerService.UpdateAsync(customer);
                     return NoContent();
                 }
                 catch (Exception ex)
@@ -78,11 +78,11 @@ namespace SamaCardAll.Api.Controllers
         }
 
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
             try
             {
-                _customerService.DeleteAsync(id);
+                await _customerService.DeleteAsync(id);
                 return NoContent();
             }
             catch (Exception ex)

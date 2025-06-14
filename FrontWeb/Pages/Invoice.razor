@@ -1,7 +1,7 @@
 ﻿@page "/invoice"
 
 @using FrontWeb.Components
-@using SamaCardAll.Infra.Models
+@using FrontWeb.DTO
 @using System.Net
 @using Radzen.Blazor
 @using Radzen.Blazor.Rendering
@@ -104,7 +104,7 @@ else
         monthYear = newMonthYear;
     }
 
-    private List<Customer> _customers = new List<Customer>();
+    private List<CustomerDTO> _customers = new List<CustomerDTO>();
 
     protected override async Task OnInitializedAsync()
     {
@@ -112,7 +112,7 @@ else
 
         try
         {
-            _customers = await HttpClient.GetFromJsonAsync<List<Customer>>("/api/Customer");
+            _customers = await HttpClient.GetFromJsonAsync<List<CustomerDTO>>("/api/Customer");
 
             monthYearList = await HttpClient.GetFromJsonAsync<IEnumerable<string>>("/api/Home/distinct-monthYears");
 

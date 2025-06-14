@@ -17,11 +17,11 @@ namespace SamaCardAll.Api.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetAll()
+        public async Task<IActionResult> GetAll()
         {
             try
             {
-                var cards = _cardService.GetCardsAsync();
+                var cards = await _cardService.GetCardsAsync();
                 return Ok(cards);
             }
             catch (Exception ex)
@@ -31,11 +31,11 @@ namespace SamaCardAll.Api.Controllers
         }
 
         [HttpGet("active", Name = "GetActiveCards")]
-        public IActionResult GetActive()
+        public async Task<IActionResult> GetActive()
         {
             try
             {
-                var cards = _cardService.GetActiveCardsAsync();
+                var cards = await _cardService.GetActiveCardsAsync();
                 return Ok(cards);
             }
             catch (Exception ex)
@@ -45,9 +45,9 @@ namespace SamaCardAll.Api.Controllers
         }
 
         [HttpGet("{id}")]
-        public IActionResult GetById(int id)
+        public async Task<IActionResult> GetById(int id)
         {
-            var card = _cardService.GetByIdAsync(id);
+            var card = await _cardService.GetByIdAsync(id);
             if (card == null)
             {
                 return NotFound();
@@ -56,13 +56,13 @@ namespace SamaCardAll.Api.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create(CardVO card)
+        public async Task<IActionResult> Create(CardVO card)
         {
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _cardService.CreateAsync(card);
+                    await _cardService.CreateAsync(card);
                     return CreatedAtAction(nameof(GetById), new { id = card.IdCard }, card);
                 }
                 catch (Exception ex)
@@ -74,7 +74,7 @@ namespace SamaCardAll.Api.Controllers
         }
 
         [HttpPut("{id}")]
-        public IActionResult Update(int id, CardVO card)
+        public async Task<IActionResult> Update(int id, CardVO card)
         {
             if (id != card.IdCard)
             {
@@ -85,7 +85,7 @@ namespace SamaCardAll.Api.Controllers
             {
                 try
                 {
-                    _cardService.UpdateAsync(card);
+                    await _cardService.UpdateAsync(card);
                     return NoContent();
                 }
                 catch (Exception ex)
@@ -97,11 +97,11 @@ namespace SamaCardAll.Api.Controllers
         }
 
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
             try
             {
-                _cardService.DeleteAsync(id);
+                await _cardService.DeleteAsync(id);
                 return NoContent();
             }
             catch (Exception ex)

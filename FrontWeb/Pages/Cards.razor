@@ -1,6 +1,6 @@
 ﻿@page "/cards"
 
-@using SamaCardAll.Infra.Models
+@using FrontWeb.DTO
 @using FrontWeb.Components
 @using Radzen.Blazor
 @using Radzen.Blazor.Rendering
@@ -13,30 +13,30 @@
 <RadzenButton Shade="Shade.Darker" Click=@(args => OpenModal()) Text="New Card" ButtonStyle="ButtonStyle.Primary" />
 <p />
 
-<RadzenDataGrid TItem="Card" Data="@cards" PagerPosition="PagerPosition.Bottom" AllowPaging="true" PageSize="5" PagerHorizontalAlign="HorizontalAlign.Center" AllowSorting="true">
+<RadzenDataGrid TItem="CardDTO" Data="@cards" PagerPosition="PagerPosition.Bottom" AllowPaging="true" PageSize="5" PagerHorizontalAlign="HorizontalAlign.Center" AllowSorting="true">
     <Columns>
-        <RadzenDataGridColumn TItem="Card" Property="Bank" Title="Bank" Width="250px">
+        <RadzenDataGridColumn TItem="CardDTO" Property="Bank" Title="Bank" Width="250px">
             <HeaderTemplate>
                 <strong style="font-size:medium">Bank</strong>
             </HeaderTemplate>
         </RadzenDataGridColumn>
 
-        <RadzenDataGridColumn TItem="Card" Property="Number" Title="Number">
+        <RadzenDataGridColumn TItem="CardDTO" Property="Number" Title="Number">
             <HeaderTemplate>
                 <strong style="font-size:medium">Number</strong>
             </HeaderTemplate>
         </RadzenDataGridColumn>
-        <RadzenDataGridColumn TItem="Card" Property="Expiration" Title="Expiration">
+        <RadzenDataGridColumn TItem="CardDTO" Property="Expiration" Title="Expiration">
             <HeaderTemplate>
                 <strong style="font-size:medium">Expiration</strong>
             </HeaderTemplate>
         </RadzenDataGridColumn>
-        <RadzenDataGridColumn TItem="Card" Property="Brand" Title="Brand">
+        <RadzenDataGridColumn TItem="CardDTO" Property="Brand" Title="Brand">
             <HeaderTemplate>
                 <strong style="font-size:medium">Brand</strong>
             </HeaderTemplate>
         </RadzenDataGridColumn>
-        <RadzenDataGridColumn TItem="Card" Property="Active" Title="Active">
+        <RadzenDataGridColumn TItem="CardDTO" Property="Active" Title="Active">
             <HeaderTemplate>
                 <strong style="font-size:medium">Active</strong>
             </HeaderTemplate>
@@ -44,7 +44,7 @@
                 <RadzenCheckBox Value="card.Active == 1" Name="Active" TriState="false" Disabled="false" ReadOnly="true" />
             </Template>
         </RadzenDataGridColumn>
-        <RadzenDataGridColumn TItem="Card" Property="Actions">
+        <RadzenDataGridColumn TItem="CardDTO" Property="Actions">
             <Template Context="card">
                 <RadzenButton Click="@(args => Edit(card))" Icon="edit" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Medium" />
                 <RadzenButton Click="@(args => Delete(card))" Icon="delete" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Medium" />
@@ -76,8 +76,8 @@
     private bool errorVisible { get; set; }
     private string errorMessage { get; set; }
 
-    private Card card = new Card();
-    private List<Card> cards = new List<Card>();
+    private CardDTO card = new CardDTO();
+    private List<CardDTO> cards = new List<CardDTO>();
 
     private String TitleModal = "New Card";
 
@@ -88,7 +88,7 @@
 
     private async Task LoadCards()
     {
-        var allCards = await HttpClient.GetFromJsonAsync<List<Card>>("/api/Card");
+        var allCards = await HttpClient.GetFromJsonAsync<List<CardDTO>>("/api/Card");
 
         cards = allCards;
 
@@ -105,7 +105,7 @@
         }
     }
 
-    private async Task OpenModal(Card cardToEdit = null)
+    private async Task OpenModal(CardDTO cardToEdit = null)
     {
         if (cardToEdit != null)
         {
@@ -114,7 +114,7 @@
         }
         else
         {
-            this.card = new Card();
+            this.card = new CardDTO();
             TitleModal = "New Card";
         }
 
@@ -127,8 +127,8 @@
             return false;
 
         var response = card.IdCard == 0
-            ? await HttpClient.PostAsJsonAsync<Card>($"/api/Card/", card) // New card, use POST
-            : await HttpClient.PutAsJsonAsync<Card>($"/api/Card/{card.IdCard}", card); // Existing card, use PUT for update
+            ? await HttpClient.PostAsJsonAsync<CardDTO>($"/api/Card/", card) // New card, use POST
+            : await HttpClient.PutAsJsonAsync<CardDTO>($"/api/Card/{card.IdCard}", card); // Existing card, use PUT for update
 
         if (response.IsSuccessStatusCode)
         {
@@ -145,12 +145,12 @@
         }
     }
 
-    private async Task Edit(Card card)
+    private async Task Edit(CardDTO card)
     {
         await OpenModal(card);
     }
 
-    private async Task Delete(Card card)
+    private async Task Delete(CardDTO card)
     {
         var confirmDelete = await JSRuntime.InvokeAsync<bool>("confirm", new object[] { "Are you sure you want to delete this card?" });
 

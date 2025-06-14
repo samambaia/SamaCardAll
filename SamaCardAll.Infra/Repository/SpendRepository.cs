@@ -61,7 +61,11 @@ namespace SamaCardAll.Infra.Repository
 
         public async Task<List<SpendVO>> GetSpendsAsync()
         {
-            var getSpends = await _context.Spends.ToListAsync();
+            var getSpends = await _context.Spends
+                                          .Include(s => s.Customer)
+                                          .Include(s => s.Card)
+                                          .Include(s => s.User)
+                                          .ToListAsync();
 
             return [.. getSpends.Select(s => s.ToVO())];
 

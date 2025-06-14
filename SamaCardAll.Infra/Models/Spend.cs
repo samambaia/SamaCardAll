@@ -26,5 +26,4 @@ public class Spend
     //User
     public int UserIdUser { get; set; } = 1; // Default to 1 for the admin user
     public User User  { get; set;}
-
 }

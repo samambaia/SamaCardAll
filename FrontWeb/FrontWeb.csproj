@@ -34,8 +34,4 @@
     <PackageReference Include="Radzen.Blazor" Version="4.31.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\SamaCardAll.Core\SamaCardAll.Core.csproj" />
-  </ItemGroup>
-
 </Project>

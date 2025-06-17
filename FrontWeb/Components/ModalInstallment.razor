@@ -1,4 +1,4 @@
-﻿@using FrontWeb.DTO
+﻿@using FrontWeb.ViewModels
 @using Radzen.Blazor
 @using Radzen.Blazor.Rendering
 
@@ -65,7 +65,7 @@
     private List<Installment> installmentPlanList = new List<Installment>();
 
     // Method to show the Installment List
-    public void ShowInstallmentPlan(SpendDTO spend)
+    public void ShowInstallmentPlan(SpendViewModel spend)
     {
         installmentPlanList = new List<Installment>();
 

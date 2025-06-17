@@ -2,8 +2,10 @@
 
 @using FrontWeb.DTO
 @using FrontWeb.Components
+@using FrontWeb.ViewModels
 @using Radzen.Blazor
 @using Radzen.Blazor.Rendering
+@using AutoMapper
 
 @inject HttpClient HttpClient
 @inject IJSRuntime JSRuntime;
@@ -14,43 +16,43 @@
 <RadzenButton Shade="Shade.Darker" Click=@(args => OpenModal()) Text="New Spend" ButtonStyle="ButtonStyle.Primary" />
 <p />
 
-<RadzenDataGrid TItem="SpendDTO" Data="@_spends" PagerPosition="PagerPosition.Bottom" AllowPaging="true" PageSize="8" PagerHorizontalAlign="HorizontalAlign.Center" AllowSorting="true">
+<RadzenDataGrid TItem="SpendViewModel" Data="@allSpendsViewModel" PagerPosition="PagerPosition.Bottom" AllowPaging="true" PageSize="8" PagerHorizontalAlign="HorizontalAlign.Center" AllowSorting="true">
     <Columns>
-        <RadzenDataGridColumn TItem="SpendDTO" Property="Expenses" Title="Expense" Width="300px">
+        <RadzenDataGridColumn TItem="SpendViewModel" Property="Expenses" Title="Expense" Width="300px">
             <HeaderTemplate>
                 <strong style="font-size:medium">Expense</strong>
             </HeaderTemplate>
         </RadzenDataGridColumn>
-        <RadzenDataGridColumn TItem="SpendDTO" Property="Date" Title="Date Purchase">
+        <RadzenDataGridColumn TItem="SpendViewModel" Property="Date" Title="Date Purchase">
             <HeaderTemplate>
                 <strong style="font-size:medium">Date Purchase</strong>
             </HeaderTemplate>
-            <Template Context="spend">
-                @spend.Date.ToString("dd/MM/yyyy")
+            <Template Context="spendDTO">
+                @spendDTO.Date.ToString("dd/MM/yyyy")
             </Template>
         </RadzenDataGridColumn>
-        <RadzenDataGridColumn TItem="SpendDTO" Property="Spend.Amount" Title="Amount">
+        <RadzenDataGridColumn TItem="SpendViewModel" Property="Spend.Amount" Title="Amount">
             <HeaderTemplate>
                 <strong style="font-size:medium">Amount</strong>
             </HeaderTemplate>
-            <Template Context="spend">
-                @spend.Amount.ToString("C2")
+            <Template Context="spendDTO">
+                @spendDTO.Amount.ToString("C2")
             </Template>
         </RadzenDataGridColumn>
-        <RadzenDataGridColumn TItem="SpendDTO" Property="Spend.Card.Bank" Title="Card Bank">
+        <RadzenDataGridColumn TItem="SpendViewModel" Property="Spend.Card.Bank" Title="Card Bank">
             <HeaderTemplate>
                 <strong style="font-size:medium">Card Bank</strong>
             </HeaderTemplate>
         </RadzenDataGridColumn>
-        <RadzenDataGridColumn TItem="SpendDTO" Property="Spend.Customer.CustomerName" Title="Customer Name">
+        <RadzenDataGridColumn TItem="SpendViewModel" Property="Spend.Customer.CustomerName" Title="Customer Name">
             <HeaderTemplate>
                 <strong style="font-size:medium">Customer Name</strong>
             </HeaderTemplate>
         </RadzenDataGridColumn>
-        <RadzenDataGridColumn TItem="SpendDTO" Property="Actions">
-            <Template Context="spend">
-                <RadzenButton Click=@(args => Edit(spend)) Icon="edit" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Medium" />
-                <RadzenButton Click=@(args => Delete(spend)) Icon="delete" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Medium" />
+        <RadzenDataGridColumn TItem="SpendViewModel" Property="Actions">
+            <Template Context="item">
+                <RadzenButton Click=@(args => Edit(item)) Icon="edit" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Medium" />
+                <RadzenButton Click=@(args => Delete(item)) Icon="delete" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Medium" />
             </Template>
         </RadzenDataGridColumn>
     </Columns>
@@ -59,8 +61,10 @@
 <ErrorMessage ErrorVisible="@errorVisible" ErrorMessage="@errorMessage" />
 
 <ModalDialog @ref="@modalDialog" Title=@TitleModal>
-    <EditSpendForm pSpend="spend" OnValidSubmit="HandleValidSubmit" />
+    <EditSpendForm pSpend="spendViewModel" OnValidSubmit="HandleValidSubmit" />
 </ModalDialog>
+
+@inject IMapper Mapper
 
 @code {
 
@@ -76,8 +80,10 @@
 
     private ModalInstallment modalInstallment { get; set; }
 
-    private SpendDTO spend;
-    private List<SpendDTO> _spends = new List<SpendDTO>();
+    private SpendDTO spendDTO;
+    private List<SpendDTO> allSpendsDTO = new List<SpendDTO>();
+    private List<SpendViewModel> allSpendsViewModel = new List<SpendViewModel>();
+    private SpendViewModel spendViewModel;
 
     private decimal amount;
     private decimal installmentValue;
@@ -92,14 +98,11 @@
     private async Task LoadSpends()
     {
         // Loading all spends
-        var allSpends = await HttpClient.GetFromJsonAsync<List<SpendDTO>>("/api/Spend?include=card,customer");
+        allSpendsDTO = await HttpClient.GetFromJsonAsync<List<SpendDTO>>("/api/Spend?include=card,customer");
 
-        // Initialize Spend - order by Date descending (most recent first)
-        _spends = allSpends
+        allSpendsViewModel = Mapper.Map<List<SpendViewModel>>(allSpendsDTO)
             .Where(s => s.Deleted == 0)
             .OrderByDescending(s => s.Date).ToList();
-
-        //Console.WriteLine($"LoadSpends: _spends.Count = {_spends.Count}");
 
         StateHasChanged();
     }
@@ -114,20 +117,28 @@
         //modalDialog.Close();
     }
 
-    private async Task OpenModal(SpendDTO spendToEdit = null)
+    private async Task OpenModal(SpendViewModel spendToEdit = null)
     {
         if (spendToEdit != null)
         {
-            this.spend = spendToEdit;
+            this.spendViewModel = Mapper.Map<SpendViewModel>(spendToEdit);
 
-            amount = this.spend.Amount;
-            installmentValue = this.spend.InstallmentValue;
+            amount = this.spendViewModel.Amount;
+            installmentValue = this.spendViewModel.InstallmentValue;
 
             TitleModal = "Edit Spend";
         }
         else
         {
-            this.spend = new SpendDTO();
+            this.spendViewModel = new SpendViewModel();
+
+            spendViewModel.Customer = new CustomerViewModel();
+            spendViewModel.Card = new CardViewModel();
+            spendViewModel.User = new UserViewModel();
+
+            amount = 0;
+            installmentValue = 0;
+
             TitleModal = "New Spend";
         }
 
@@ -136,14 +147,16 @@
 
     private async Task<bool> Save()
     {
-        if (spend == null)
+        if (spendViewModel == null)
             return false;
 
         try
         {
-            var response = spend.IdSpend == 0
-                ? await HttpClient.PostAsJsonAsync<SpendDTO>($"/api/Spend/", spend) // New spend, use POST
-                : await HttpClient.PutAsJsonAsync<SpendDTO>($"/api/Spend/{spend.IdSpend}", spend); // Existing spend, use PUT for update
+            spendViewModel = Mapper.Map<SpendViewModel>(spendViewModel);
+
+            var response = spendViewModel.IdSpend == 0
+                ? await HttpClient.PostAsJsonAsync<SpendViewModel>($"/api/Spend/", spendViewModel) // New spend, use POST
+                : await HttpClient.PutAsJsonAsync<SpendViewModel>($"/api/Spend/{spendViewModel.IdSpend}", spendViewModel); // Existing spend, use PUT for update
 
             if (response.IsSuccessStatusCode)
             {
@@ -169,12 +182,12 @@
 
     }
 
-    private async Task Edit(SpendDTO spend)
+    private async Task Edit(SpendViewModel spend)
     {
         await OpenModal(spend);
     }
 
-    private async Task Delete(SpendDTO spend)
+    private async Task Delete(SpendViewModel spend)
     {
         var confirmDelete = await JSRuntime.InvokeAsync<bool>("confirm", new object[] { "Are you sure you want to delete this Spend?" });
 
@@ -186,10 +199,10 @@
                 if (response.IsSuccessStatusCode)
                 {
                     // Remove the spend from the list by Id to ensure correct removal and force UI update
-                    var toRemove = _spends.FirstOrDefault(s => s.IdSpend == spend.IdSpend);
+                    var toRemove = allSpendsViewModel.FirstOrDefault(s => s.IdSpend == spend.IdSpend);
                     if (toRemove != null)
                     {
-                        _spends.Remove(toRemove);
+                        allSpendsViewModel.Remove(toRemove);
                     }
                     StateHasChanged();
                 }

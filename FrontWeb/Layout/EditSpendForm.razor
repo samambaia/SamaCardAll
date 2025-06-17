@@ -1,98 +1,79 @@
-﻿@using FrontWeb.DTO
-@using FrontWeb.Components
+﻿@using FrontWeb.Components
+@using FrontWeb.ViewModels
 @using Microsoft.AspNetCore.Components.Forms
 @using System.Globalization
 
 @inject HttpClient HttpClient
 
-<EditForm Model="spendModel" OnValidSubmit="HandleValidSubmit">
-    <div class="form-group">
-        <label for="Expenses">Expenses:</label>
-        <InputText id="Expenses" class="form-control" @bind-Value="spendModel.Expenses" />
-    </div>
-    <div class="form-group">
-        <label for="IdCustomer">Customer:</label>
-        <InputSelect id="IdCustomer" class="form-select" @bind-Value="spendModel.Customer.IdCustomer" style="width: 300px">
-            @foreach (var customer in _customers)
-            {
-                // If it's a NEW Spend, filter by Active Customer
-                @if (spendModel.IdSpend == 0)
-                {
-                    @if (customer.Active == 1)
-                    {
-                        <option value="@customer.IdCustomer">@customer.CustomerName</option>
-                    }
-                }
-                else
+<RadzenTemplateForm TItem="SpendViewModel" Data="@spendViewModel" Submit=HandleValidSubmit>
+    <RadzenCard class="my-2 mx-auto" Style="max-width: 400px;">
+        <div class="form-group">
+            <label for="Expenses">Expenses:</label>
+            <InputText id="Expenses" class="form-control" @bind-Value="spendViewModel.Expenses" />
+            <RadzenRequiredValidator Component="Expenses" Text="Expenses is required." />
+        </div>
+        <div class="form-group">
+            <label for="IdCustomer">Customer:</label>
+            <InputSelect id="IdCustomer" class="form-select" @bind-Value="spendViewModel.Customer.IdCustomer" style="width: 300px">
+                @foreach (var customer in _customers)
                 {
                     <option value="@customer.IdCustomer">@customer.CustomerName</option>
                 }
-            }
-        </InputSelect>
-    </div>
-    <div class="form-group">
-        <label for="Bank">Card:</label>
-        <InputSelect id="Bank" class="form-select" @bind-Value="spendModel.Card.IdCard" style="width: 300px">
-            @foreach (var card in _cards)
-            {
-                // If it is a NEW Spend, filter by Active Card
-                @if (spendModel.IdSpend == 0)
-                {
-                    @if (card.Active == 1)
-                    {
-                        <option value="@card.IdCard">@card.Bank</option>
-                    }
-                }
-                else
+            </InputSelect>
+        </div>
+        <div class="form-group">
+            <label for="Bank">Card:</label>
+            <InputSelect id="Bank" class="form-select" @bind-Value="spendViewModel.Card.IdCard" style="width: 300px">
+                @foreach (var card in _cards)
                 {
                     <option value="@card.IdCard">@card.Bank</option>
                 }
-            }
-        </InputSelect>
-    </div>
-    <div class="form-group">
-        <label for="Date">Date Purchase:</label>
-        <InputDate id="Date" class="form-control" @bind-Value="spendModel.Date" style="width: 200px" />
-    </div>
-    <div class="form-group">
-        <label for="Amount">Amount:</label>
-        <InputText id="Amount" class="form-control" @bind-Value="Amountformatted" Format="C2" Culture="pt-BR" @oninput="UpdateAmount" @onblur="FormatAndCalculate" readonly=@(spendModel.IdSpend != 0) style="width: 200px" />
-    </div>
-    <div class="form-group">
-        <label for="InstallmentPlan">Installment Plan:</label>
-        <InputNumber id="InstallmentPlan" class="form-control" @bind-Value="spendModel.InstallmentPlan" @oninput="UpdateInstallmentPlan" readonly=@(spendModel.IdSpend != 0) Min="1" Max="60" style="width: 100px" />
-    </div>
+            </InputSelect>
+        </div>
+        <div class="form-group">
+            <label for="Date">Date Purchase:</label>
+            <InputDate id="Date" class="form-control" @bind-Value="spendViewModel.Date" style="width: 200px" />
+        </div>
+        <div class="form-group">
+            <label for="Amount">Amount:</label>
+            <InputText id="Amount" class="form-control" @bind-Value="Amountformatted" Format="C2" Culture="pt-BR" @oninput="UpdateAmount" @onblur="FormatAndCalculate" readonly=@(spendViewModel.IdSpend != 0) style="width: 200px" />
+        </div>
+        <div class="form-group">
+            <label for="InstallmentPlan">Installment Plan:</label>
+            <InputNumber id="InstallmentPlan" class="form-control" @bind-Value="spendViewModel.InstallmentPlan" @oninput="UpdateInstallmentPlan" readonly=@(spendViewModel.IdSpend != 0) Min="1" Max="60" style="width: 100px" />
+        </div>
 
-    <div class="form-group">
-        <label for="InstallmentValue">Installment Value:</label>
-        <input id="InstallmentValue" class="form-control" Value="@FormattedInstallmentValue" readonly style="width: 200px" />
+        <div class="form-group">
+            <label for="InstallmentValue">Installment Value:</label>
+            <input id="InstallmentValue" class="form-control" Value="@FormattedInstallmentValue" readonly style="width: 200px" />
+        </div>
+
+        <!-- Creating the Installment Modal-->
+        <ModalInstallment @ref="modalInstallment" />
+    </RadzenCard>
+    <div class="col-md-12 d-flex align-items-end justify-content-start mt-4">
+        <RadzenButton ButtonType="ButtonType.Submit" Icon="save" Text="Save" class="me-3" />
+        <RadzenButton ButtonType="ButtonType.Button" Icon="" Text="Installment Plan" Click="@(() => ShowInstallmentPlan())" ButtonStyle="ButtonStyle.Secondary" />
     </div>
-
-    <hr />
-    <button type="submit" class="btn btn-primary">Save</button>
-
-    <!-- Botão para exibir o plano de parcelamento --> 
-    <button type="button" class="btn btn-danger" @onclick="() => ShowInstallmentPlan()">Installment Plan</button>
-
-    <!-- Creating the Installment Modal-->
-    <ModalInstallment @ref="modalInstallment" />
-
-</EditForm>
+</RadzenTemplateForm>
 
 @code {
 
     [Parameter]
-    public SpendDTO pSpend { get; set; }
+    public SpendViewModel pSpend { get; set; }
 
     [Parameter]
     public EventCallback OnValidSubmit { get; set; }
 
-    private List<CustomerDTO> _customers = new();
-    private List<CardDTO> _cards = new();
+    private List<CustomerViewModel> _customers = new();
+    private List<CustomerViewModel> allCustomers = new();
+
+    private List<CardViewModel> _cards = new();
+    private List<CardViewModel> allCards = new();
+
     private List<ModalInstallment.Installment> _installments = new();
 
-    // Model for SpendDTO
-    private SpendDTO spendModel = new SpendDTO();
+    private SpendViewModel spendViewModel = new SpendViewModel();
 
     // Calculate InstallmentValue
     private decimal Amount { get; set; }
@@ -102,8 +83,8 @@
     // InstallmentValue is now a calculated property based on spendModel
     public decimal InstallmentValue
     {
-        get => spendModel.InstallmentValue; // Get from model
-        set => spendModel.InstallmentValue = value; // Set to model
+        get => spendViewModel.InstallmentValue; // Get from model
+        set => spendViewModel.InstallmentValue = value; // Set to model
     }
 
     private int InstallmentPlan { get; set; } = 1;
@@ -111,82 +92,39 @@
     // Format InstallmentValue
     public string FormattedInstallmentValue
     {
-        get { return spendModel.InstallmentValue.ToString("C2", CultureInfo.GetCultureInfo("pt-BR")); } // Use CultureInfo for currency format
+        get { return spendViewModel.InstallmentValue.ToString("C2"); } // Use CultureInfo for currency format
         set { /* Not directly setting via string, conversion happens in CalculateInstallmentValue */ }
     }
 
-
     protected override async Task OnInitializedAsync()
     {
-
-        if (pSpend != null && pSpend.IdSpend != 0)
-        {
-            spendModel = pSpend;
-
-        }
-        else
-        {
-            // Se pSpend é nulo ou 0, um novo SpendDTO já foi criado pela linha 'private SpendDTO spendModel = new SpendDTO();'
-            // e seu construtor já definiu os valores padrão.
-            // Apenas para garantir que não haja referências nulas para Customer e Card caso não estejam no construtor de SpendDTO
-            if (spendModel.Customer == null) spendModel.Customer = new CustomerDTO();
-            if (spendModel.Card == null) spendModel.Card = new CardDTO();
-            if (spendModel.User == null) spendModel.User = new UserDTO(); // If UserDTO is used as well
-        }
-
         // Loading all Customers and Cards
-        var allCustomers = await HttpClient.GetFromJsonAsync<List<CustomerDTO>>("/api/Customer");
-        var allCards = await HttpClient.GetFromJsonAsync<List<CardDTO>>("/api/Card");
-
-        if (spendModel.IdSpend != 0)
-        {
-            // Edit mode: show all customers and cards (including inactive)
-            _customers = allCustomers;
-            _cards = allCards;
-        }
-        else
-        {
-            // New Spend: only show active customers and cards
-            _customers = allCustomers.Where(c => c.Active == 1).ToList();
-            _cards = allCards.Where(c => c.Active == 1).ToList();
-        }
-
-        // Inicializa Amountformatted e AmountNoFormat com base no spendModel.Amount
-        // Importante para o modo de edição, onde spendModel.Amount já pode ter um valor.
-        Amount = spendModel.Amount;
-        AmountNoFormat = spendModel.Amount.ToString(CultureInfo.InvariantCulture); // Use InvariantCulture for internal string representation
-        Amountformatted = spendModel.Amount.ToString("C2", CultureInfo.GetCultureInfo("pt-BR"));
-
-        // Garante que o InstallmentPlan do spendModel é usado
-        // InstallmentPlan = spendModel.InstallmentPlan; // This is redundant if InputNumber is bound to spendModel.InstallmentPlan directly
-        // InstallmentValue = spendModel.InstallmentValue; // This is also redundant if FormattedInstallmentValue uses spendModel.InstallmentValue directly
-
-        // Chame calculate para atualizar valores baseados no modelo inicial
-        CalculateInstallmentValue();
+        allCustomers = await HttpClient.GetFromJsonAsync<List<CustomerViewModel>>("/api/Customer");
+        allCards = await HttpClient.GetFromJsonAsync<List<CardViewModel>>("/api/Card");
     }
 
     private void CalculateInstallmentValue()
     {
-        // Garanta que você está usando as propriedades do spendModel
+        // Garanta que você está usando as propriedades do spendViewModel
         if (decimal.TryParse(AmountNoFormat, out decimal parsedAmount))
         {
-            spendModel.Amount = parsedAmount; // Atualiza o Amount no modelo
+            spendViewModel.Amount = parsedAmount; // Atualiza o Amount no modelo
 
             // Calcular o InstallmentValue baseado no Amount e InstallmentPlan do modelo
-            if (spendModel.InstallmentPlan > 0) // Evitar divisão por zero
+            if (spendViewModel.InstallmentPlan > 0) // Evitar divisão por zero
             {
-                spendModel.InstallmentValue = spendModel.Amount / spendModel.InstallmentPlan;
+                spendViewModel.InstallmentValue = spendViewModel.Amount / spendViewModel.InstallmentPlan;
             }
             else
             {
-                spendModel.InstallmentValue = spendModel.Amount; // Se plano for 0 ou inválido, valor da parcela é o total
+                spendViewModel.InstallmentValue = spendViewModel.Amount; // Se plano for 0 ou inválido, valor da parcela é o total
             }
         }
         else
         {
             // Lide com casos onde AmountNoFormat não pode ser convertido para decimal
-            spendModel.Amount = 0;
-            spendModel.InstallmentValue = 0;
+            spendViewModel.Amount = 0;
+            spendViewModel.InstallmentValue = 0;
         }
     }
 
@@ -201,12 +139,12 @@
     {
         if (e.Value != null && int.TryParse(e.Value.ToString(), out int parsedInstallmentPlan) && parsedInstallmentPlan > 0)
         {
-            spendModel.InstallmentPlan = parsedInstallmentPlan; // Atualiza o InstallmentPlan no modelo
+            spendViewModel.InstallmentPlan = parsedInstallmentPlan; // Atualiza o InstallmentPlan no modelo
             CalculateInstallmentValue();
         }
         else
         {
-            spendModel.InstallmentPlan = 1; // Padrão se entrada inválida ou vazia
+            spendViewModel.InstallmentPlan = 1; // Padrão se entrada inválida ou vazia
             CalculateInstallmentValue();
         }
     }
@@ -216,11 +154,11 @@
         // Formata o valor quando o foco sai do campo
         if (decimal.TryParse(AmountNoFormat, out decimal parsedAmount))
         {
-            Amountformatted = parsedAmount.ToString("C2", CultureInfo.GetCultureInfo("pt-BR"));
+            Amountformatted = parsedAmount.ToString("C2");
         }
         else
         {
-            Amountformatted = (0M).ToString("C2", CultureInfo.GetCultureInfo("pt-BR")); // Se for inválido, mostra 0 formatado
+            Amountformatted = (0M).ToString("C2"); // Se for inválido, mostra 0 formatado
         }
         CalculateInstallmentValue();
     }
@@ -228,19 +166,34 @@
     private void HandleValidSubmit()
     {
         // Pass the event upwards to the parent component
-        OnValidSubmit.InvokeAsync(spendModel);
+        OnValidSubmit.InvokeAsync(spendViewModel);
     }
 
     protected override void OnParametersSet()
     {
-        if (pSpend != null)
+        spendViewModel = pSpend ?? new SpendViewModel();
+
+        if (spendViewModel.IdSpend != 0)
         {
-            spendModel = pSpend;
+            // Edit mode: show all customers and cards (including inactive)
+            _customers = allCustomers;
+            _cards = allCards;
         }
         else
         {
-            spendModel = new SpendDTO();
+            // New Spend: only show active customers and cards
+            _customers = allCustomers.Where(c => c.Active == 1).ToList();
+            _cards = allCards.Where(c => c.Active == 1).ToList();
         }
+
+        // Inicializa Amountformatted e AmountNoFormat com base no spendViewModel.Amount
+        // Importante para o modo de edição, onde spendViewModel.Amount já pode ter um valor.
+        Amount = spendViewModel.Amount;
+        AmountNoFormat = spendViewModel.Amount.ToString(CultureInfo.InvariantCulture); // Use InvariantCulture for internal string representation
+        Amountformatted = spendViewModel.Amount.ToString("C2");
+
+        // Chame calculate para atualizar valores baseados no modelo inicial
+        CalculateInstallmentValue();
     }
 
     /* Installment Plan */
@@ -250,8 +203,8 @@
     // Função para exibir o plano de parcelamento
     private void ShowInstallmentPlan()
     {
-        if (spendModel != null)
-            modalInstallment.ShowInstallmentPlan(spendModel);
+        if (spendViewModel != null)
+            modalInstallment.ShowInstallmentPlan(spendViewModel);
         else
             throw new InvalidOperationException("Cannot show installment plan without a valid SpendDTO.");
     }

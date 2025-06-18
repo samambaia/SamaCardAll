@@ -10,8 +10,8 @@
         <div class="form-group">
             <label for="Expenses">Expenses:</label>
             <InputText id="Expenses" class="form-control" @bind-Value="spendViewModel.Expenses" />
-            <RadzenRequiredValidator Component="Expenses" Text="Expenses is required." />
-        </div>
+@*             <RadzenRequiredValidator For="@(() => spendViewModel.Expenses)" Text="Expenses is required." />
+ *@        </div>
         <div class="form-group">
             <label for="IdCustomer">Customer:</label>
             <InputSelect id="IdCustomer" class="form-select" @bind-Value="spendViewModel.Customer.IdCustomer" style="width: 300px">
@@ -20,7 +20,8 @@
                     <option value="@customer.IdCustomer">@customer.CustomerName</option>
                 }
             </InputSelect>
-        </div>
+@*             <RadzenRequiredValidator For="@(() => spendViewModel.CustomerIdCustomer)" Text="Customer is required." />
+ *@        </div>
         <div class="form-group">
             <label for="Bank">Card:</label>
             <InputSelect id="Bank" class="form-select" @bind-Value="spendViewModel.Card.IdCard" style="width: 300px">
@@ -29,7 +30,8 @@
                     <option value="@card.IdCard">@card.Bank</option>
                 }
             </InputSelect>
-        </div>
+@*             <RadzenRequiredValidator For="@(() => spendViewModel.CardIdCard)" Text="Card is required." />
+ *@        </div>
         <div class="form-group">
             <label for="Date">Date Purchase:</label>
             <InputDate id="Date" class="form-control" @bind-Value="spendViewModel.Date" style="width: 200px" />
@@ -37,7 +39,8 @@
         <div class="form-group">
             <label for="Amount">Amount:</label>
             <InputText id="Amount" class="form-control" @bind-Value="Amountformatted" Format="C2" Culture="pt-BR" @oninput="UpdateAmount" @onblur="FormatAndCalculate" readonly=@(spendViewModel.IdSpend != 0) style="width: 200px" />
-        </div>
+@*             <RadzenRequiredValidator For="@(() => spendViewModel.Amount)" Text="Amount is required." />
+ *@        </div>
         <div class="form-group">
             <label for="InstallmentPlan">Installment Plan:</label>
             <InputNumber id="InstallmentPlan" class="form-control" @bind-Value="spendViewModel.InstallmentPlan" @oninput="UpdateInstallmentPlan" readonly=@(spendViewModel.IdSpend != 0) Min="1" Max="60" style="width: 100px" />
@@ -92,8 +95,8 @@
     // Format InstallmentValue
     public string FormattedInstallmentValue
     {
-        get { return spendViewModel.InstallmentValue.ToString("C2"); } // Use CultureInfo for currency format
-        set { /* Not directly setting via string, conversion happens in CalculateInstallmentValue */ }
+        get { return spendViewModel.InstallmentValue.ToString("C2"); }
+        set { }
     }
 
     protected override async Task OnInitializedAsync()

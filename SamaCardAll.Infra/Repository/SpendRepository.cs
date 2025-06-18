@@ -3,11 +3,6 @@ using SamaCardAll.Core.Interfaces;
 using SamaCardAll.Core.VO;
 using SamaCardAll.Infra.Mapping;
 using SamaCardAll.Infra.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SamaCardAll.Infra.Repository
 {

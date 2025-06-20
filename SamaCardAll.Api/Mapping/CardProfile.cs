@@ -1,12 +1,14 @@
 ﻿using AutoMapper;
+using SamaCardAll.Core.Models;
+using SamaCardAll.Shared.Contracts.ViewModels;
 
-namespace FrontWeb.Mapping
+namespace SamaCardAll.Api.Mapping
 {
     public class CardProfile : Profile
     {
         public CardProfile()
         {
-            CreateMap<DTO.CardDTO, ViewModels.CardViewModel>()
+            CreateMap<CardViewModel, Card>()
                 .ReverseMap();
         }
     }

@@ -1,6 +1,6 @@
-﻿namespace FrontWeb.DTO
+﻿namespace SamaCardAll.Shared.Contracts.ViewModels
 {
-    public class CustomerDTO
+    public class CustomerViewModel
     {
         public int IdCustomer { get; set; }
         public string CustomerName { get; set; }

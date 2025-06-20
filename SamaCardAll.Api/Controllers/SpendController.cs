@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using SamaCardAll.Core.Interfaces;
-using SamaCardAll.Core.VO;
+using SamaCardAll.Core.Models;
+using SamaCardAll.Shared.Contracts.ViewModels;
 
 namespace SamaCardAll.Api.Controllers
 {
@@ -9,10 +11,12 @@ namespace SamaCardAll.Api.Controllers
     public class SpendController : ControllerBase
     {
         private readonly ISpendService _spendService;
+        private readonly IMapper _mapper;
 
-        public SpendController(ISpendService spendService)
+        public SpendController(ISpendService spendService, IMapper mapper)
         {
             _spendService = spendService;
+            _mapper = mapper;
         }
 
         [HttpGet]
@@ -30,15 +34,17 @@ namespace SamaCardAll.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(SpendVO spend)
+        public async Task<IActionResult> Create(SpendViewModel spendVM)
         {
+            var spendModel = _mapper.Map<Spend>(spendVM);
+
             if (ModelState.IsValid)
             {
                 try
                 {
-                    await _spendService.CreateAsync(spend);
-                    int spendId = spend.IdSpend;
-                    return CreatedAtAction(nameof(GetById), new { id = spend.IdSpend }, spend);
+                    await _spendService.CreateAsync(spendModel);
+                    int spendId = spendModel.IdSpend;
+                    return CreatedAtAction(nameof(GetById), new { id = spendModel.IdSpend }, spendModel);
                 }
                 catch (Exception ex)
                 {
@@ -49,14 +55,16 @@ namespace SamaCardAll.Api.Controllers
         }
 
         [HttpPut]
-        public async Task<IActionResult> Update([FromBody] SpendVO spend)
+        public async Task<IActionResult> Update([FromBody] SpendViewModel spendVM)
         {
+            var spendModel = _mapper.Map<Spend>(spendVM);
+
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
             try
             {
-                await _spendService.UpdateAsync(spend);
+                await _spendService.UpdateAsync(spendModel);
                 return NoContent();
             }
             catch (Exception ex)

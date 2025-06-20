@@ -1,5 +1,5 @@
 ﻿using SamaCardAll.Core.Interfaces;
-using SamaCardAll.Core.VO;
+using SamaCardAll.Shared.Contracts.Report;
 
 namespace SamaCardAll.Core.Services
 {
@@ -18,7 +18,7 @@ namespace SamaCardAll.Core.Services
             return monthYears.OrderBy(my => my.ToMonthYearInt()).ToList();
         }
 
-        public async Task<List<InvoiceVO>> GetFilteredInstallments(int? customerId, string monthYear)
+        public async Task<List<InvoiceDTO>> GetFilteredInstallments(int? customerId, string monthYear)
         {
             string decodedMonthYear = monthYear.DecodeMonthYear();
 
@@ -26,7 +26,7 @@ namespace SamaCardAll.Core.Services
             return [.. installments.OrderBy(i => i.Installment).ThenBy(i => i.Installment)];
         }
 
-        public async Task<List<InvoiceVO>> GetTotalCustomerPerMonth(string monthYear)
+        public async Task<List<InvoiceDTO>> GetTotalCustomerPerMonth(string monthYear)
         {
             string decodedMonthYear = monthYear.DecodeMonthYear();
 
@@ -34,7 +34,7 @@ namespace SamaCardAll.Core.Services
             return [.. invoices.OrderBy(i => i.CustomerName).ThenBy(i => i.MonthYear)];
         }
 
-        public async Task<List<TotalCardMonthYearVO>> GetTotalCardMonthYear(string monthYear)
+        public async Task<List<TotalCardMonthYearDTO>> GetTotalCardMonthYear(string monthYear)
         {
             string decodedMonthYear = monthYear.DecodeMonthYear();
 
@@ -50,7 +50,7 @@ namespace SamaCardAll.Core.Services
             return [.. spends.OrderBy(s => s)];
         }
 
-        public async Task<List<DetailedCardVO>> DetailedCard(int? cardId, string? monthYear)
+        public async Task<List<DetailedCardDTO>> DetailedCard(int? cardId, string? monthYear)
         {
             string decodedMonthYear = monthYear?.DecodeMonthYear() ?? string.Empty;
 

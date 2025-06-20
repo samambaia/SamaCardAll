@@ -1,5 +1,5 @@
-﻿using SamaCardAll.Core.VO;
-using SamaCardAll.Core.Interfaces;
+﻿using SamaCardAll.Core.Interfaces;
+using SamaCardAll.Core.Models;
 
 namespace SamaCardAll.Core.Services
 {
@@ -12,7 +12,7 @@ namespace SamaCardAll.Core.Services
             cardRepository = repository;
         }
 
-        public async Task CreateAsync(CardVO card)
+        public async Task CreateAsync(Card card)
         {
             await cardRepository.CreateAsync(card);
         }
@@ -22,22 +22,22 @@ namespace SamaCardAll.Core.Services
             return await cardRepository.DeleteAsync(id);
         }
 
-        public async Task<List<CardVO>> GetActiveCardsAsync()
+        public async Task<List<Card>> GetActiveCardsAsync()
         {
             return await cardRepository.GetActiveCardsAsync();
         }
 
-        public async Task<CardVO> GetByIdAsync(int id)
+        public async Task<Card> GetByIdAsync(int id)
         {
             return await cardRepository.GetByIdAsync(id);
         }
 
-        public async Task<List<CardVO>> GetCardsAsync()
+        public async Task<List<Card>> GetCardsAsync()
         {
             return await cardRepository.GetCardsAsync();
         }
 
-        public async Task<bool> UpdateAsync(CardVO card)
+        public async Task<bool> UpdateAsync(Card card)
         {
             return await cardRepository.UpdateAsync(card);
         }

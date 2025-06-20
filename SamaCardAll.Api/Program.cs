@@ -2,7 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using SamaCardAll.Core.Interfaces;
 using SamaCardAll.Core.Services;
-using SamaCardAll.Infra;
 using SamaCardAll.Infra.Repository;
 
 namespace SamaCardAll
@@ -18,8 +17,8 @@ namespace SamaCardAll
             builder.Logging.SetMinimumLevel(LogLevel.Information);
             builder.Logging.AddConsole();
 
-            builder.Services.AddDbContext<AppDbContext>(options =>
-                options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+            //builder.Services.AddDbContext<AppDbContext>(options =>
+            //    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             var constr = builder.Configuration.GetConnectionString("DefaultConnection");
 

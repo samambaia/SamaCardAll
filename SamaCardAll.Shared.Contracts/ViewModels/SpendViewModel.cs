@@ -1,4 +1,4 @@
-﻿namespace FrontWeb.ViewModels
+﻿namespace SamaCardAll.Shared.Contracts.ViewModels
 {
     public class SpendViewModel
     {

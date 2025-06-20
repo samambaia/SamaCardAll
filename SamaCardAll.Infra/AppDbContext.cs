@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using SamaCardAll.Infra.Models;
+using SamaCardAll.Core.Models;
 
 namespace SamaCardAll.Infra
 {

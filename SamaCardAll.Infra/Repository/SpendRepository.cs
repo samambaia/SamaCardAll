@@ -1,8 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SamaCardAll.Core.Interfaces;
-using SamaCardAll.Core.VO;
-using SamaCardAll.Infra.Mapping;
-using SamaCardAll.Infra.Models;
+using SamaCardAll.Core.Models;
 
 namespace SamaCardAll.Infra.Repository
 {
@@ -10,7 +8,6 @@ namespace SamaCardAll.Infra.Repository
     {
         private readonly AppDbContext _context;
         private readonly List<Installments> installmentsExist;
-        private readonly List<Installments> installments = new();
 
         public SpendRepository(AppDbContext context)
         {
@@ -19,10 +16,10 @@ namespace SamaCardAll.Infra.Repository
             var q = _context.Installments
                 .Include(s => s.Spend);
 
-            installmentsExist = q.ToList();
+            installmentsExist = [..q];
         }
 
-        public async Task CreateAsync(SpendVO spend)
+        public async Task CreateAsync(Spend spend)
         {
             // Define de ID
             int newIdSpend = await _context.Spends.AnyAsync() ? await _context.Spends.MaxAsync(s => s.IdSpend) + 1 : 1;
@@ -31,11 +28,11 @@ namespace SamaCardAll.Infra.Repository
             var installmentList = GenerateInstallmentPlan(newIdSpend, spend.InstallmentPlan, spend.InstallmentValue, spend.Date);
 
             // Add a new expense
-            _context.Add(spend);
+            _context.Spends.Add(spend);
             // Add Installment List
-            _context.Installments.AddRange(installmentList);
+            _context.Installments.AddRange(installmentList); // Fix: Ensure installmentList is a List<Installments>, which matches the expected type.
 
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
         public async Task<bool> DeleteAsync(int id)
@@ -48,13 +45,12 @@ namespace SamaCardAll.Infra.Repository
             return true;
         }
 
-        public async Task<SpendVO> GetByIdAsync(int id)
+        public async Task<Spend> GetByIdAsync(int id)
         {
-            var getSpend = await _context.Spends.FindAsync(id);
-            return getSpend.ToVO();
+            return await _context.Spends.FindAsync(id);
         }
 
-        public async Task<List<SpendVO>> GetSpendsAsync()
+        public async Task<List<Spend>> GetSpendsAsync()
         {
             var getSpends = await _context.Spends
                                           .Include(s => s.Customer)
@@ -62,11 +58,10 @@ namespace SamaCardAll.Infra.Repository
                                           .Include(s => s.User)
                                           .ToListAsync();
 
-            return [.. getSpends.Select(s => s.ToVO())];
-
+            return [.. getSpends.Select(s => s)];
         }
 
-        public async Task<bool> UpdateAsync(SpendVO spend)
+        public async Task<bool> UpdateAsync(Spend spend)
         {
             var getSpend = await _context.Spends.FindAsync(spend.IdSpend);
 
@@ -99,6 +94,8 @@ namespace SamaCardAll.Infra.Repository
 
         private List<Installments> GenerateInstallmentPlan(int spendId, int installmentPlan, decimal installmentValue, DateTime purchaseDate)
         {
+            var installmentsLocal = new List<Installments>();
+
             string installmentDisplay = string.Empty;
 
             int maxId = 1;
@@ -114,19 +111,19 @@ namespace SamaCardAll.Infra.Repository
             decimal amount = 0;
             DateTime dueDate;
 
-            // Add installments to the intallment plan
+            // Add installments to the installment plan
             for (int i = 1; i <= installmentPlan; i++)
             {
-                // Calcular o valor da parcela
+                // Calculate the value of the installment
                 amount = installmentValue;
 
-                // Calcular a data da parcela
+                // Calculate the due date of the installment
                 dueDate = purchaseDate.AddMonths(i * monthsInterval);
                 string monthYear = dueDate.ToString("MM/yyyy");
 
                 installmentDisplay = i.ToString("00") + "/" + installmentPlan.ToString("00");
 
-                // Create a instance of Installment to Add the new
+                // Create an instance of Installment to add the new installment
                 Installments installment = new()
                 {
                     SpendIdSpend = spendId,
@@ -135,13 +132,12 @@ namespace SamaCardAll.Infra.Repository
                     Active = 1,
                     Installment = installmentDisplay
                 };
-                installments.Add(installment);
+                installmentsLocal.Add(installment);
 
                 Console.WriteLine("Installment:" + installmentDisplay);
             }
 
-            return installments;
+            return installmentsLocal;
         }
-
     }
 }

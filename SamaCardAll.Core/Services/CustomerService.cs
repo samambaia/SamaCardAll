@@ -1,6 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
-using SamaCardAll.Core.Interfaces;
-using SamaCardAll.Core.VO;
+﻿using SamaCardAll.Core.Interfaces;
+using SamaCardAll.Core.Models;
 
 namespace SamaCardAll.Core.Services
 {
@@ -13,22 +12,22 @@ namespace SamaCardAll.Core.Services
             customerRepository = repository;
         }
 
-        public async Task<List<CustomerVO>> GetCustomersAsync()
+        public async Task<List<Customer>> GetCustomersAsync()
         {
             return await customerRepository.GetCustomersAsync();
         }
 
-        public async Task<CustomerVO> GetByIdAsync(int id)
+        public async Task<Customer> GetByIdAsync(int id)
         {
             return await customerRepository.GetByIdAsync(id);
         }
 
-        public async Task CreateAsync(CustomerVO customer)
+        public async Task CreateAsync(Customer customer)
         {
             await customerRepository.CreateAsync(customer);
         }
 
-        public async Task<bool> UpdateAsync(CustomerVO customer)
+        public async Task<bool> UpdateAsync(Customer customer)
         {
             return await customerRepository.UpdateAsync(customer);
         }

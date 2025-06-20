@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace SamaCardAll.Infra.Models
+namespace SamaCardAll.Core.Models
 {
     public class Installments
     {

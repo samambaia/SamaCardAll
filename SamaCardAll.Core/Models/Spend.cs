@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace SamaCardAll.Infra.Models;
+namespace SamaCardAll.Core.Models;
 
 public class Spend
 {

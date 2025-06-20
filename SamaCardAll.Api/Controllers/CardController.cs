@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SamaCardAll.Core.Interfaces;
-using SamaCardAll.Core.VO;
+using SamaCardAll.Core.Models;
+using SamaCardAll.Shared.Contracts.ViewModels;
 
 namespace SamaCardAll.Api.Controllers
 {
@@ -10,10 +12,12 @@ namespace SamaCardAll.Api.Controllers
     public class CardController : ControllerBase
     {
         private readonly ICardService _cardService;
+        private readonly IMapper _mapper;
 
-        public CardController(ICardService cardService)
+        public CardController(ICardService cardService,IMapper mapper)
         {
             _cardService = cardService;
+            _mapper = mapper;
         }
 
         [HttpGet]
@@ -56,14 +60,16 @@ namespace SamaCardAll.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(CardVO card)
+        public async Task<IActionResult> Create(CardViewModel cardVM)
         {
+            var cardModel = _mapper.Map<Card>(cardVM);
+
             if (ModelState.IsValid)
             {
                 try
                 {
-                    await _cardService.CreateAsync(card);
-                    return CreatedAtAction(nameof(GetById), new { id = card.IdCard }, card);
+                    await _cardService.CreateAsync(cardModel);
+                    return CreatedAtAction(nameof(GetById), new { id = cardModel.IdCard }, cardModel);
                 }
                 catch (Exception ex)
                 {
@@ -74,9 +80,11 @@ namespace SamaCardAll.Api.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, CardVO card)
+        public async Task<IActionResult> Update(int id, CardViewModel cardVM)
         {
-            if (id != card.IdCard)
+            var cardModel = _mapper.Map<Card>(cardVM);
+
+            if (id != cardModel.IdCard)
             {
                 return BadRequest("ID mismatch");
             }
@@ -85,7 +93,7 @@ namespace SamaCardAll.Api.Controllers
             {
                 try
                 {
-                    await _cardService.UpdateAsync(card);
+                    await _cardService.UpdateAsync(cardModel);
                     return NoContent();
                 }
                 catch (Exception ex)

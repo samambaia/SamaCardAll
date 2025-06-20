@@ -1,5 +1,5 @@
 ﻿using SamaCardAll.Core.Interfaces;
-using SamaCardAll.Core.VO;
+using SamaCardAll.Core.Models;
 
 namespace SamaCardAll.Core.Services
 {
@@ -12,23 +12,23 @@ namespace SamaCardAll.Core.Services
             spendRepository = repository;
         }
 
-        public async Task<List<SpendVO>> GetSpendsAsync()
+        public async Task<List<Spend>> GetSpendsAsync()
         {
             var result = await spendRepository.GetSpendsAsync();
             return result;
         }
 
-        public async Task<SpendVO> GetByIdAsync(int id)
+        public async Task<Spend> GetByIdAsync(int id)
         {
             return await spendRepository.GetByIdAsync(id);
         }
 
-        public async Task CreateAsync(SpendVO spend)
+        public async Task CreateAsync(Spend spend)
         {
             await spendRepository.CreateAsync(spend);
         }
 
-        public async Task<bool> UpdateAsync(SpendVO spend)
+        public async Task<bool> UpdateAsync(Spend spend)
         {
             return await spendRepository.UpdateAsync(spend);
         }

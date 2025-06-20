@@ -1,8 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SamaCardAll.Core.Interfaces;
-using SamaCardAll.Core.VO;
-using SamaCardAll.Infra.Mapping;
-using SamaCardAll.Infra.Models;
+using SamaCardAll.Core.Models;
 
 namespace SamaCardAll.Infra.Repository
 {
@@ -10,16 +8,16 @@ namespace SamaCardAll.Infra.Repository
     {
         private readonly AppDbContext _context = context ?? throw new ArgumentNullException(nameof(context));
 
-        public async Task CreateAsync(CardVO cardVO)
+        public async Task CreateAsync(Card cardModel)
         {
             var card = new Card
             {
                 IdCard = await _context.Cards.MaxAsync(s => s.IdCard) + 1,
-                Bank = cardVO.Bank,
-                Number = cardVO.Number,
-                Expiration = cardVO.Expiration,
-                Brand = cardVO.Brand,
-                Active = cardVO.Active
+                Bank = cardModel.Bank,
+                Number = cardModel.Number,
+                Expiration = cardModel.Expiration,
+                Brand = cardModel.Brand,
+                Active = cardModel.Active
             };
             await _context.AddAsync(card);
             await _context.SaveChangesAsync();
@@ -37,28 +35,36 @@ namespace SamaCardAll.Infra.Repository
             return true;
         }
 
-        public async Task<List<CardVO>> GetActiveCardsAsync()
+        public async Task<List<Card>> GetActiveCardsAsync()
         {
             var activeCards = await _context.Cards.Where(c => c.Active == 1).ToListAsync();
 
-            return activeCards.Select(c => new CardVO(IdCard: c.IdCard, Bank: c.Bank, Number: c.Number, Expiration: c.Expiration, Brand: c.Brand, Active: c.Active)).ToList();
+            return activeCards.Select(c => new Card
+            {
+                IdCard = c.IdCard,
+                Bank = c.Bank,
+                Number = c.Number,
+                Expiration = c.Expiration,
+                Brand = c.Brand,
+                Active = c.Active
+            };
         }
 
-        public async Task<CardVO> GetByIdAsync(int id)
+        public async Task<Card> GetByIdAsync(int id)
         {
             var getCard = await _context.Cards.FindAsync(id);
             return getCard.ToVO();
 
         }
 
-        public async Task<List<CardVO>> GetCardsAsync()
+        public async Task<List<Card>> GetCardsAsync()
         {
             var getCards = await _context.Cards.ToListAsync();
 
             return [.. getCards.Select(c => c.ToVO())];
         }
 
-        public async Task<bool> UpdateAsync(CardVO card)
+        public async Task<bool> UpdateAsync(Card card)
         {
             var existingCard = await _context.Cards.FindAsync(card.IdCard);
 

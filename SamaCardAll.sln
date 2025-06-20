@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SamaCardAll.Infra", "SamaCa
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FrontWeb", "FrontWeb\FrontWeb.csproj", "{50F2008D-45A1-4B48-8839-FF0701A2F8D0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SamaCardAll.Shared.Contracts", "SamaCardAll.Shared.Contracts\SamaCardAll.Shared.Contracts.csproj", "{08E8BCDC-37D0-46E6-BA8D-46DA9D23DC96}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{50F2008D-45A1-4B48-8839-FF0701A2F8D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{50F2008D-45A1-4B48-8839-FF0701A2F8D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{50F2008D-45A1-4B48-8839-FF0701A2F8D0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{08E8BCDC-37D0-46E6-BA8D-46DA9D23DC96}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{08E8BCDC-37D0-46E6-BA8D-46DA9D23DC96}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{08E8BCDC-37D0-46E6-BA8D-46DA9D23DC96}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{08E8BCDC-37D0-46E6-BA8D-46DA9D23DC96}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

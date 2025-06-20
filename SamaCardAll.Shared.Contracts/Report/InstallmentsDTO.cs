@@ -1,6 +1,6 @@
-﻿namespace SamaCardAll.Core.VO
+﻿namespace SamaCardAll.Shared.Contracts.Report
 {
-    public record InstallmentsVO(
+    public record InstallmentsDTO(
         int IdInstallment,
         int IdCard,
         string MonthYear,

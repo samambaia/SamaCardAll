@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using SamaCardAll.Core.VO;
+using SamaCardAll.Shared.Contracts.Report;
 using SamaCardAll.Core.Interfaces;
 
 namespace SamaCardAll.Api.Controllers
@@ -22,7 +22,7 @@ namespace SamaCardAll.Api.Controllers
          */
 
         [HttpGet("{customerId}/{monthYear}")]
-        public async Task<ActionResult<List<InvoiceVO>>> GetInstallments(int? customerId, string? monthYear)
+        public async Task<ActionResult<List<InvoiceDTO>>> GetInstallments(int? customerId, string? monthYear)
         {
             try
             {
@@ -79,7 +79,7 @@ namespace SamaCardAll.Api.Controllers
         }
 
         [HttpGet("customer/{monthYear}", Name = "TotalCustomerPerMonth")]
-        public async Task<ActionResult<List<InvoiceVO>>> GetTotalCustomerPerMonth(string monthYear)
+        public async Task<ActionResult<List<InvoiceDTO>>> GetTotalCustomerPerMonth(string monthYear)
         {
             try
             {
@@ -93,7 +93,7 @@ namespace SamaCardAll.Api.Controllers
         }
 
         [HttpGet("card/{monthYear}", Name = "TotalCardPerMonth")]
-        public async Task<ActionResult<List<TotalCardMonthYearVO>>> GetTotalCardPerMonth(string monthYear)
+        public async Task<ActionResult<List<TotalCardMonthYearDTO>>> GetTotalCardPerMonth(string monthYear)
         {
             try
             {

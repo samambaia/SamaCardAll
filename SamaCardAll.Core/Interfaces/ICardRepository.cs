@@ -1,14 +1,14 @@
-﻿using SamaCardAll.Core.VO;
+﻿using SamaCardAll.Core.Models;
 
 namespace SamaCardAll.Core.Interfaces
 {
     public interface ICardRepository
     {
-        Task<List<CardVO>> GetCardsAsync();
-        Task<List<CardVO>> GetActiveCardsAsync();
-        Task<CardVO> GetByIdAsync(int id);
-        Task CreateAsync(CardVO card);
-        Task<bool> UpdateAsync(CardVO card);
+        Task<List<Card>> GetCardsAsync();
+        Task<List<Card>> GetActiveCardsAsync();
+        Task<Card> GetByIdAsync(int id);
+        Task CreateAsync(Card card);
+        Task<bool> UpdateAsync(Card card);
         Task<bool> DeleteAsync(int id);
     }
 }

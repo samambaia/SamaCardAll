@@ -1,8 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SamaCardAll.Core.Interfaces;
-using SamaCardAll.Core.VO;
-using SamaCardAll.Infra.Mapping;
-using SamaCardAll.Infra.Models;
+using SamaCardAll.Core.Models;
 
 namespace SamaCardAll.Infra.Repository
 {
@@ -15,14 +13,8 @@ namespace SamaCardAll.Infra.Repository
             _context = context;
         }
 
-        public async Task CreateAsync(CustomerVO customerVO)
+        public async Task CreateAsync(Customer customer)
         {
-            var customer = new Customer
-            {
-                CustomerName = customerVO.CustomerName,
-                Active = customerVO.Active
-            };
-
             await _context.AddAsync(customer);
             await _context.SaveChangesAsync();
         }
@@ -38,24 +30,19 @@ namespace SamaCardAll.Infra.Repository
             return false;
         }
 
-        public async Task<CustomerVO> GetByIdAsync(int id)
+        public async Task<Customer> GetByIdAsync(int id)
         {
-            var customer = await _context.Customers
-                .Where(c => c.IdCustomer == id)
-                .Select(c => c.ToVO())
-                .FirstOrDefaultAsync();
-
-            return customer;
+            return await _context.Customers.FindAsync(id);
         }
 
-        public async Task<List<CustomerVO>> GetCustomersAsync()
+        public async Task<List<Customer>> GetCustomersAsync()
         {
             var customers = await _context.Customers.ToListAsync();
 
-            return [.. customers.Select(c => c.ToVO())];
+            return [.. customers.Select(c => c)];
         }
 
-        public async Task<bool> UpdateAsync(CustomerVO customer)
+        public async Task<bool> UpdateAsync(Customer customer)
         {
             var existingCustomer = await _context.Customers.FindAsync(customer.IdCustomer);
 

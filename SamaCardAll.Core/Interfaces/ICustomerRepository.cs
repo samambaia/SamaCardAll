@@ -1,13 +1,13 @@
-﻿using SamaCardAll.Core.VO;
+﻿using SamaCardAll.Core.Models;
 
 namespace SamaCardAll.Core.Interfaces
 {
     public interface ICustomerRepository
     {
-        Task<List<CustomerVO>> GetCustomersAsync();
-        Task<CustomerVO> GetByIdAsync(int id);
-        Task CreateAsync(CustomerVO customer);
-        Task<bool> UpdateAsync(CustomerVO customer);
+        Task<List<Customer>> GetCustomersAsync();
+        Task<Customer> GetByIdAsync(int id);
+        Task CreateAsync(Customer customer);
+        Task<bool> UpdateAsync(Customer customer);
         Task<bool> DeleteAsync(int id);
     }
 }

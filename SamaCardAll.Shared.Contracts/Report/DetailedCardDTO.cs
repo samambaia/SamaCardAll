@@ -1,6 +1,6 @@
-﻿namespace SamaCardAll.Core.VO
+﻿namespace SamaCardAll.Shared.Contracts.Report
 {
-    public record DetailedCardVO
+    public record DetailedCardDTO
     {
         public int IdCard { get; init; }
         public string CardName { get; init; }
@@ -9,7 +9,7 @@
         public decimal InstallmentAmount { get; init; }
         public string MonthYear { get; init; }
         public string Installment { get; init; }
-        public DetailedCardVO(int idCard, string cardName, string descriptionSpend, string customerName, decimal installmentAmount, string monthYear, string installment)
+        public DetailedCardDTO(int idCard, string cardName, string descriptionSpend, string customerName, decimal installmentAmount, string monthYear, string installment)
         {
             IdCard = idCard;
             CardName = cardName;

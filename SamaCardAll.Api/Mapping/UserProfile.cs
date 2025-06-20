@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using SamaCardAll.Core.Models;
+using SamaCardAll.Shared.Contracts.ViewModels;
 
 namespace FrontWeb.Mapping
 {
@@ -6,7 +8,7 @@ namespace FrontWeb.Mapping
     {
         public UserProfile()
         {
-            CreateMap<DTO.UserDTO, ViewModels.UserViewModel>()
+            CreateMap<UserViewModel, User>()
                 .ReverseMap();
         }
     }

@@ -1,6 +1,6 @@
-﻿namespace FrontWeb.DTO
+﻿namespace SamaCardAll.Shared.Contracts.ViewModels
 {
-    public class CardDTO
+    public class CardViewModel
     {
         public int IdCard { get; set; }
         public string? Bank { get; set; }
@@ -8,5 +8,6 @@
         public string? Expiration { get; set; }
         public string? Brand { get; set; }
         public short Active { get; set; }
+
     }
 }

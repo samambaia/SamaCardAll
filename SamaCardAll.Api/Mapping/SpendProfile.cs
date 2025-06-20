@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
-using FrontWeb.DTO;
-using FrontWeb.ViewModels;
+using SamaCardAll.Core.Models;
+using SamaCardAll.Shared.Contracts.ViewModels;
 
 namespace FrontWeb.Mapping
 {
@@ -8,16 +8,15 @@ namespace FrontWeb.Mapping
     {
         public SpendProfile()
         {
-            CreateMap<SpendDTO, SpendViewModel>()
+            CreateMap<Spend, SpendViewModel>()
                 .ReverseMap();
 
-            CreateMap<CustomerDTO, CustomerViewModel>()
+            CreateMap<Customer, CustomerViewModel>()
                 .ReverseMap();
-            CreateMap<CardDTO, CardViewModel>()
+            CreateMap<Card, CardViewModel>()
                 .ReverseMap();
-            CreateMap<UserDTO, UserViewModel>()
+            CreateMap<User, UserViewModel>()
                 .ReverseMap();
-
         }
     }
 }

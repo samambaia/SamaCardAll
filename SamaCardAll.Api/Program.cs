@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using SamaCardAll.Api.Mapping;
 using SamaCardAll.Core.Interfaces;
 using SamaCardAll.Core.Services;
 using SamaCardAll.Infra;
@@ -91,8 +90,9 @@ namespace SamaCardAll
             // Maps controllers to the request pipeline
             app.MapControllers(); 
             
-            app.MapGet("/", () => "API is Running...");
-            
+            app.MapGet("/", () => "API is Running...")
+                .ExcludeFromDescription(); // Exclude from Swagger documentation
+
             app.Run();
         }
     }

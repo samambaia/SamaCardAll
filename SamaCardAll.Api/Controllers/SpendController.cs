@@ -67,13 +67,18 @@ namespace SamaCardAll.Api.Controllers
             return BadRequest(ModelState);
         }
 
-        [HttpPut]
-        public async Task<IActionResult> Update([FromBody] SpendViewModel spendVM)
+        [HttpPut("{idSpend}")]
+        public async Task<IActionResult> Update(int idSpend, [FromBody] SpendViewModel spendVM)
         {
-            var spendModel = _mapper.Map<Spend>(spendVM);
-
-            if (ModelState.IsValid)
+            if (idSpend == spendVM.IdSpend)
             {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                var spendModel = _mapper.Map<Spend>(spendVM);
+
                 try
                 {
                     await _spendService.UpdateAsync(spendModel);
@@ -89,7 +94,7 @@ namespace SamaCardAll.Api.Controllers
                 }
             }
 
-            return BadRequest(ModelState);
+            return BadRequest("Spend ID mismatch.");
         }
 
         [HttpDelete("{id}")]

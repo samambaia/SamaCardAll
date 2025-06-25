@@ -1,7 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using SamaCardAll.Api.Mapping;
 using SamaCardAll.Core.Interfaces;
 using SamaCardAll.Core.Services;
+using SamaCardAll.Infra;
 using SamaCardAll.Infra.Repository;
 
 namespace SamaCardAll
@@ -17,8 +19,8 @@ namespace SamaCardAll
             builder.Logging.SetMinimumLevel(LogLevel.Information);
             builder.Logging.AddConsole();
 
-            //builder.Services.AddDbContext<AppDbContext>(options =>
-            //    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+            builder.Services.AddDbContext<AppDbContext>(options =>
+                options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             var constr = builder.Configuration.GetConnectionString("DefaultConnection");
 
@@ -36,6 +38,9 @@ namespace SamaCardAll
             builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
             builder.Services.AddScoped<ICardRepository, CardRepository>();
             builder.Services.AddScoped<IReportRepository, ReportRepository>();
+
+            // Register AutoMapper
+            builder.Services.AddAutoMapper(typeof(Program).Assembly);
 
             // Integrating Swagger
             builder.Services.AddSwaggerGen(c =>

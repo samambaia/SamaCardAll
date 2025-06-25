@@ -13,19 +13,10 @@
         public DateTime CreatedDate { get; set; } = DateTime.Now;
 
         public int CustomerIdCustomer { get; set; }
-        public CustomerViewModel Customer { get; set; } = new CustomerViewModel();
-
+        public string CustomerName { get; set; }
         public int CardIdCard { get; set; }
-        public CardViewModel Card { get; set; } = new CardViewModel();
-
+        public string CardName { get; set; }
         public int UserIdUser { get; set; }
-        public UserViewModel User { get; set; } = new UserViewModel();
-
-        public SpendViewModel() 
-        {
-            Customer = new CustomerViewModel();
-            Card = new CardViewModel();
-            User = new UserViewModel();
-        } // Construtor padrão para o Blazor
+        public string UserName { get; set; }
     }
 }

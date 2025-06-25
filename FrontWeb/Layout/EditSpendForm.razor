@@ -1,5 +1,5 @@
 ﻿@using FrontWeb.Components
-@using FrontWeb.ViewModels
+@using SamaCardAll.Shared.Contracts.ViewModels
 @using Microsoft.AspNetCore.Components.Forms
 @using System.Globalization
 
@@ -10,28 +10,25 @@
         <div class="form-group">
             <label for="Expenses">Expenses:</label>
             <InputText id="Expenses" class="form-control" @bind-Value="spendViewModel.Expenses" />
-@*             <RadzenRequiredValidator For="@(() => spendViewModel.Expenses)" Text="Expenses is required." />
- *@        </div>
+         </div>
         <div class="form-group">
             <label for="IdCustomer">Customer:</label>
-            <InputSelect id="IdCustomer" class="form-select" @bind-Value="spendViewModel.Customer.IdCustomer" style="width: 300px">
+            <InputSelect id="IdCustomer" class="form-select" @bind-Value="spendViewModel.CustomerIdCustomer" style="width: 300px">
                 @foreach (var customer in _customers)
                 {
                     <option value="@customer.IdCustomer">@customer.CustomerName</option>
                 }
             </InputSelect>
-@*             <RadzenRequiredValidator For="@(() => spendViewModel.CustomerIdCustomer)" Text="Customer is required." />
- *@        </div>
+        </div>
         <div class="form-group">
             <label for="Bank">Card:</label>
-            <InputSelect id="Bank" class="form-select" @bind-Value="spendViewModel.Card.IdCard" style="width: 300px">
+            <InputSelect id="Bank" class="form-select" @bind-Value="spendViewModel.CardIdCard" style="width: 300px">
                 @foreach (var card in _cards)
                 {
                     <option value="@card.IdCard">@card.Bank</option>
                 }
             </InputSelect>
-@*             <RadzenRequiredValidator For="@(() => spendViewModel.CardIdCard)" Text="Card is required." />
- *@        </div>
+        </div>
         <div class="form-group">
             <label for="Date">Date Purchase:</label>
             <InputDate id="Date" class="form-control" @bind-Value="spendViewModel.Date" style="width: 200px" />
@@ -39,8 +36,7 @@
         <div class="form-group">
             <label for="Amount">Amount:</label>
             <InputText id="Amount" class="form-control" @bind-Value="Amountformatted" Format="C2" Culture="pt-BR" @oninput="UpdateAmount" @onblur="FormatAndCalculate" readonly=@(spendViewModel.IdSpend != 0) style="width: 200px" />
-@*             <RadzenRequiredValidator For="@(() => spendViewModel.Amount)" Text="Amount is required." />
- *@        </div>
+        </div>
         <div class="form-group">
             <label for="InstallmentPlan">Installment Plan:</label>
             <InputNumber id="InstallmentPlan" class="form-control" @bind-Value="spendViewModel.InstallmentPlan" @oninput="UpdateInstallmentPlan" readonly=@(spendViewModel.IdSpend != 0) Min="1" Max="60" style="width: 100px" />
@@ -69,10 +65,10 @@
     public EventCallback OnValidSubmit { get; set; }
 
     private List<CustomerViewModel> _customers = new();
-    private List<CustomerViewModel> allCustomers = new();
-
+    // private List<CustomerViewModel> allCustomers = new();
     private List<CardViewModel> _cards = new();
-    private List<CardViewModel> allCards = new();
+    // private List<CardViewModel> allCards = new();
+    private List<UserViewModel> _users = new();
 
     private List<ModalInstallment.Installment> _installments = new();
 
@@ -102,8 +98,21 @@
     protected override async Task OnInitializedAsync()
     {
         // Loading all Customers and Cards
-        allCustomers = await HttpClient.GetFromJsonAsync<List<CustomerViewModel>>("/api/Customer");
-        allCards = await HttpClient.GetFromJsonAsync<List<CardViewModel>>("/api/Card");
+        _customers = await HttpClient.GetFromJsonAsync<List<CustomerViewModel>>("/api/Customer");
+        _cards = await HttpClient.GetFromJsonAsync<List<CardViewModel>>("/api/Card");
+
+        // Create a single user entry (mocked, since no service)
+        _users = new List<UserViewModel>
+            {
+                new UserViewModel
+                {
+                    // Set properties manually for the mocked user
+                    IdUser = 1,
+                    Name = "Samambaia",
+                    Password = "",
+                    Active = 1
+                }
+            };
     }
 
     private void CalculateInstallmentValue()
@@ -176,17 +185,11 @@
     {
         spendViewModel = pSpend ?? new SpendViewModel();
 
-        if (spendViewModel.IdSpend != 0)
-        {
-            // Edit mode: show all customers and cards (including inactive)
-            _customers = allCustomers;
-            _cards = allCards;
-        }
-        else
+        if (spendViewModel.IdSpend == 0)
         {
             // New Spend: only show active customers and cards
-            _customers = allCustomers.Where(c => c.Active == 1).ToList();
-            _cards = allCards.Where(c => c.Active == 1).ToList();
+            _customers = _customers.Where(c => c.Active == 1).ToList();
+            _cards = _cards.Where(c => c.Active == 1).ToList();
         }
 
         // Inicializa Amountformatted e AmountNoFormat com base no spendViewModel.Amount

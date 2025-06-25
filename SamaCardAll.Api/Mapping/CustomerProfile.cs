@@ -2,7 +2,7 @@
 using SamaCardAll.Core.Models;
 using SamaCardAll.Shared.Contracts.ViewModels;
 
-namespace FrontWeb.Mapping
+namespace SamaCardAll.Api.Mapping
 {
     public class CustomerProfile : Profile
     {

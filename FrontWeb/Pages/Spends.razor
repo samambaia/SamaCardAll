@@ -1,11 +1,9 @@
 ﻿@page "/spends"
 
-@using FrontWeb.DTO
 @using FrontWeb.Components
-@using FrontWeb.ViewModels
+@using SamaCardAll.Shared.Contracts.ViewModels
 @using Radzen.Blazor
 @using Radzen.Blazor.Rendering
-@using AutoMapper
 
 @inject HttpClient HttpClient
 @inject IJSRuntime JSRuntime;
@@ -39,12 +37,12 @@
                 @spendDTO.Amount.ToString("C2")
             </Template>
         </RadzenDataGridColumn>
-        <RadzenDataGridColumn TItem="SpendViewModel" Property="Spend.Card.Bank" Title="Card Bank">
+        <RadzenDataGridColumn TItem="SpendViewModel" Property="Spend.CardName" Title="Card Bank">
             <HeaderTemplate>
                 <strong style="font-size:medium">Card Bank</strong>
             </HeaderTemplate>
         </RadzenDataGridColumn>
-        <RadzenDataGridColumn TItem="SpendViewModel" Property="Spend.Customer.CustomerName" Title="Customer Name">
+        <RadzenDataGridColumn TItem="SpendViewModel" Property="Spend.CustomerName" Title="Customer Name">
             <HeaderTemplate>
                 <strong style="font-size:medium">Customer Name</strong>
             </HeaderTemplate>
@@ -64,8 +62,6 @@
     <EditSpendForm pSpend="spendViewModel" OnValidSubmit="HandleValidSubmit" />
 </ModalDialog>
 
-@inject IMapper Mapper
-
 @code {
 
     [Parameter]
@@ -80,8 +76,6 @@
 
     private ModalInstallment modalInstallment { get; set; }
 
-    private SpendDTO spendDTO;
-    private List<SpendDTO> allSpendsDTO = new List<SpendDTO>();
     private List<SpendViewModel> allSpendsViewModel = new List<SpendViewModel>();
     private SpendViewModel spendViewModel;
 
@@ -97,12 +91,12 @@
 
     private async Task LoadSpends()
     {
-        // Loading all spends
-        allSpendsDTO = await HttpClient.GetFromJsonAsync<List<SpendDTO>>("/api/Spend?include=card,customer");
+        var spends = await HttpClient.GetFromJsonAsync<List<SpendViewModel>>("/api/Spend?include=card,customer");
 
-        allSpendsViewModel = Mapper.Map<List<SpendViewModel>>(allSpendsDTO)
+        allSpendsViewModel = spends
             .Where(s => s.Deleted == 0)
-            .OrderByDescending(s => s.Date).ToList();
+            .OrderByDescending(s => s.Date)
+            .ToList();
 
         StateHasChanged();
     }
@@ -121,7 +115,7 @@
     {
         if (spendToEdit != null)
         {
-            this.spendViewModel = Mapper.Map<SpendViewModel>(spendToEdit);
+            this.spendViewModel = spendToEdit;
 
             amount = this.spendViewModel.Amount;
             installmentValue = this.spendViewModel.InstallmentValue;
@@ -131,11 +125,6 @@
         else
         {
             this.spendViewModel = new SpendViewModel();
-
-            spendViewModel.Customer = new CustomerViewModel();
-            spendViewModel.Card = new CardViewModel();
-            spendViewModel.User = new UserViewModel();
-
             amount = 0;
             installmentValue = 0;
 
@@ -152,16 +141,12 @@
 
         try
         {
-            spendViewModel = Mapper.Map<SpendViewModel>(spendViewModel);
-
             var response = spendViewModel.IdSpend == 0
                 ? await HttpClient.PostAsJsonAsync<SpendViewModel>($"/api/Spend/", spendViewModel) // New spend, use POST
                 : await HttpClient.PutAsJsonAsync<SpendViewModel>($"/api/Spend/{spendViewModel.IdSpend}", spendViewModel); // Existing spend, use PUT for update
 
             if (response.IsSuccessStatusCode)
             {
-                // Refresh the spend list
-                // _spends = await HttpClient.GetFromJsonAsync<List<SpendDTO>>("/api/Spend?include=card,customer");
                 await LoadSpends();
                 return true; // Return true indicating successful save
             }
@@ -179,7 +164,6 @@
             errorMessage = $"Error: {ex.Message}";
             return false;
         }
-
     }
 
     private async Task Edit(SpendViewModel spend)
@@ -204,7 +188,7 @@
                     {
                         allSpendsViewModel.Remove(toRemove);
                     }
-                    StateHasChanged();
+                    await LoadSpends();
                 }
                 else
                 {

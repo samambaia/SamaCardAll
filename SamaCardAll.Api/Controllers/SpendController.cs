@@ -25,11 +25,18 @@ namespace SamaCardAll.Api.Controllers
             try
             {
                 var spends = await _spendService.GetSpendsAsync();
-                return Ok(spends);
+
+                var result = _mapper.Map<List<SpendViewModel>>(spends);
+
+                return Ok(result);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                var errorMessage = ex.InnerException != null
+                    ? $"Internal server error: {ex.Message} | Inner exception: {ex.InnerException.Message}"
+                    : $"Internal server error: {ex.Message}";
+
+                return StatusCode(500, errorMessage);
             }
         }
 
@@ -44,13 +51,19 @@ namespace SamaCardAll.Api.Controllers
                 {
                     await _spendService.CreateAsync(spendModel);
                     int spendId = spendModel.IdSpend;
+
                     return CreatedAtAction(nameof(GetById), new { id = spendModel.IdSpend }, spendModel);
                 }
                 catch (Exception ex)
                 {
-                    return StatusCode(500, $"Internal server error: {ex.Message}");
+                    var errorMessage = ex.InnerException != null
+                        ? $"Internal server error: {ex.Message} | Inner exception: {ex.InnerException.Message}"
+                        : $"Internal server error: {ex.Message}";
+
+                    return StatusCode(500, errorMessage);
                 }
             }
+
             return BadRequest(ModelState);
         }
 
@@ -59,18 +72,24 @@ namespace SamaCardAll.Api.Controllers
         {
             var spendModel = _mapper.Map<Spend>(spendVM);
 
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    await _spendService.UpdateAsync(spendModel);
+                    return NoContent();
+                }
+                catch (Exception ex)
+                {
+                    var errorMessage = ex.InnerException != null
+                        ? $"Internal server error: {ex.Message} | Inner exception: {ex.InnerException.Message}"
+                        : $"Internal server error: {ex.Message}";
 
-            try
-            {
-                await _spendService.UpdateAsync(spendModel);
-                return NoContent();
+                    return StatusCode(500, errorMessage);
+                }
             }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+
+            return BadRequest(ModelState);
         }
 
         [HttpDelete("{id}")]
@@ -83,7 +102,11 @@ namespace SamaCardAll.Api.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                var errorMessage = ex.InnerException != null
+                    ? $"Internal server error: {ex.Message} | Inner exception: {ex.InnerException.Message}"
+                    : $"Internal server error: {ex.Message}";
+
+                return StatusCode(500, errorMessage);
             }
         }
 

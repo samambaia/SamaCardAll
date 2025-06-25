@@ -1,9 +1,9 @@
-﻿@using FrontWeb.DTO
-@using FrontWeb.Components
+﻿@using FrontWeb.Components
+@using SamaCardAll.Shared.Contracts.ViewModels
 @using Radzen.Blazor
 @using Radzen.Blazor.Rendering
 
-<RadzenTemplateForm TItem="CardDTO" Data=@card Submit=HandleValidSubmit>
+<RadzenTemplateForm TItem="CardViewModel" Data=@card Submit=HandleValidSubmit>
     <RadzenCard class="my-2 mx-auto" Style="max-width: 400px;">
         <div class="row">
             <div class="col">
@@ -55,7 +55,7 @@
 
 @code {
     [Parameter]
-    public CardDTO card { get; set; }
+    public CardViewModel card { get; set; }
 
     [Parameter]
     public EventCallback OnValidSubmit { get; set; }

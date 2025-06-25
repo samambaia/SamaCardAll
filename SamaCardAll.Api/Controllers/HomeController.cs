@@ -22,13 +22,13 @@ namespace SamaCardAll.Api.Controllers
          */
 
         [HttpGet("{customerId}/{monthYear}")]
-        public async Task<ActionResult<List<InvoiceDTO>>> GetInstallments(int? customerId, string? monthYear)
+        public async Task<ActionResult<List<InvoiceDTO>>> GetInstallments(int? customerId, string monthYear)
         {
             try
             {
                 var filteredInstallments = await _reportService.GetFilteredInstallments(customerId, monthYear);
 
-                var invoiceDtos = filteredInstallments.Select(i => new InvoiceVO(i.DescriptionSpend, i.CustomerName, i.CardName, i.InstallmentAmount, i.MonthYear, i.Installment));
+                var invoiceDtos = filteredInstallments.Select(i => new InvoiceDTO(i.DescriptionSpend, i.CustomerName, i.CardName, i.InstallmentAmount, i.MonthYear, i.Installment));
 
                 return Ok(invoiceDtos);
             }
@@ -131,7 +131,7 @@ namespace SamaCardAll.Api.Controllers
         }
 
         [HttpGet("detailed-card/{cardId}/{monthYear}")]
-        public async Task<ActionResult<List<CardVO>>> DetailedCard(int? cardId, string? monthYear)
+        public async Task<ActionResult<List<DetailedCardDTO>>> DetailedCard(int? cardId, string monthYear)
         {
             _logger.LogInformation("DetailedCard called with cardId: {cardId} and monthYear: {monthYear}", cardId, monthYear);
 

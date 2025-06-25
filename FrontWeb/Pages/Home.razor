@@ -1,5 +1,6 @@
 ﻿@page "/"
-@using FrontWeb.DTO
+@using SamaCardAll.Shared.Contracts.ViewModels
+@using SamaCardAll.Shared.Contracts.Report
 @using Microsoft.CSharp.RuntimeBinder
 @using Radzen.Blazor
 @using Radzen.Blazor.Rendering
@@ -145,7 +146,7 @@
 
     private string monthYear;
     private IEnumerable<string> monthYearList = new List<string>();
-    private IEnumerable<InvoiceDto> _customerTotal = new List<InvoiceDto>();
+    private IEnumerable<InvoiceDTO> _customerTotal = new List<InvoiceDTO>();
     private IEnumerable<TotalCardMonthYearDTO> _cardTotal = new List<TotalCardMonthYearDTO>();
     private IEnumerable<DetailedCardDTO> _cardDetails = new List<DetailedCardDTO>();
     private decimal totalSpends;
@@ -230,7 +231,7 @@
         // visibleAlert = true;
     }
 
-    private async Task<IEnumerable<InvoiceDto>> GetCustomerTotalPerMonthYear(string monthYear)
+    private async Task<List<InvoiceDTO>> GetCustomerTotalPerMonthYear(string monthYear)
     {
 
         if (monthYearList == null || !monthYearList.Any())
@@ -247,7 +248,7 @@
         {
             encodedMonthYear = WebUtility.UrlEncode(monthYear);
             url = $"/api/Home/customer/{encodedMonthYear}";
-            return await HttpClient.GetFromJsonAsync<IEnumerable<InvoiceDto>>(url);
+            return await HttpClient.GetFromJsonAsync<List<InvoiceDTO>>(url);
         }
         catch (Exception ex)
         {

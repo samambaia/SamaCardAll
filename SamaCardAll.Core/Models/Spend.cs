@@ -1,11 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SamaCardAll.Core.Models;
 
 public class Spend
 {
     [Key]
-    //[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int IdSpend { get; set; }
     public string Expenses { get; set;}
     public decimal Amount { get; set;}

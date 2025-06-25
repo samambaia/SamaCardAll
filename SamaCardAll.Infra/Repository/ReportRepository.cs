@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SamaCardAll.Core.Interfaces;
+using SamaCardAll.Core.Models;
 using SamaCardAll.Shared.Contracts.Report;
 
 namespace SamaCardAll.Infra.Repository
@@ -37,25 +38,30 @@ namespace SamaCardAll.Infra.Repository
             return [.. monthYears.OrderBy(my => my.ToMonthYearInt())];
         }
 
-        /*
-        * The method GetFilteredInstallments is used to retrieve the installments for a specific customer and month/year.
-        * The method receives the customer ID and the month/year as parameters.
-        * The month/year parameter is URL encoded, so it is decoded before being used.
-        * The method retrieves the installments from the database using the GetInstallments method.
-        * The GetInstallments method returns an IQueryable<Installments> object that includes the related Spend, Customer, and Card entities.
-        * The method then maps the installments to a list of InvoiceVO objects using the MapToInvoiceVO method.
-        * Finally, the method returns the list of InvoiceDto objects.
-        */
         public async Task<List<InvoiceDTO>> GetFilteredInstallments(int? customerId, string monthYear)
         {
-            string decodeMonthYear = monthYear.DecodeMonthYear();
+            string decodedMonthYear = monthYear.DecodeMonthYear();
 
-            var installments = GetInstallments(customerId, decodeMonthYear);
+            var installments = context.Installments
+                .Include(i => i.Spend)
+                .Include(i => i.Spend.Customer)
+                .Include(i => i.Spend.Card)
+                .Where(i => i.MonthYear == decodedMonthYear &&
+                            (!customerId.HasValue || i.Spend.Customer.IdCustomer == customerId) &&
+                            i.Spend.Deleted == 0);
 
-            // TODO: preciso implementar o método MapToInvoiceVO para mapear os dados corretamente. Ele está comentado no final dessa implementação.
-            //var results = MapToInvoiceVO(installments);
+            var result = await installments
+                .Select(i => new InvoiceDTO(
+                    i.Spend.Expenses,
+                    i.Spend.Customer.CustomerName,
+                    i.Spend.Card.Bank,
+                    i.InstallmentValue,
+                    i.MonthYear,
+                    i.Installment.ToString()
+                ))
+                .ToListAsync();
 
-            return await Task.FromResult(results);
+            return result;
         }
 
         public async Task<List<TotalCardMonthYearDTO>> GetTotalCardMonthYear(string monthYear)
@@ -135,16 +141,16 @@ namespace SamaCardAll.Infra.Repository
          * Privates methods
          */
 
-        private IQueryable<InstallmentsDTO> GetInstallments(int? customerId, string monthYear)
-        {
-            var result = context.Installments
-                            .Include(i => i.Spend)
-                            .Include(i => i.Spend.Customer)
-                            .Include(i => i.Spend.Card)
-                            .Where(i => i.MonthYear == monthYear && i.Spend.Customer.IdCustomer == customerId && i.Spend.Deleted == 0);
+        //private IQueryable<Installments> GetInstallments(int? customerId, string monthYear)
+        //{
+        //    var result = context.Installments
+        //                    .Include(i => i.Spend)
+        //                    .Include(i => i.Spend.Customer)
+        //                    .Include(i => i.Spend.Card)
+        //                    .Where(i => i.MonthYear == monthYear && i.Spend.Customer.IdCustomer == customerId && i.Spend.Deleted == 0);
 
-            return result;
-        }
+        //    return result;
+        //}
 
         //private static List<InvoiceDTO> MapToInvoiceVO(IQueryable<InstallmentsDTO> installments)
         //{

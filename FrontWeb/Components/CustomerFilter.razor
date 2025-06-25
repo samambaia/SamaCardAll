@@ -1,4 +1,4 @@
-﻿@using FrontWeb.DTO
+﻿@using SamaCardAll.Shared.Contracts.ViewModels
 @inject HttpClient HttpClient 
 
 <select @bind="pSelectedCustomerId"> 
@@ -16,10 +16,10 @@
     [Parameter]
     public int? pSelectedCustomerId { get; set; }
 
-    private List<CustomerDTO> _customers = new List<CustomerDTO>();
+    private List<CustomerViewModel> _customers = new List<CustomerViewModel>();
 
     protected override async Task OnInitializedAsync()
     {
-        _customers = await HttpClient.GetFromJsonAsync<List<CustomerDTO>>("/api/Customer");
+        _customers = await HttpClient.GetFromJsonAsync<List<CustomerViewModel>>("/api/Customer");
     }
 }

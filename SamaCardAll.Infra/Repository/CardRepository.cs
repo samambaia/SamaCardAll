@@ -47,21 +47,17 @@ namespace SamaCardAll.Infra.Repository
                 Expiration = c.Expiration,
                 Brand = c.Brand,
                 Active = c.Active
-            };
+            }).ToList();
         }
 
         public async Task<Card> GetByIdAsync(int id)
         {
-            var getCard = await _context.Cards.FindAsync(id);
-            return getCard.ToVO();
-
+            return await _context.Cards.FindAsync(id);
         }
 
         public async Task<List<Card>> GetCardsAsync()
         {
-            var getCards = await _context.Cards.ToListAsync();
-
-            return [.. getCards.Select(c => c.ToVO())];
+            return await _context.Cards.ToListAsync();
         }
 
         public async Task<bool> UpdateAsync(Card card)

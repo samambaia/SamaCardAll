@@ -1,5 +1,4 @@
 ﻿using FrontWeb;
-using FrontWeb.Mapping;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Radzen;
@@ -13,11 +12,11 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 builder.Services.AddRadzenComponents();
 
 // Register AutoMapper
-builder.Services.AddAutoMapper(typeof(Program).Assembly);
-builder.Services.AddScoped<SpendProfile>();
-builder.Services.AddScoped<CustomerProfile>();
-builder.Services.AddScoped<CardProfile>();
-builder.Services.AddScoped<UserProfile>();
+//builder.Services.AddAutoMapper(typeof(Program).Assembly);
+//builder.Services.AddScoped<SpendProfile>();
+//builder.Services.AddScoped<CustomerProfile>();
+//builder.Services.AddScoped<CardProfile>();
+//builder.Services.AddScoped<UserProfile>();
 
 // Load configuration from appsettings.json
 var httpClient = new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) };

@@ -86,7 +86,22 @@
 
     protected override async Task OnInitializedAsync()
     {
-        customers = await HttpClient.GetFromJsonAsync<List<CustomerViewModel>>("/api/Customer");
+        await LoadCustomers();
+    }
+
+    private async Task LoadCustomers()
+    {
+        try
+        {
+            customers = await HttpClient.GetFromJsonAsync<List<CustomerViewModel>>("/api/Customer");
+
+            customers = customers.OrderByDescending(c => c.IdCustomer).ToList();
+        }
+        catch (Exception ex)
+        {
+            errorVisible = true;
+            errorMessage = $"Error loading customers: {ex.Message}";
+        }
     }
 
     private async void HandleValidSubmit()
@@ -94,11 +109,11 @@
         if (await Save())
         {
             await OnValidSubmit.InvokeAsync();
-            await modalDialog.Close();
+            modalDialog.Close();
         }
     }
 
-    private async Task OpenModal(CustomerViewModel customerToEdit = null)
+    private void OpenModal(CustomerViewModel customerToEdit = null)
     {
         if (customerToEdit != null)
         {
@@ -111,7 +126,7 @@
             TitleModal = "New Customer";
         }
 
-        await modalDialog.Open();
+        modalDialog.Open();
     }
 
     private async Task<bool> Save()
@@ -125,20 +140,21 @@
 
         if (response.IsSuccessStatusCode)
         {
-            customers = await HttpClient.GetFromJsonAsync<List<CustomerViewModel>>("/api/Customer"); // Refresh the customer list
+            await LoadCustomers();
             StateHasChanged();
-            return true; // Return true indicating successful save
+
+            return true;
         }
         else
         {
             Console.WriteLine($"Error saving customer: {response.StatusCode} - {await response.Content.ReadAsStringAsync()}");
-            return false; // Return false indicating save failed
+            return false;
         }
     }
 
-    private async Task Edit(CustomerViewModel customer)
+    private void Edit(CustomerViewModel customer)
     {
-        await OpenModal(customer);
+        OpenModal(customer);
     }
 
     private async Task Delete(CustomerViewModel customer)
@@ -154,6 +170,7 @@
                 {
                     // Remove the card from the list
                     customers.Remove(customer);
+                    await LoadCustomers();
                     StateHasChanged();
                 }
                 else

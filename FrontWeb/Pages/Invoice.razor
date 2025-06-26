@@ -144,15 +144,29 @@ else
         {
             string encodedMonthYear = WebUtility.UrlEncode(monthYear);
             string url = $"/api/Home/{customerId}/{encodedMonthYear}";
-            _installments = await HttpClient.GetFromJsonAsync<List<InvoiceDTO>>(url);
+            var response = await HttpClient.GetAsync(url);
 
-            // Calculate the Sum
-            totalInstallmentSum = _installments?.Sum(i => i.InstallmentAmount) ?? 0;
+            if (response.IsSuccessStatusCode)
+            {
+                _installments = await response.Content.ReadFromJsonAsync<List<InvoiceDTO>>();
+                totalInstallmentSum = _installments?.Sum(i => i.InstallmentAmount) ?? 0;
+            }
+            else
+            {
+                // Optionally, you can read the error message from the response
+                var errorMsg = await response.Content.ReadAsStringAsync();
+                _installments = new List<InvoiceDTO>();
+                totalInstallmentSum = 0;
+                // Optionally, show error to user (e.g., using a notification component)
+                Console.WriteLine($"API error: {errorMsg}");
+            }
         }
         catch (Exception ex)
         {
-            // TO DO: Handle Error
-            Console.WriteLine($"Error fetching MonthYear options: {ex.Message}");
+            _installments = new List<InvoiceDTO>();
+            totalInstallmentSum = 0;
+            // Optionally, show error to user (e.g., using a notification component)
+            Console.WriteLine($"Unexpected error: {ex.Message}");
         }
         finally
         {

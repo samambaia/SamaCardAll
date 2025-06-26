@@ -30,7 +30,11 @@ namespace SamaCardAll.Api.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                var errorMessage = ex.InnerException != null
+                    ? $"Internal server error: {ex.Message} | Inner exception: {ex.InnerException.Message}"
+                    : $"Internal server error: {ex.Message}";
+
+                return StatusCode(500, errorMessage);
             }
         }
 
@@ -59,30 +63,40 @@ namespace SamaCardAll.Api.Controllers
                 }
                 catch (Exception ex)
                 {
-                    return StatusCode(500, $"Internal server error: {ex.Message}");
+                    var errorMessage = ex.InnerException != null
+                        ? $"Internal server error: {ex.Message} | Inner exception: {ex.InnerException.Message}"
+                        : $"Internal server error: {ex.Message}";
+
+                    return StatusCode(500, errorMessage);
                 }
             }
             return BadRequest(ModelState);
         }
 
-        [HttpPut]
-        public async Task<IActionResult> Update([FromBody] CustomerViewModel customerVM)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] CustomerViewModel customerVM)
         {
+            if (id != customerVM.IdCustomer)
+                return BadRequest("ID mismatch");
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             var customerModel = _mapper.Map<Customer>(customerVM);
 
-            if (ModelState.IsValid)
+            try
             {
-                try
-                {
-                    await _customerService.UpdateAsync(customerModel);
-                    return NoContent();
-                }
-                catch (Exception ex)
-                {
-                    return StatusCode(500, $"Internal server error: {ex.Message}");
-                }
+                await _customerService.UpdateAsync(customerModel);
+                return NoContent();
             }
-            return BadRequest(ModelState);
+            catch (Exception ex)
+            {
+                var errorMessage = ex.InnerException != null
+                    ? $"Internal server error: {ex.Message} | Inner exception: {ex.InnerException.Message}"
+                    : $"Internal server error: {ex.Message}";
+
+                return StatusCode(500, errorMessage);
+            }
         }
 
         [HttpDelete("{id}")]
@@ -100,7 +114,13 @@ namespace SamaCardAll.Api.Controllers
                     return BadRequest($"Could not delete {ex.InnerException}");
                 }
                 else
-                    return StatusCode(500, $"Internal server error: {ex.Message}");
+                {
+                    var errorMessage = ex.InnerException != null
+                        ? $"Internal server error: {ex.Message} | Inner exception: {ex.InnerException.Message}"
+                        : $"Internal server error: {ex.Message}";
+
+                    return StatusCode(500, errorMessage);
+                }
             }
         }
     }

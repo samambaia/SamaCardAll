@@ -70,8 +70,6 @@
     [Parameter]
     public EditCardForm editCardForm { get; set; }
 
-    // private int i;
-
     // Using the ErrorMessage Component
     private bool errorVisible { get; set; }
     private string errorMessage { get; set; }
@@ -96,16 +94,16 @@
         StateHasChanged();
     }
 
-    private async void HandleValidSubmit()
+    private async Task HandleValidSubmit()
     {
         if (await Save())
         {
             await OnValidSubmit.InvokeAsync();
-            await modalDialog.Close();
+            modalDialog.Close();
         }
     }
 
-    private async Task OpenModal(CardViewModel cardToEdit = null)
+    private void OpenModal(CardViewModel cardToEdit = null)
     {
         if (cardToEdit != null)
         {
@@ -118,7 +116,7 @@
             TitleModal = "New Card";
         }
 
-        await modalDialog.Open();
+        modalDialog.Open();
     }
 
     private async Task<bool> Save()
@@ -132,22 +130,21 @@
 
         if (response.IsSuccessStatusCode)
         {
-            // _cards = await HttpClient.GetFromJsonAsync<List<Card>>("/api/Card"); // Refresh the card list
             await LoadCards();
             StateHasChanged();
 
-            return true; // Return true indicating successful save
+            return true;
         }
         else
         {
             Console.WriteLine($"Error saving Card: {response.StatusCode} - {await response.Content.ReadAsStringAsync()}");
-            return false; // Return false indicating save failed
+            return false; 
         }
     }
 
-    private async Task Edit(CardViewModel card)
+    private void Edit(CardViewModel card)
     {
-        await OpenModal(card);
+        OpenModal(card);
     }
 
     private async Task Delete(CardViewModel card)
@@ -163,6 +160,7 @@
                 {
                     // Remove the card from the list and update List
                     cards.Remove(card);
+                    await LoadCards();
                     StateHasChanged();
                 }
                 else

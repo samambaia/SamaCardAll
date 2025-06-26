@@ -3,7 +3,7 @@
 @using Radzen.Blazor
 @using Radzen.Blazor.Rendering
 
-<RadzenTemplateForm TItem="CardViewModel" Data=@card Submit=HandleValidSubmit>
+<RadzenTemplateForm TItem="CardViewModel" Data=@card>
     <RadzenCard class="my-2 mx-auto" Style="max-width: 400px;">
         <div class="row">
             <div class="col">
@@ -35,7 +35,7 @@
 </RadzenTemplateForm>
 
 <div class="col-md-12 d-flex align-items-end justify-content-left mt-4">
-    <RadzenButton ButtonType="ButtonType.Submit" Icon="save" Text="Save" Click="@(() => HandleValidSubmit())" />
+    <RadzenButton ButtonType="ButtonType.Button" Icon="save" Text="Save" Click="@(() => HandleValidSubmit())" />
 </div>
 
 @code {
@@ -70,8 +70,6 @@
         AmericanExpress,
         Discover
     }
-
-    // private String TitleModal = "New Card";
 
     private void HandleValidSubmit()
     {

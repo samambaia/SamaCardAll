@@ -106,9 +106,9 @@
 </ModalDialog>
 
 @code {
-    private async Task OpenModalAsync() => await modalDialog.Open();
+    private void OpenModalAsync() => modalDialog.Open();
 
-    private async Task CloseModalAsync() => await modalDialog.Close();
+    private void CloseModalAsync() => modalDialog.Close();
 
     private async Task OnCardSeriesClick(object data)
     {
@@ -117,7 +117,7 @@
         if (cardData != null)
         {
             _cardDetails = await GetCardDetails(cardData.IdCard, monthYear);
-            await OpenModalAsync();
+            OpenModalAsync();
         }
         else
         {
@@ -151,9 +151,9 @@
     private IEnumerable<DetailedCardDTO> _cardDetails = new List<DetailedCardDTO>();
     private decimal totalSpends;
 
-    private async Task OpenModal() => await modalDialog.Open();
+    private void OpenModal() => modalDialog.Open();
 
-    private async Task CloseModal() => await modalDialog.Close();
+    private void CloseModal() => modalDialog.Close();
 
     protected override async Task OnInitializedAsync()
     {

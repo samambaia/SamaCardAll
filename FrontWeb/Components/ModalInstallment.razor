@@ -103,18 +103,16 @@
             // Calcular a data da parcela
             dueDate = purchaseDate.AddMonths(i * monthsInterval);
 
-            //installmentDisplay = i.ToString() + "/" + installmentPlan.ToString();
-
             // Format to show 00/00
             installmentDisplay = string.Format("{0:00}/{1:00}", i, installmentPlan);
 
             // Criar uma instância de Installment e adicioná-la à lista
             Installment installment = new Installment
-                {
-                    Amount = amount,
-                    DueDate = dueDate,
-                    InstallmentDisplay = installmentDisplay
-                };
+            {
+                Amount = amount,
+                DueDate = dueDate,
+                InstallmentDisplay = installmentDisplay
+            };
             installmentPlanList.Add(installment);
 
             Console.WriteLine($"Installment Plan: {installmentDisplay}");

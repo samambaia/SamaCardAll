@@ -106,12 +106,12 @@
         if (await Save())
         {
             await OnValidSubmit.InvokeAsync();
-            await modalDialog.Close();
+            modalDialog.Close();
         }
         //modalDialog.Close();
     }
 
-    private async Task OpenModal(SpendViewModel spendToEdit = null)
+    private void OpenModal(SpendViewModel spendToEdit = null)
     {
         if (spendToEdit != null)
         {
@@ -131,7 +131,7 @@
             TitleModal = "New Spend";
         }
 
-        await modalDialog.Open();
+        modalDialog.Open();
     }
 
     private async Task<bool> Save()
@@ -166,9 +166,9 @@
         }
     }
 
-    private async Task Edit(SpendViewModel spend)
+    private void Edit(SpendViewModel spend)
     {
-        await OpenModal(spend);
+        OpenModal(spend);
     }
 
     private async Task Delete(SpendViewModel spend)

@@ -35,14 +35,14 @@
 
     private bool showBackdrop = false;
 
-    public async Task Open()
+    public void Open()
     {
         modalClass = true;
         isVisible = true;
         showBackdrop = true;
     }
 
-    public async Task Close()
+    public void Close()
     {
         modalClass = false;
         isVisible = false;

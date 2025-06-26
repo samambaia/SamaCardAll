@@ -7,8 +7,8 @@ using SamaCardAll.Shared.Contracts.ViewModels;
 
 namespace SamaCardAll.Api.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class CardController : ControllerBase
     {
         private readonly ICardService _cardService;
@@ -30,7 +30,11 @@ namespace SamaCardAll.Api.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                var errorMessage = ex.InnerException != null
+                    ? $"Internal server error: {ex.Message} | Inner exception: {ex.InnerException.Message}"
+                    : $"Internal server error: {ex.Message}";
+
+                return StatusCode(500, errorMessage);
             }
         }
 
@@ -44,7 +48,11 @@ namespace SamaCardAll.Api.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal server erro: {ex.Message}");
+                var errorMessage = ex.InnerException != null
+                    ? $"Internal server error: {ex.Message} | Inner exception: {ex.InnerException.Message}"
+                    : $"Internal server error: {ex.Message}";
+
+                return StatusCode(500, errorMessage);
             }
         }
 
@@ -73,35 +81,40 @@ namespace SamaCardAll.Api.Controllers
                 }
                 catch (Exception ex)
                 {
-                    return StatusCode(500, $"Internal server error: {ex.Message}");
+                    var errorMessage = ex.InnerException != null
+                        ? $"Internal server error: {ex.Message} | Inner exception: {ex.InnerException.Message}"
+                        : $"Internal server error: {ex.Message}";
+
+                    return StatusCode(500, errorMessage);
                 }
             }
             return BadRequest(ModelState);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, CardViewModel cardVM)
+        public async Task<IActionResult> Update(int id, [FromBody] CardViewModel cardVM)
         {
+            if (id != cardVM.IdCard)
+                return BadRequest("ID mismatch");
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             var cardModel = _mapper.Map<Card>(cardVM);
 
-            if (id != cardModel.IdCard)
+            try
             {
-                return BadRequest("ID mismatch");
+                await _cardService.UpdateAsync(cardModel);
+                return NoContent();
             }
+            catch (Exception ex)
+            {
+                var errorMessage = ex.InnerException != null
+                    ? $"Internal server error: {ex.Message} | Inner exception: {ex.InnerException.Message}"
+                    : $"Internal server error: {ex.Message}";
 
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    await _cardService.UpdateAsync(cardModel);
-                    return NoContent();
-                }
-                catch (Exception ex)
-                {
-                    return StatusCode(500, $"Internal server error: {ex.Message}");
-                }
+                return StatusCode(500, errorMessage);
             }
-            return BadRequest(ModelState);
         }
 
         [HttpDelete("{id}")]
@@ -119,7 +132,13 @@ namespace SamaCardAll.Api.Controllers
                     return BadRequest($"Could not delete {ex.InnerException}");
                 }
                 else
-                    return StatusCode(500, $"Internal server error: {ex.Message}");
+                {
+                    var errorMessage = ex.InnerException != null
+                        ? $"Internal server error: {ex.Message} | Inner exception: {ex.InnerException.Message}"
+                        : $"Internal server error: {ex.Message}";
+
+                    return StatusCode(500, errorMessage);
+                }
             }
         }
     }

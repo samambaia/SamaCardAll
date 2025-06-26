@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using SamaCardAll.Core.DTO;
+using SamaCardAll.Shared.Contracts.Report;
 using SamaCardAll.Core.Interfaces;
 
 namespace SamaCardAll.Api.Controllers
@@ -18,25 +18,17 @@ namespace SamaCardAll.Api.Controllers
         }
 
         /*
-         * TO DO:Handle Error
+         * TODO:Handle Error
          */
 
         [HttpGet("{customerId}/{monthYear}")]
-        public async Task<ActionResult<IEnumerable<InvoiceDto>>> GetInstallments(int? customerId, string? monthYear)
+        public async Task<ActionResult<List<InvoiceDTO>>> GetInstallments(int? customerId, string monthYear)
         {
             try
             {
                 var filteredInstallments = await _reportService.GetFilteredInstallments(customerId, monthYear);
 
-                var invoiceDtos = filteredInstallments.Select(i => new InvoiceDto
-                {
-                    DescriptionSpend = i.DescriptionSpend,
-                    CustomerName = i.CustomerName,
-                    CardName = i.CardName,
-                    InstallmentAmount = i.InstallmentAmount,
-                    MonthYear = i.MonthYear,
-                    Installment = i.Installment
-                }).ToList();
+                var invoiceDtos = filteredInstallments.Select(i => new InvoiceDTO(i.DescriptionSpend, i.CustomerName, i.CardName, i.InstallmentAmount, i.MonthYear, i.Installment));
 
                 return Ok(invoiceDtos);
             }
@@ -73,7 +65,7 @@ namespace SamaCardAll.Api.Controllers
         }
 
         [HttpGet("distinct-monthYears")]
-        public async Task<ActionResult<IEnumerable<string>>> GetDistinctMonthYears()
+        public async Task<ActionResult<List<string>>> GetDistinctMonthYears()
         {
             try
             {
@@ -87,7 +79,7 @@ namespace SamaCardAll.Api.Controllers
         }
 
         [HttpGet("customer/{monthYear}", Name = "TotalCustomerPerMonth")]
-        public async Task<ActionResult<IEnumerable<InvoiceDto>>> GetTotalCustomerPerMonth(string monthYear)
+        public async Task<ActionResult<List<InvoiceDTO>>> GetTotalCustomerPerMonth(string monthYear)
         {
             try
             {
@@ -101,7 +93,7 @@ namespace SamaCardAll.Api.Controllers
         }
 
         [HttpGet("card/{monthYear}", Name = "TotalCardPerMonth")]
-        public async Task<ActionResult<IEnumerable<TotalCardMonthYearDTO>>> GetTotalCardPerMonth(string monthYear)
+        public async Task<ActionResult<List<TotalCardMonthYearDTO>>> GetTotalCardPerMonth(string monthYear)
         {
             try
             {
@@ -139,7 +131,7 @@ namespace SamaCardAll.Api.Controllers
         }
 
         [HttpGet("detailed-card/{cardId}/{monthYear}")]
-        public async Task<ActionResult<IEnumerable<DetailedCardDTO>>> DetailedCard(int? cardId, string? monthYear)
+        public async Task<ActionResult<List<DetailedCardDTO>>> DetailedCard(int? cardId, string monthYear)
         {
             _logger.LogInformation("DetailedCard called with cardId: {cardId} and monthYear: {monthYear}", cardId, monthYear);
 

@@ -1,9 +1,9 @@
 ﻿@page "/"
-@using FrontWeb.DTO
+@using SamaCardAll.Shared.Contracts.ViewModels
+@using SamaCardAll.Shared.Contracts.Report
 @using Microsoft.CSharp.RuntimeBinder
 @using Radzen.Blazor
 @using Radzen.Blazor.Rendering
-@using SamaCardAll.Infra.Models
 @using FrontWeb.Components
 @using System.Net
 
@@ -106,9 +106,9 @@
 </ModalDialog>
 
 @code {
-    private async Task OpenModalAsync() => await modalDialog.Open();
+    private void OpenModalAsync() => modalDialog.Open();
 
-    private async Task CloseModalAsync() => await modalDialog.Close();
+    private void CloseModalAsync() => modalDialog.Close();
 
     private async Task OnCardSeriesClick(object data)
     {
@@ -117,7 +117,7 @@
         if (cardData != null)
         {
             _cardDetails = await GetCardDetails(cardData.IdCard, monthYear);
-            await OpenModalAsync();
+            OpenModalAsync();
         }
         else
         {
@@ -146,14 +146,14 @@
 
     private string monthYear;
     private IEnumerable<string> monthYearList = new List<string>();
-    private IEnumerable<InvoiceDto> _customerTotal = new List<InvoiceDto>();
+    private IEnumerable<InvoiceDTO> _customerTotal = new List<InvoiceDTO>();
     private IEnumerable<TotalCardMonthYearDTO> _cardTotal = new List<TotalCardMonthYearDTO>();
     private IEnumerable<DetailedCardDTO> _cardDetails = new List<DetailedCardDTO>();
     private decimal totalSpends;
 
-    private async Task OpenModal() => await modalDialog.Open();
+    private void OpenModal() => modalDialog.Open();
 
-    private async Task CloseModal() => await modalDialog.Close();
+    private void CloseModal() => modalDialog.Close();
 
     protected override async Task OnInitializedAsync()
     {
@@ -231,7 +231,7 @@
         // visibleAlert = true;
     }
 
-    private async Task<IEnumerable<InvoiceDto>> GetCustomerTotalPerMonthYear(string monthYear)
+    private async Task<List<InvoiceDTO>> GetCustomerTotalPerMonthYear(string monthYear)
     {
 
         if (monthYearList == null || !monthYearList.Any())
@@ -248,7 +248,7 @@
         {
             encodedMonthYear = WebUtility.UrlEncode(monthYear);
             url = $"/api/Home/customer/{encodedMonthYear}";
-            return await HttpClient.GetFromJsonAsync<IEnumerable<InvoiceDto>>(url);
+            return await HttpClient.GetFromJsonAsync<List<InvoiceDTO>>(url);
         }
         catch (Exception ex)
         {

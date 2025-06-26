@@ -1,7 +1,7 @@
-﻿@using SamaCardAll.Infra.Models
+﻿@using SamaCardAll.Shared.Contracts.ViewModels
 @inject HttpClient HttpClient 
 
-<select @bind="SelectedCustomerId"> 
+<select @bind="pSelectedCustomerId"> 
   <option value="">-- Select Customer --</option>
   @if (_customers != null)
   {
@@ -14,12 +14,12 @@
 
 @code {
     [Parameter]
-    public int? SelectedCustomerId { get; set; }
+    public int? pSelectedCustomerId { get; set; }
 
-    private List<Customer> _customers = new List<Customer>();
+    private List<CustomerViewModel> _customers = new List<CustomerViewModel>();
 
     protected override async Task OnInitializedAsync()
     {
-        _customers = await HttpClient.GetFromJsonAsync<List<Customer>>("/api/Customer");
+        _customers = await HttpClient.GetFromJsonAsync<List<CustomerViewModel>>("/api/Customer");
     }
 }

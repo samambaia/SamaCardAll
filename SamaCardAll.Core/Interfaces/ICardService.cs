@@ -1,14 +1,14 @@
-﻿using SamaCardAll.Infra.Models;
+﻿using SamaCardAll.Core.Models;
 
 namespace SamaCardAll.Core.Interfaces
 {
     public interface ICardService
     {
-        Task<IEnumerable<Card>> GetCardsAsync();
-        Task<IEnumerable<Card>> GetActiveCardsAsync();
+        Task<List<Card>> GetCardsAsync();
+        Task<List<Card>> GetActiveCardsAsync();
         Task<Card> GetByIdAsync(int id);
         Task CreateAsync(Card card);
-        Task UpdateAsync(Card card);
-        Task DeleteAsync(int id);
+        Task<bool> UpdateAsync(Card card);
+        Task<bool> DeleteAsync(int id);
     }
 }

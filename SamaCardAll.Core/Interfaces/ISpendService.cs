@@ -1,13 +1,13 @@
-﻿using SamaCardAll.Infra.Models;
+﻿using SamaCardAll.Core.Models;
 
 namespace SamaCardAll.Core.Interfaces
 {
     public interface ISpendService
     {
-        Task<IEnumerable<Spend>> GetSpendsAsync();
+        Task<List<Spend>> GetSpendsAsync();
         Task<Spend> GetByIdAsync(int id);
         Task CreateAsync(Spend spend);
-        Task UpdateAsync(Spend spend);
-        Task DeleteAsync(int id);
+        Task<bool> UpdateAsync(Spend spend);
+        Task<bool> DeleteAsync(int id);
     }
 }

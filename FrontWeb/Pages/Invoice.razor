@@ -1,7 +1,8 @@
 ﻿@page "/invoice"
 
 @using FrontWeb.Components
-@using SamaCardAll.Infra.Models
+@using SamaCardAll.Shared.Contracts.ViewModels
+@using SamaCardAll.Shared.Contracts.Report
 @using System.Net
 @using Radzen.Blazor
 @using Radzen.Blazor.Rendering
@@ -42,24 +43,24 @@
 @if (_installments != null && _installments.Any())
 {
     <br />
-    <RadzenDataGrid TItem="InvoiceDto" Data="@_installments" Style="width: 100%; align-items:center; line-height:15px; outline-color:darkcyan">
+    <RadzenDataGrid TItem="InvoiceDTO" Data="@_installments" Style="width: 100%; align-items:center; line-height:15px; outline-color:darkcyan">
         <Columns>
-            <RadzenDataGridColumn TItem="InvoiceDto" Property="DescriptionSpend" Title="Description Spend" Width="350px">
+            <RadzenDataGridColumn TItem="InvoiceDTO" Property="DescriptionSpend" Title="Description Spend" Width="350px">
                 <HeaderTemplate>
                     <strong style="font-size:medium">Description Spend</strong>
                 </HeaderTemplate>
             </RadzenDataGridColumn>
-            <RadzenDataGridColumn TItem="InvoiceDto" Property="Installment" Title="Installment" Width="150px">
+            <RadzenDataGridColumn TItem="InvoiceDTO" Property="Installment" Title="Installment" Width="150px">
                 <HeaderTemplate>
                     <strong style="font-size:medium">Installment</strong>
                 </HeaderTemplate>
             </RadzenDataGridColumn>
-            <RadzenDataGridColumn TItem="InvoiceDto" Property="CardName" Title="Card">
+            <RadzenDataGridColumn TItem="InvoiceDTO" Property="CardName" Title="Card">
                 <HeaderTemplate>
                     <strong style="font-size:medium">Card</strong>
                 </HeaderTemplate>
             </RadzenDataGridColumn>
-            <RadzenDataGridColumn TItem="InvoiceDto" Property="InstallmentAmount" Title="Amount">
+            <RadzenDataGridColumn TItem="InvoiceDTO" Property="InstallmentAmount" Title="Amount">
                 <HeaderTemplate>
                     <strong style="font-size:medium">Amount</strong>
                 </HeaderTemplate>
@@ -104,7 +105,7 @@ else
         monthYear = newMonthYear;
     }
 
-    private List<Customer> _customers = new List<Customer>();
+    private List<CustomerViewModel> _customers = new List<CustomerViewModel>();
 
     protected override async Task OnInitializedAsync()
     {
@@ -112,7 +113,7 @@ else
 
         try
         {
-            _customers = await HttpClient.GetFromJsonAsync<List<Customer>>("/api/Customer");
+            _customers = await HttpClient.GetFromJsonAsync<List<CustomerViewModel>>("/api/Customer");
 
             monthYearList = await HttpClient.GetFromJsonAsync<IEnumerable<string>>("/api/Home/distinct-monthYears");
 
@@ -133,7 +134,7 @@ else
         }
     }
 
-    private IEnumerable<InvoiceDto> _installments;
+    private List<InvoiceDTO> _installments;
     private bool isLoading = true;
 
     private async Task FetchInstallments()
@@ -143,15 +144,29 @@ else
         {
             string encodedMonthYear = WebUtility.UrlEncode(monthYear);
             string url = $"/api/Home/{customerId}/{encodedMonthYear}";
-            _installments = await HttpClient.GetFromJsonAsync<IEnumerable<InvoiceDto>>(url);
+            var response = await HttpClient.GetAsync(url);
 
-            // Calculate the Sum
-            totalInstallmentSum = _installments?.Sum(i => i.InstallmentAmount) ?? 0;
+            if (response.IsSuccessStatusCode)
+            {
+                _installments = await response.Content.ReadFromJsonAsync<List<InvoiceDTO>>();
+                totalInstallmentSum = _installments?.Sum(i => i.InstallmentAmount) ?? 0;
+            }
+            else
+            {
+                // Optionally, you can read the error message from the response
+                var errorMsg = await response.Content.ReadAsStringAsync();
+                _installments = new List<InvoiceDTO>();
+                totalInstallmentSum = 0;
+                // Optionally, show error to user (e.g., using a notification component)
+                Console.WriteLine($"API error: {errorMsg}");
+            }
         }
         catch (Exception ex)
         {
-            // TO DO: Handle Error
-            Console.WriteLine($"Error fetching MonthYear options: {ex.Message}");
+            _installments = new List<InvoiceDTO>();
+            totalInstallmentSum = 0;
+            // Optionally, show error to user (e.g., using a notification component)
+            Console.WriteLine($"Unexpected error: {ex.Message}");
         }
         finally
         {

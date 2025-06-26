@@ -3,6 +3,7 @@ using Microsoft.OpenApi.Models;
 using SamaCardAll.Core.Interfaces;
 using SamaCardAll.Core.Services;
 using SamaCardAll.Infra;
+using SamaCardAll.Infra.Repository;
 
 namespace SamaCardAll
 {
@@ -30,6 +31,15 @@ namespace SamaCardAll
             builder.Services.AddScoped<ICustomerService, CustomerService>();
             builder.Services.AddScoped<ICardService, CardService>();
             builder.Services.AddScoped<IReportService, ReportService>();
+
+            // Register Repositories and its implementation
+            builder.Services.AddScoped<ISpendRepository, SpendRepository>();
+            builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
+            builder.Services.AddScoped<ICardRepository, CardRepository>();
+            builder.Services.AddScoped<IReportRepository, ReportRepository>();
+
+            // Register AutoMapper
+            builder.Services.AddAutoMapper(typeof(Program).Assembly);
 
             // Integrating Swagger
             builder.Services.AddSwaggerGen(c =>
@@ -80,8 +90,9 @@ namespace SamaCardAll
             // Maps controllers to the request pipeline
             app.MapControllers(); 
             
-            app.MapGet("/", () => "API is Running...");
-            
+            app.MapGet("/", () => "API is Running...")
+                .ExcludeFromDescription(); // Exclude from Swagger documentation
+
             app.Run();
         }
     }

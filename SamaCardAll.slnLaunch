@@ -1,0 +1,17 @@
+[
+  {
+    "Name": "Multiple Dev",
+    "Projects": [
+      {
+        "Path": "SamaCardAll.Api\\SamaCardAll.Api.csproj",
+        "Action": "Start",
+        "DebugTarget": "http"
+      },
+      {
+        "Path": "FrontWeb\\FrontWeb.csproj",
+        "Action": "Start",
+        "DebugTarget": "http"
+      }
+    ]
+  }
+]

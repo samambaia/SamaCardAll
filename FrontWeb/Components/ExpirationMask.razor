@@ -5,7 +5,7 @@
 @code {
 
     /*
-     * I created this component to format the Expiration field, like this:
+     * Created this component to format the Expiration field, like this:
      * mm/yy
      * Ex: 12/29
      */
@@ -36,22 +36,19 @@
 
     private string FormatValue(string value)
     {
-        // Implement your masking logic here
-        // For example, format expiration date
-        if (!string.IsNullOrEmpty(value))
-        {
-            // Ensure that only alphanumeric characters are accepted
-            value = new string(value.Where(char.IsLetterOrDigit).ToArray());
+        if (string.IsNullOrEmpty(value))
+            return string.Empty;
 
-            // Apply mask (MM/yy)
-            if (value.Length >= 2)
-            {
-                value = value.Substring(0, 2) + "/" + value.Substring(2);
-            }
+        // Keep only digits
+        var digits = new string(value.Where(char.IsDigit).ToArray());
 
-            // Trim to ensure length does not exceed the mask
-            value = value.Substring(0, Math.Min(value.Length, 5));
-        }
-        return value;
+        // Limit to 4 digits (MMYY)
+        if (digits.Length > 4)
+            digits = digits.Substring(0, 4);
+
+        // Format as MM/YY
+        if (digits.Length <= 2)
+            return digits;
+        return $"{digits.Substring(0, 2)}/{digits.Substring(2)}";
     }
 }

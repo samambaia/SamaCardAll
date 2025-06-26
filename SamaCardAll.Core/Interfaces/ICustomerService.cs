@@ -1,13 +1,13 @@
-﻿using SamaCardAll.Infra.Models;
+﻿using SamaCardAll.Core.Models;
 
 namespace SamaCardAll.Core.Interfaces
 {
     public interface ICustomerService
     {
-        Task<IEnumerable<Customer>> GetCustomersAsync();
+        Task<List<Customer>> GetCustomersAsync();
         Task<Customer> GetByIdAsync(int id);
         Task CreateAsync(Customer customer);
-        Task UpdateAsync(Customer customer);
-        Task DeleteAsync(int id);
+        Task<bool> UpdateAsync(Customer customer);
+        Task<bool> DeleteAsync(int id);
     }
 }

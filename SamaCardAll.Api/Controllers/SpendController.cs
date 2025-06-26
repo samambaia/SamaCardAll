@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using SamaCardAll.Core.Interfaces;
-using SamaCardAll.Infra.Models;
+using SamaCardAll.Core.Models;
+using SamaCardAll.Shared.Contracts.ViewModels;
 
 namespace SamaCardAll.Api.Controllers
 {
@@ -9,86 +11,114 @@ namespace SamaCardAll.Api.Controllers
     public class SpendController : ControllerBase
     {
         private readonly ISpendService _spendService;
+        private readonly IMapper _mapper;
 
-        public SpendController(ISpendService spendService)
+        public SpendController(ISpendService spendService, IMapper mapper)
         {
             _spendService = spendService;
+            _mapper = mapper;
         }
 
         [HttpGet]
-        public IActionResult GetAll()
+        public async Task<IActionResult> GetAll()
         {
             try
             {
-                var spends = _spendService.GetSpendsAsync();
-                return Ok(spends);
+                var spends = await _spendService.GetSpendsAsync();
+
+                var result = _mapper.Map<List<SpendViewModel>>(spends);
+
+                return Ok(result);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                var errorMessage = ex.InnerException != null
+                    ? $"Internal server error: {ex.Message} | Inner exception: {ex.InnerException.Message}"
+                    : $"Internal server error: {ex.Message}";
+
+                return StatusCode(500, errorMessage);
             }
         }
 
         [HttpPost]
-        public IActionResult Create(Spend spend)
+        public async Task<IActionResult> Create(SpendViewModel spendVM)
         {
+            var spendModel = _mapper.Map<Spend>(spendVM);
+
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _spendService.CreateAsync(spend);
-                    int spendId = spend.IdSpend;
-                    return CreatedAtAction(nameof(GetById), new { id = spend.IdSpend }, spend);
+                    await _spendService.CreateAsync(spendModel);
+                    int spendId = spendModel.IdSpend;
+
+                    return CreatedAtAction(nameof(GetById), new { id = spendModel.IdSpend }, spendModel);
                 }
                 catch (Exception ex)
                 {
-                    return StatusCode(500, $"Internal server error: {ex.Message}");
+                    var errorMessage = ex.InnerException != null
+                        ? $"Internal server error: {ex.Message} | Inner exception: {ex.InnerException.Message}"
+                        : $"Internal server error: {ex.Message}";
+
+                    return StatusCode(500, errorMessage);
                 }
             }
+
             return BadRequest(ModelState);
         }
 
         [HttpPut("{idSpend}")]
-        public IActionResult Update(int idSpend, Spend spend)
+        public async Task<IActionResult> Update(int idSpend, [FromBody] SpendViewModel spendVM)
         {
-            if (idSpend != spend.IdSpend)
+            if (idSpend == spendVM.IdSpend)
             {
-                return BadRequest("ID mismatch");
-            }
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
 
-            if (ModelState.IsValid)
-            {
+                var spendModel = _mapper.Map<Spend>(spendVM);
+
                 try
                 {
-                    _spendService.UpdateAsync(spend);
+                    await _spendService.UpdateAsync(spendModel);
                     return NoContent();
                 }
                 catch (Exception ex)
                 {
-                    return StatusCode(500, $"Internal server error: {ex.Message}");
+                    var errorMessage = ex.InnerException != null
+                        ? $"Internal server error: {ex.Message} | Inner exception: {ex.InnerException.Message}"
+                        : $"Internal server error: {ex.Message}";
+
+                    return StatusCode(500, errorMessage);
                 }
             }
-            return BadRequest(ModelState);
+
+            return BadRequest("Spend ID mismatch.");
         }
 
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
             try
             {
-                _spendService.DeleteAsync(id);
+                await _spendService.DeleteAsync(id);
                 return NoContent();
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                var errorMessage = ex.InnerException != null
+                    ? $"Internal server error: {ex.Message} | Inner exception: {ex.InnerException.Message}"
+                    : $"Internal server error: {ex.Message}";
+
+                return StatusCode(500, errorMessage);
             }
         }
 
         [HttpGet("{id}")]
-        public IActionResult GetById(int id)
+        public async Task<IActionResult> GetById(int id)
         {
-            var spend = _spendService.GetByIdAsync(id);
+            var spend = await _spendService.GetByIdAsync(id);
             if (spend == null)
             {
                 return NotFound();

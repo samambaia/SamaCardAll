@@ -76,7 +76,7 @@
 </RadzenChart>
 
 @* Add the modal component to your Razor page *@
-<ModalDialog @ref="@modalDialog" Title=@TitleModal>
+<ModalDialogHome @ref="@modalDialog" Title=@TitleModal>
     <ChildContent>
         <RadzenDataGrid Data="@_cardDetails" AllowPaging="false" AllowSorting="true">
             <Columns>
@@ -103,7 +103,7 @@
             </Columns>
         </RadzenDataGrid>
     </ChildContent>
-</ModalDialog>
+</ModalDialogHome>
 
 @code {
     private void OpenModalAsync() => modalDialog.Open();
@@ -133,7 +133,7 @@
 
     // Detail Modal
     [Parameter]
-    public ModalDialog modalDialog { get; set; }
+    public ModalDialogHome modalDialog { get; set; }
 
     private string TitleModal = "Card Details";
     bool showModal = false;

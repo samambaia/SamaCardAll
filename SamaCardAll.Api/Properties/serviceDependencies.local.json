@@ -5,6 +5,12 @@
       "resourceId": null,
       "type": "secrets.user",
       "connectionId": null
+    },
+    "sqlite1": {
+      "secretStore": "LocalSecretsFile",
+      "type": "sqlite.local",
+      "connectionId": "ConnectionStrings:DatabaseConnection",
+      "dynamicId": null
     }
   }
 }

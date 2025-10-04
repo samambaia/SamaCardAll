@@ -13,6 +13,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FrontWeb", "FrontWeb\FrontW
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SamaCardAll.Shared.Contracts", "SamaCardAll.Shared.Contracts\SamaCardAll.Shared.Contracts.csproj", "{08E8BCDC-37D0-46E6-BA8D-46DA9D23DC96}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FrontMaui", "FrontMaui\FrontMaui.csproj", "{186A9061-6D28-6EAD-7CF3-C0EB83858450}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FrontMaui.Tests", "FrontMaui.Tests\FrontMaui.Tests.csproj", "{60D5AA6C-FC59-9AD3-00D7-7C36439F89E5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +43,14 @@ Global
 		{08E8BCDC-37D0-46E6-BA8D-46DA9D23DC96}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{08E8BCDC-37D0-46E6-BA8D-46DA9D23DC96}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{08E8BCDC-37D0-46E6-BA8D-46DA9D23DC96}.Release|Any CPU.Build.0 = Release|Any CPU
+		{186A9061-6D28-6EAD-7CF3-C0EB83858450}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{186A9061-6D28-6EAD-7CF3-C0EB83858450}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{186A9061-6D28-6EAD-7CF3-C0EB83858450}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{186A9061-6D28-6EAD-7CF3-C0EB83858450}.Release|Any CPU.Build.0 = Release|Any CPU
+		{60D5AA6C-FC59-9AD3-00D7-7C36439F89E5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{60D5AA6C-FC59-9AD3-00D7-7C36439F89E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{60D5AA6C-FC59-9AD3-00D7-7C36439F89E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{60D5AA6C-FC59-9AD3-00D7-7C36439F89E5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

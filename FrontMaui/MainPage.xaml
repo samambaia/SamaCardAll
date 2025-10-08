@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             x:Class="FrontMaui.MainPage"
+             Title="Add Expense">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="12">
+            <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" />
+
+            <Label Text="Expense Description" />
+            <Entry Placeholder="Describe the spend" Text="{Binding Description}" />
+
+            <Label Text="Customer" />
+            <Picker Title="Select customer"
+                    ItemsSource="{Binding FilteredCustomers}"
+                    ItemDisplayBinding="{Binding CustomerName}"
+                    SelectedItem="{Binding SelectedCustomer, Mode=TwoWay}" />
+
+            <Label Text="Card" />
+            <Picker Title="Select card"
+                    ItemsSource="{Binding FilteredCards}"
+                    ItemDisplayBinding="{Binding Bank}"
+                    SelectedItem="{Binding SelectedCard, Mode=TwoWay}" />
+
+            <Label Text="Date of Purchase" />
+            <DatePicker Date="{Binding DatePurchase, Mode=TwoWay}" />
+
+            <Label Text="Amount (R$)" />
+            <Entry Keyboard="Numeric" Placeholder="0,00" Text="{Binding AmountString, Mode=TwoWay}" />
+
+            <Grid ColumnDefinitions="*,Auto" VerticalOptions="Center">
+                <Label Text="Installment Plan (1-60)" Grid.Column="0" />
+                <Label Text="{Binding InstallmentValueDisplay}" Grid.Column="1" HorizontalTextAlignment="End" />
+            </Grid>
+            <Slider Minimum="1" Maximum="60" Value="{Binding InstallmentPlan, Mode=TwoWay}" />
+            <Label Text="{Binding InstallmentPlan}" HorizontalTextAlignment="Center" />
+
+            <Button Text="Save Expense"
+                    Command="{Binding SubmitCommand}"
+                    IsEnabled="{Binding CanSubmit}"
+                    HorizontalOptions="Fill" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SamaCardAll.Infra;
@@ -11,84 +12,92 @@ using SamaCardAll.Infra;
 namespace SamaCardAll.Infra.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240426231238_RecoveryDB")]
-    partial class RecoveryDB
+    [Migration("20251006205000_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "8.0.4");
+            modelBuilder
+                .HasAnnotation("ProductVersion", "9.0.6")
+                .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
-            modelBuilder.Entity("SamaCardAll.Infra.Models.Card", b =>
+            MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
+
+            modelBuilder.Entity("SamaCardAll.Core.Models.Card", b =>
                 {
                     b.Property<int>("IdCard")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("IdCard"));
 
                     b.Property<short>("Active")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("smallint");
 
                     b.Property<string>("Bank")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Brand")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Expiration")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Number")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("longtext");
 
                     b.HasKey("IdCard");
 
                     b.ToTable("Cards");
                 });
 
-            modelBuilder.Entity("SamaCardAll.Infra.Models.Customer", b =>
+            modelBuilder.Entity("SamaCardAll.Core.Models.Customer", b =>
                 {
                     b.Property<int>("IdCustomer")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("IdCustomer"));
 
                     b.Property<short>("Active")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("smallint");
 
                     b.Property<string>("CustomerName")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("longtext");
 
                     b.HasKey("IdCustomer");
 
                     b.ToTable("Customers");
                 });
 
-            modelBuilder.Entity("SamaCardAll.Infra.Models.Installments", b =>
+            modelBuilder.Entity("SamaCardAll.Core.Models.Installments", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<short>("Active")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("smallint");
 
                     b.Property<string>("Installment")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("longtext");
 
                     b.Property<decimal>("InstallmentValue")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("decimal(65,30)");
 
                     b.Property<string>("MonthYear")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("longtext");
 
                     b.Property<int>("SpendIdSpend")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -97,41 +106,43 @@ namespace SamaCardAll.Infra.Migrations
                     b.ToTable("Installments");
                 });
 
-            modelBuilder.Entity("SamaCardAll.Infra.Models.Spend", b =>
+            modelBuilder.Entity("SamaCardAll.Core.Models.Spend", b =>
                 {
                     b.Property<int>("IdSpend")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("IdSpend"));
 
                     b.Property<decimal>("Amount")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("decimal(65,30)");
 
                     b.Property<int>("CardIdCard")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<int>("CustomerIdCustomer")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("Date")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<short>("Deleted")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("smallint");
 
                     b.Property<string>("Expenses")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("longtext");
 
                     b.Property<int>("InstallmentPlan")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<decimal>("InstallmentValue")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("decimal(65,30)");
 
                     b.Property<int>("UserIdUser")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.HasKey("IdSpend");
 
@@ -144,29 +155,31 @@ namespace SamaCardAll.Infra.Migrations
                     b.ToTable("Spends");
                 });
 
-            modelBuilder.Entity("SamaCardAll.Infra.Models.User", b =>
+            modelBuilder.Entity("SamaCardAll.Core.Models.User", b =>
                 {
                     b.Property<int>("IdUser")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("IdUser"));
 
                     b.Property<short>("Active")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("smallint");
 
                     b.Property<string>("Name")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Password")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("longtext");
 
                     b.HasKey("IdUser");
 
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("SamaCardAll.Infra.Models.Installments", b =>
+            modelBuilder.Entity("SamaCardAll.Core.Models.Installments", b =>
                 {
-                    b.HasOne("SamaCardAll.Infra.Models.Spend", "Spend")
+                    b.HasOne("SamaCardAll.Core.Models.Spend", "Spend")
                         .WithMany()
                         .HasForeignKey("SpendIdSpend")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -175,21 +188,21 @@ namespace SamaCardAll.Infra.Migrations
                     b.Navigation("Spend");
                 });
 
-            modelBuilder.Entity("SamaCardAll.Infra.Models.Spend", b =>
+            modelBuilder.Entity("SamaCardAll.Core.Models.Spend", b =>
                 {
-                    b.HasOne("SamaCardAll.Infra.Models.Card", "Card")
+                    b.HasOne("SamaCardAll.Core.Models.Card", "Card")
                         .WithMany()
                         .HasForeignKey("CardIdCard")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SamaCardAll.Infra.Models.Customer", "Customer")
+                    b.HasOne("SamaCardAll.Core.Models.Customer", "Customer")
                         .WithMany()
                         .HasForeignKey("CustomerIdCustomer")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SamaCardAll.Infra.Models.User", "User")
+                    b.HasOne("SamaCardAll.Core.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserIdUser")
                         .OnDelete(DeleteBehavior.Cascade)

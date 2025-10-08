@@ -24,7 +24,8 @@ public static class MauiProgram
         // Services
         builder.Services.AddHttpClient("Api", client =>
         {
-            var baseUrl = "http://192.160.0.6:5000";
+            //var baseUrl = "http://192.160.0.6:5000";
+            var baseUrl = "http://samacard-api-env-small.eba-ptdnxy2k.us-east-1.elasticbeanstalk.com/";
             //var baseUrl = DeviceInfo.Platform == DevicePlatform.Android
             //    ? "http://192.168.0.6:5000" // Android emulator loopback to host
             //    : "http://localhost:5000";

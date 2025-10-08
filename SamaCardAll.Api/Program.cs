@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 using Microsoft.OpenApi.Models;
 using SamaCardAll.Core.Interfaces;
 using SamaCardAll.Core.Services;
@@ -18,8 +19,13 @@ namespace SamaCardAll
             builder.Logging.SetMinimumLevel(LogLevel.Information);
             builder.Logging.AddConsole();
 
+            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
             builder.Services.AddDbContext<AppDbContext>(options =>
-                options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+                options.UseMySql(
+                    connectionString,
+                    ServerVersion.AutoDetect(connectionString)
+                ));
 
             var constr = builder.Configuration.GetConnectionString("DefaultConnection");
 
@@ -47,6 +53,16 @@ namespace SamaCardAll
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "SamaCard API", Version = "v1" });
             });
 
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll", builder =>
+                {
+                    builder.AllowAnyOrigin()
+                           .AllowAnyMethod()
+                           .AllowAnyHeader();
+                }); 
+            });
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -65,23 +81,7 @@ namespace SamaCardAll
                 });
             }
 
-            // Adiciona a configuração de CORS
-            app.UseCors(options =>
-            {
-                options.AllowAnyOrigin()
-                       .AllowAnyMethod()
-                       .AllowAnyHeader();
-            });
-
-            /*
-             * To use in Production Environment
-             * app.UseCors(options =>
-                {
-                    options.WithOrigins("https://yourfrontenddomain.com")
-                            .AllowMethods("GET", "POST")
-                            .WithHeaders("Content-Type");
-                });
-            */
+            app.UseCors("AllowAll");
 
             app.UseHttpsRedirection();
 

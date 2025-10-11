@@ -98,6 +98,20 @@ a, .btn-link {
         content: var(--blazor-load-percentage-text, "Loading");
     }
 
+.login-container {
+    /* Ocupa 100% da altura da página (view height) */
+    height: 100vh;
+    width: 100%;
+    /* Ativa o Flexbox para centralização */
+    display: flex;
+    /* Centraliza horizontalmente */
+    justify-content: center;
+    /* Centraliza verticalmente (alinhamento no eixo cruzado) */
+    align-items: center;
+    /* Garante que o conteúdo não seja cortado se a altura for pequena */
+    overflow: auto;
+}
+
 code {
     color: #c02d76;
 }

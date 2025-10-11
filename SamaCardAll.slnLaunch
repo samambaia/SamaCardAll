@@ -8,7 +8,7 @@
         "DebugTarget": "http"
       },
       {
-        "Path": "FrontMaui\\FrontMaui.csproj",
+        "Path": "FrontWeb\\FrontWeb.csproj",
         "Action": "Start"
       }
     ]

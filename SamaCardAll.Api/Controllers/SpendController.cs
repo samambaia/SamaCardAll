@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SamaCardAll.Core.Interfaces;
 using SamaCardAll.Core.Models;
@@ -8,6 +9,7 @@ namespace SamaCardAll.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class SpendController : ControllerBase
     {
         private readonly ISpendService _spendService;

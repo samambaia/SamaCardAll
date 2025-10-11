@@ -25,6 +25,6 @@ public class Spend
     public Card Card { get; set;}
 
     //User
-    public int UserIdUser { get; set; } = 1; // Default to 1 for the admin user
+    public int UserIdUser { get; set; }
     public User User  { get; set;}
 }

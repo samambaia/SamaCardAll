@@ -14,7 +14,7 @@ namespace SamaCardAll.Api.Mapping
                 .ForMember(vm => vm.CustomerIdCustomer, m => m.MapFrom(e => e.CustomerIdCustomer))
                 .ForMember(vm => vm.UserIdUser, m => m.MapFrom(e => e.UserIdUser))
                 .ForMember(vm => vm.CardName, m => m.MapFrom(s => s.Card.Bank))
-                .ForMember(vm => vm.CustomerName, m => m.MapFrom(s => s.Customer.CustomerName));
+                .ForMember(vm => vm.CustomerName, m => m.MapFrom(s => s.Customer.CustomerName)).ReverseMap();
 
             // ViewModel → Model
             CreateMap<SpendViewModel, Spend>()

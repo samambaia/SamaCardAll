@@ -1,10 +1,13 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 using Microsoft.OpenApi.Models;
 using SamaCardAll.Core.Interfaces;
 using SamaCardAll.Core.Services;
 using SamaCardAll.Infra;
 using SamaCardAll.Infra.Repository;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace SamaCardAll
 {
@@ -37,12 +40,41 @@ namespace SamaCardAll
             builder.Services.AddScoped<ICustomerService, CustomerService>();
             builder.Services.AddScoped<ICardService, CardService>();
             builder.Services.AddScoped<IReportService, ReportService>();
+            builder.Services.AddScoped<IAuthService, AuthService>();
 
             // Register Repositories and its implementation
             builder.Services.AddScoped<ISpendRepository, SpendRepository>();
             builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
             builder.Services.AddScoped<ICardRepository, CardRepository>();
             builder.Services.AddScoped<IReportRepository, ReportRepository>();
+            builder.Services.AddScoped<IUserRepository, UserRepository>();
+            builder.Services.AddScoped<IAuthRepository, AuthRepository>();
+
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    // 👇 VALIDAÇÃO: Verifica se o Secret foi carregado
+                    var secret = builder.Configuration["Jwt:Secret"];
+                    if (string.IsNullOrEmpty(secret))
+                    {
+                        throw new InvalidOperationException("A variável Jwt:Secret não foi configurada. Verifique appsettings.json ou variáveis de ambiente.");
+                    }
+
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                        ValidAudience = builder.Configuration["Jwt:Audience"],
+                        //IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Secret"]))
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret))
+                    };
+                });
+
+
+            builder.Services.AddAuthorization();
 
             // Register AutoMapper
             builder.Services.AddAutoMapper(typeof(Program).Assembly);
@@ -84,6 +116,8 @@ namespace SamaCardAll
             app.UseCors("AllowAll");
 
             app.UseHttpsRedirection();
+
+            app.UseAuthentication();
 
             app.UseAuthorization();
 

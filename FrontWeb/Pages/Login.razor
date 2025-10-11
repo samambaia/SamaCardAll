@@ -1,0 +1,61 @@
+﻿@page "/login"
+@using FrontWeb.Services
+@using Microsoft.AspNetCore.Components.Authorization
+@inject HttpClient Http
+@inject NavigationManager Nav
+@inject TokenService TokenService
+@inject AuthenticationStateProvider AuthStateProvider
+    
+<h3>Login</h3>
+
+<div class="card p-4" style="max-width:400px;">
+    <div class="mb-3">
+        <label>Email</label>
+        <input class="form-control" @bind="Email" />
+    </div>
+    <div class="mb-3">
+        <label>Password</label>
+        <input class="form-control" type="password" @bind="Password" />
+    </div>
+    <button class="btn btn-primary" @onclick="HandleLogin">Login</button>
+
+    @if (!string.IsNullOrEmpty(Error))
+    {
+        <div class="text-danger mt-3">@Error</div>
+    }
+</div>
+
+@code {
+    private string Email = "";
+    private string Password = "";
+    private string Error = "";
+
+    private async Task HandleLogin()
+    {
+        var dto = new { Email, Password };
+        var response = await Http.PostAsJsonAsync("auth/login", dto);
+
+        if (response.IsSuccessStatusCode)
+        {
+            var result = await response.Content.ReadFromJsonAsync<LoginResult>();
+            await TokenService.SetTokenAsync(result!.AccessToken);
+
+            if (AuthStateProvider is CustomAuthenticationStateProvider customProvider)
+            {
+                customProvider.NotifyUserAuthentication(result.AccessToken);
+            }
+
+            Nav.NavigateTo("/");
+        }
+        else
+        {
+            Error = "Invalid credentials";
+        }
+    }
+
+    public class LoginResult
+    {
+        public string AccessToken { get; set; }
+        public string RefreshToken { get; set; }
+    }
+}

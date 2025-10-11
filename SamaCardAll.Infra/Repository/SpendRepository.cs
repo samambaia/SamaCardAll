@@ -9,31 +9,32 @@ namespace SamaCardAll.Infra.Repository
     {
         private readonly AppDbContext _context;
         private readonly List<Installments> installmentsExist;
+        private readonly IUserContextService _userContext;
 
-        public SpendRepository(AppDbContext context)
+        public SpendRepository(AppDbContext context, IUserContextService userContext)
         {
             _context = context;
+            _userContext = userContext;
 
             var q = _context.Installments
                 .Include(s => s.Spend);
 
-            installmentsExist = [..q];
+            installmentsExist = [.. q];
         }
 
         public async Task CreateAsync(Spend spend)
         {
-            // TODO: Atribuir manualmente o idUser, enquanto não tem um serviço para recuperar o usuário logado.
-            spend.UserIdUser = 1;
+            spend.UserIdUser = _userContext.GetUserId();
 
             // Add a new expense
             _context.Spends.Add(spend);
 
             // Generate Installment Plan
             var installmentList = GenerateInstallmentPlan(
-                                    spend, 
-                                    spend.InstallmentPlan, 
-                                    spend.InstallmentValue, 
-                                    spend.Date);
+                spend, 
+                spend.InstallmentPlan, 
+                spend.InstallmentValue, 
+                spend.Date);
 
             // Add Installment List
             _context.Installments.AddRange(installmentList); 

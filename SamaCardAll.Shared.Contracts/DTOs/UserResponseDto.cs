@@ -8,7 +8,7 @@ namespace SamaCardAll.Shared.Contracts.DTOs
 {
     public class UserResponseDto
     {
-        public long Id { get; set; }
+        public int Id { get; set; }
         public string Email { get; set; } = string.Empty;
         public string FullName { get; set; } = string.Empty;
     }

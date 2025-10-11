@@ -1,7 +1,7 @@
 ﻿using FrontWeb.Services;
 using System.Net.Http.Headers;
 
-namespace FrontWeb.Services
+namespace FrontWeb.Handlers
 {
     public class AuthHeaderHandler : DelegatingHandler
     {
@@ -10,7 +10,7 @@ namespace FrontWeb.Services
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            var token = await _tokenService.GetTokenAsync();
+            var token = await _tokenService.GetAccessTokenAsync();
             if (!string.IsNullOrEmpty(token))
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
 

@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using SamaCardAll.Core.Entities;
 using SamaCardAll.Core.Interfaces;
+using SamaCardAll.Core.Models;
 
 namespace SamaCardAll.Infra.Repository
 {

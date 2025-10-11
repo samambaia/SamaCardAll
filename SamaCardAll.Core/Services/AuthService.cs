@@ -1,7 +1,6 @@
 ﻿using BCrypt.Net;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using SamaCardAll.Core.Entities;
 using SamaCardAll.Core.Interfaces;
 using SamaCardAll.Core.Models;
 using System.IdentityModel.Tokens.Jwt;
@@ -46,7 +45,7 @@ namespace SamaCardAll.Core.Services
             if (stored == null || !stored.IsActive)
                 return (false, null, null, "Invalid refresh token");
 
-            var user = await _userRepo.GetByIdAsync(stored.UserId);
+            var user = await _userRepo.GetByIdAsync(stored.UserIdUser);
             if (user == null)
                 return (false, null, null, "User not found");
 
@@ -77,8 +76,8 @@ namespace SamaCardAll.Core.Services
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
                 new Claim("FullName", user.FullName)
-            }),
-                Expires = DateTime.UtcNow.AddMinutes(15),
+            }), //TODO
+                Expires = DateTime.UtcNow.AddSeconds(30), //DateTime.UtcNow.AddMinutes(15), //Change when go to production
                 Issuer = _config["Jwt:Issuer"],
                 Audience = _config["Jwt:Audience"],
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
@@ -88,12 +87,12 @@ namespace SamaCardAll.Core.Services
             return handler.WriteToken(token);
         }
 
-        private RefreshToken GenerateRefreshToken(long userId)
+        private RefreshToken GenerateRefreshToken(int userId)
         {
             var randomBytes = RandomNumberGenerator.GetBytes(64);
             return new RefreshToken
             {
-                UserId = userId,
+                UserIdUser = userId,
                 Token = Convert.ToBase64String(randomBytes),
                 ExpiresAt = DateTime.UtcNow.AddDays(7)
             };

@@ -22,9 +22,9 @@ namespace SamaCardAll.Api.Controllers
         }
 
         [HttpPost("refresh")]
-        public async Task<IActionResult> Refresh([FromBody] string refreshToken)
+        public async Task<IActionResult> Refresh([FromBody] RefreshTokenDto dto)
         {
-            var result = await _authService.RefreshTokenAsync(refreshToken);
+            var result = await _authService.RefreshTokenAsync(dto.RefreshToken);
             if (!result.Success)
                 return Unauthorized(new { message = result.Message });
 
@@ -32,9 +32,9 @@ namespace SamaCardAll.Api.Controllers
         }
 
         [HttpPost("logout")]
-        public async Task<IActionResult> Logout([FromBody] string refreshToken)
+        public async Task<IActionResult> Logout([FromBody] RefreshTokenDto dto)
         {
-            var revoked = await _authService.RevokeTokenAsync(refreshToken);
+            var revoked = await _authService.RevokeTokenAsync(dto.RefreshToken);
             return revoked ? NoContent() : NotFound();
         }   
     }

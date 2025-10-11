@@ -1,4 +1,5 @@
 ﻿using FrontWeb;
+using FrontWeb.Handlers;
 using FrontWeb.Services;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
@@ -13,25 +14,24 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddSingleton<TokenService>();
 builder.Services.AddTransient<AuthHeaderHandler>();
-builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
+builder.Services.AddScoped<CustomAuthenticationStateProvider>();
+builder.Services.AddScoped<AuthenticationStateProvider>(sp =>
+    sp.GetRequiredService<CustomAuthenticationStateProvider>());
+
 builder.Services.AddAuthorizationCore();
 
-builder.Services.AddHttpClient("Api", client =>
-{
-    client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress);
-})
-.AddHttpMessageHandler<AuthHeaderHandler>();
-
-builder.Services.AddScoped(sp =>
-    sp.GetRequiredService<IHttpClientFactory>().CreateClient("Api"));
+builder.Services.AddTransient<TokenRefreshHandler>();
 
 builder.Services.AddRadzenComponents();
 
+builder.Services.AddHttpClient("ApiWithHandlers")
+    // 🚨 1. ADICIONE O REFRESH HANDLER (CHAMA O REFRESH EM CASO DE 401)
+    .AddHttpMessageHandler<TokenRefreshHandler>()
+    // 2. ADICIONE O AUTH HEADER HANDLER (ADICIONA O TOKEN ATUAL NO HEADER)
+    .AddHttpMessageHandler<AuthHeaderHandler>();
+
 // Load configuration from appsettings.json
 var httpClient = new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) };
-
-CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("pt-BR");
-CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("pt-BR");
 
 // Load appsettings.json manually
 using var configStream = await httpClient.GetStreamAsync("appsettings.json");
@@ -53,8 +53,18 @@ var apiBaseUrl = root
 
 Console.WriteLine($"[DEBUG] API URL configurada: {apiBaseUrl}");
 
-// Register HttpClient with this URL
-builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(apiBaseUrl!) });
+builder.Services.AddScoped<HttpClient>(sp =>
+{
+    var factory = sp.GetRequiredService<IHttpClientFactory>();
+
+    // Cria o cliente usando a definição "ApiWithHandlers" (que inclui os Handlers)
+    var client = factory.CreateClient("ApiWithHandlers");
+
+    // Aplica o BaseAddress correto, carregado do appsettings.json
+    client.BaseAddress = new Uri(apiBaseUrl!);
+
+    return client;
+});
 
 // --- Adicione esta seção para definir a cultura globalmente ---
 var culture = new CultureInfo("pt-BR");

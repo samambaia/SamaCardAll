@@ -1,31 +1,34 @@
 ﻿@using Microsoft.AspNetCore.Components.Authorization
 @using FrontWeb.Services
+@using Radzen.Blazor
+@using Radzen.Blazor.Rendering
+
 @inject NavigationManager Nav
-@inject TokenService TokenService
 @inject AuthenticationStateProvider AuthStateProvider
 
 <AuthorizeView>
     <Authorized>
         <div class="d-flex align-items-center">
             <span class="me-3">Olá, @context.User.Identity?.Name!</span>
-            <button class="btn btn-outline-danger btn-sm" @onclick="Logout">Logout</button>
+
+            <RadzenButton Text="Logout"
+                          Click="@Logout"
+                          ButtonStyle="ButtonStyle.Danger"
+                          Icon="exit_to_app" />
+
         </div>
     </Authorized>
-    <NotAuthorized>
-        <a href="/login">Login</a>
-    </NotAuthorized>
 </AuthorizeView>
 
 @code {
     private async Task Logout()
     {
-        await TokenService.RemoveTokenAsync();
-
         if (AuthStateProvider is CustomAuthenticationStateProvider customProvider)
         {
-            customProvider.NotifyUserAuthentication(null);
+            await customProvider.LogoutAsync();
         }
 
+        // Mantemos a navegação forçada para garantir
         Nav.NavigateTo("/login");
     }
 }

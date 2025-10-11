@@ -33,7 +33,10 @@ namespace SamaCardAll
             var constr = builder.Configuration.GetConnectionString("DefaultConnection");
 
             // Enables controllers for API endpoints
-            builder.Services.AddControllers(); 
+            builder.Services.AddControllers();
+
+            // Need to access HTTP Context (where token is)
+            builder.Services.AddHttpContextAccessor();
 
             // Register Services and its implementation
             builder.Services.AddScoped<ISpendService, SpendService>();
@@ -41,6 +44,8 @@ namespace SamaCardAll
             builder.Services.AddScoped<ICardService, CardService>();
             builder.Services.AddScoped<IReportService, ReportService>();
             builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddScoped<UserService>();
+            builder.Services.AddScoped<IUserContextService, UserContextService>();
 
             // Register Repositories and its implementation
             builder.Services.AddScoped<ISpendRepository, SpendRepository>();

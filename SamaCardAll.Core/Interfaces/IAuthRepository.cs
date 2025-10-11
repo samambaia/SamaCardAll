@@ -1,4 +1,4 @@
-﻿using SamaCardAll.Core.Entities;
+﻿using SamaCardAll.Core.Models;
 
 namespace SamaCardAll.Core.Interfaces
 {

@@ -103,6 +103,33 @@ namespace SamaCardAll.Infra.Migrations
                     b.ToTable("Installments");
                 });
 
+            modelBuilder.Entity("SamaCardAll.Core.Models.RefreshToken", b =>
+                {
+                    b.Property<string>("Token")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("ReplacedByToken")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("RevokedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Token");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RefreshTokens");
+                });
+
             modelBuilder.Entity("SamaCardAll.Core.Models.Spend", b =>
                 {
                     b.Property<int>("IdSpend")
@@ -138,6 +165,9 @@ namespace SamaCardAll.Infra.Migrations
                     b.Property<decimal>("InstallmentValue")
                         .HasColumnType("decimal(65,30)");
 
+                    b.Property<long?>("UserId")
+                        .HasColumnType("bigint");
+
                     b.Property<int>("UserIdUser")
                         .HasColumnType("int");
 
@@ -147,29 +177,38 @@ namespace SamaCardAll.Infra.Migrations
 
                     b.HasIndex("CustomerIdCustomer");
 
-                    b.HasIndex("UserIdUser");
+                    b.HasIndex("UserId");
 
                     b.ToTable("Spends");
                 });
 
             modelBuilder.Entity("SamaCardAll.Core.Models.User", b =>
                 {
-                    b.Property<int>("IdUser")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("bigint");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("IdUser"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
 
-                    b.Property<short>("Active")
-                        .HasColumnType("smallint");
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("Email")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("FullName")
                         .HasColumnType("longtext");
 
-                    b.Property<string>("Password")
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("PasswordHash")
                         .HasColumnType("longtext");
 
-                    b.HasKey("IdUser");
+                    b.HasKey("Id");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
 
                     b.ToTable("Users");
                 });
@@ -183,6 +222,15 @@ namespace SamaCardAll.Infra.Migrations
                         .IsRequired();
 
                     b.Navigation("Spend");
+                });
+
+            modelBuilder.Entity("SamaCardAll.Core.Models.RefreshToken", b =>
+                {
+                    b.HasOne("SamaCardAll.Core.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("SamaCardAll.Core.Models.Spend", b =>
@@ -201,9 +249,7 @@ namespace SamaCardAll.Infra.Migrations
 
                     b.HasOne("SamaCardAll.Core.Models.User", "User")
                         .WithMany()
-                        .HasForeignKey("UserIdUser")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserId");
 
                     b.Navigation("Card");
 

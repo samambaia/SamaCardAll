@@ -8,7 +8,7 @@ namespace SamaCardAll.Infra.Repository
     {
         private readonly AppDbContext _context = context ?? throw new ArgumentNullException(nameof(context));
 
-        public async Task<long> CreateAsync(User user)
+        public async Task<int> CreateAsync(User user)
         {
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
@@ -20,7 +20,7 @@ namespace SamaCardAll.Infra.Repository
             return await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Email == email);
         }
 
-        public async Task<User> GetByIdAsync(long id)
+        public async Task<User> GetByIdAsync(int id)
         {
             return await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == id);
         }

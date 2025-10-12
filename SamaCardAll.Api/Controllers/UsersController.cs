@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using SamaCardAll.Core.Services;
+using SamaCardAll.Core.Interfaces;
 using SamaCardAll.Shared.Contracts.DTOs;
 
 namespace SamaCardAll.Api.Controllers
@@ -8,8 +8,8 @@ namespace SamaCardAll.Api.Controllers
     [Route("users")]
     public class UsersController : ControllerBase
     {
-        private readonly UserService _userService;
-        public UsersController(UserService userService) => _userService = userService;
+        private readonly IUserService _userService;
+        public UsersController(IUserService userService) => _userService = userService;
 
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterUserDto dto)

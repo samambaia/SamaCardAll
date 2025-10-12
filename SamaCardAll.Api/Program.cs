@@ -43,7 +43,6 @@ namespace SamaCardAll
             builder.Services.AddScoped<ICardService, CardService>();
             builder.Services.AddScoped<IReportService, ReportService>();
             builder.Services.AddScoped<IAuthService, AuthService>();
-            builder.Services.AddScoped<UserService>();
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IUserContextService, UserContextService>();
 

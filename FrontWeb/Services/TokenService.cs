@@ -1,4 +1,5 @@
-﻿using Microsoft.JSInterop;
+﻿#nullable enable
+using Microsoft.JSInterop;
 
 namespace FrontWeb.Services
 {
@@ -16,8 +17,6 @@ namespace FrontWeb.Services
         {
             await _jsRuntime.InvokeVoidAsync("localStorage.setItem", "accessToken", accessToken);
             await _jsRuntime.InvokeVoidAsync("localStorage.setItem", "refreshToken", refreshToken);
-            // Garante que o nome antigo (authToken) seja limpo
-            await _jsRuntime.InvokeVoidAsync("localStorage.removeItem", "authToken");
         }
 
         // 🚨 NOVO: Obtém o Access Token (usado pelo AuthHeaderHandler)
@@ -26,11 +25,6 @@ namespace FrontWeb.Services
             // Tenta obter o token com o nome correto.
             var token = await _jsRuntime.InvokeAsync<string?>("localStorage.getItem", "accessToken");
 
-            // Caso de migração: se não achar 'accessToken', tenta 'authToken' pela última vez.
-            if (string.IsNullOrEmpty(token))
-            {
-                token = await _jsRuntime.InvokeAsync<string?>("localStorage.getItem", "authToken");
-            }
             return token;
         }
 
@@ -45,7 +39,6 @@ namespace FrontWeb.Services
         {
             await _jsRuntime.InvokeVoidAsync("localStorage.removeItem", "accessToken");
             await _jsRuntime.InvokeVoidAsync("localStorage.removeItem", "refreshToken");
-            await _jsRuntime.InvokeVoidAsync("localStorage.removeItem", "authToken");
         }
     }
 }

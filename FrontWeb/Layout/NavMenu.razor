@@ -10,10 +10,6 @@
 <div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
     <nav class="flex-column">
         <div class="nav-item px-3">
-@*             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door" aria-hidden="true"></span> Home
-            </NavLink>
- *@
             <NavLink class="nav-link" href="" @onclick="() => { }">
                 <span class="bi bi-house-door" aria-hidden="true"></span> Home
             </NavLink>
@@ -39,6 +35,16 @@
                 <span class="bi bi-card-heading" aria-hidden="true"></span> Invoice
             </NavLink>
         </div>
+        <AuthorizeView>
+            <Authorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="change-password">
+                        <span class="bi bi-person-lock" aria-hidden="true"></span> Change Password
+                    </NavLink>
+                </div>
+
+            </Authorized>
+        </AuthorizeView>
     </nav>
 </div>
 

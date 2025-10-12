@@ -1,6 +1,7 @@
 ﻿@page "/login"
 
 @using FrontWeb.Services
+@using SamaCardAll.Shared.Contracts.DTOs
 @using Microsoft.AspNetCore.Components.Authorization
 
 @inject HttpClient Http
@@ -9,7 +10,7 @@
 @inject AuthenticationStateProvider AuthStateProvider
 
 @attribute [AllowAnonymous]
-    
+
 <div class="login-container">
     <RadzenCard Style="width: 400px; padding: 20px;">
         <h3 class="mb-4">Login</h3>
@@ -19,12 +20,12 @@
 
             <div class="mb-3">
                 <RadzenLabel Text="Email" />
-                <RadzenTextBox @bind-Value="Email" Class="w-100" />
+                <RadzenTextBox @bind-Value="LoginModel.Email" Class="w-100" />
             </div>
 
             <div class="mb-4">
                 <RadzenLabel Text="Senha" />
-                <RadzenPassword @bind-Value="Password" Class="w-100" />
+                <RadzenPassword @bind-Value="LoginModel.Password" Class="w-100" />
             </div>
 
             @if (!string.IsNullOrEmpty(Error))
@@ -48,31 +49,45 @@
 </div>
 
 @code {
-
-    private string Email = "";
-    private string Password = "";
+    @inject LoadingService LoadingService
+    private LoginDto LoginModel = new LoginDto();
     private string Error = "";
 
     private async Task HandleLogin()
     {
-        var dto = new { Email, Password };
-        var response = await Http.PostAsJsonAsync("auth/login", dto);
+        LoadingService.Show();
 
-        if (response.IsSuccessStatusCode)
+        try
         {
-            var result = await response.Content.ReadFromJsonAsync<LoginResult>();
-            await TokenService.SetTokensAsync(result!.AccessToken, result.RefreshToken);
+            var response = await Http.PostAsJsonAsync("api/auth/login", LoginModel);
 
-            if (AuthStateProvider is CustomAuthenticationStateProvider customProvider)
+            if (response.IsSuccessStatusCode)
             {
-                customProvider.NotifyUserAuthentication(result.AccessToken);
+                var result = await response.Content.ReadFromJsonAsync<LoginResult>();
+                await TokenService.SetTokensAsync(result!.AccessToken, result.RefreshToken);
+
+                if (AuthStateProvider is CustomAuthenticationStateProvider customProvider)
+                {
+                    customProvider.NotifyUserAuthentication(result.AccessToken);
+                }
+
+                Nav.NavigateTo("/");
+
+            }
+            else
+            {
+                LoadingService.Hide();
+                Error = "Invalid credentials";
             }
 
-            Nav.NavigateTo("/");
         }
-        else
+        catch (Exception)
         {
-            Error = "Invalid credentials";
+            Error = "An error occurred during login. Please try again.";
+        }
+        finally
+        {
+            LoadingService.Hide();
         }
     }
 

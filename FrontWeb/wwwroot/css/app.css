@@ -1,4 +1,4 @@
-html, body {
+﻿html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
@@ -99,18 +99,69 @@ a, .btn-link {
     }
 
 .login-container {
-    /* Ocupa 100% da altura da p�gina (view height) */
+    /* Ocupa 100% da altura da página (view height) */
     height: 100vh;
     width: 100%;
-    /* Ativa o Flexbox para centraliza��o */
+    /* Ativa o Flexbox para centralização */
     display: flex;
     /* Centraliza horizontalmente */
     justify-content: center;
     /* Centraliza verticalmente (alinhamento no eixo cruzado) */
     align-items: center;
-    /* Garante que o conte�do n�o seja cortado se a altura for pequena */
+    /* Garante que o conteúdo não seja cortado se a altura for pequena */
     overflow: auto;
 }
+
+/* app.css ou site.css */
+
+/* 🚨 NOVO ESTILO: OVERLAY DE CARREGAMENTO CENTRALIZADO 🚨 */
+.loading-overlay {
+    /* Cobre toda a janela do navegador */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* Z-index muito alto para garantir que fique acima de tudo */
+    z-index: 9999;
+    /* Fundo levemente transparente (escurece a tela) */
+    background-color: rgba(0, 0, 0, 0.4);
+    /* Centralização usando Flexbox */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* Garante que o usuário não possa clicar nos elementos por baixo */
+    pointer-events: all;
+}
+
+.loading-box {
+    /* Estilo da caixa que contém a barra/texto (opcional) */
+    background-color: white;
+    padding: 20px 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    display: flex; /* Transforma em contêiner flexível */
+    flex-direction: column; /* Organiza os itens (círculo e texto) verticalmente */
+    align-items: center; /* Centraliza os itens horizontalmente */
+    justify-content: center; /* Centraliza os itens verticalmente (se houver espaço) */
+}
+
+.sidebar .nav-link {
+    /* Usa Flexbox para alinhar os itens horizontalmente */
+    display: flex;
+    align-items: center; /* Centraliza verticalmente o ícone com o texto */
+    padding: 0.5rem 1rem; /* Ajuste o padding se necessário */
+}
+
+    /* Garante que o ícone tenha um espaçamento e tamanho consistentes */
+    .sidebar .nav-link .bi {
+        /* Define o tamanho da fonte do ícone (ajuste o valor se quiser maior) */
+        font-size: 1.25rem;
+        /* Adiciona um pequeno espaçamento à direita para separar do texto */
+        margin-right: 0.75rem;
+        /* Garante que ele fique alinhado com o texto */
+        line-height: 1;
+    }
 
 code {
     color: #c02d76;

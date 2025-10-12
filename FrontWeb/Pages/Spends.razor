@@ -3,6 +3,7 @@
 @attribute [Authorize]
 
 @using FrontWeb.Components
+@using FrontWeb.Services
 @using SamaCardAll.Shared.Contracts.ViewModels
 @using Radzen.Blazor
 @using Radzen.Blazor.Rendering
@@ -10,6 +11,7 @@
 @inject HttpClient HttpClient
 @inject IJSRuntime JSRuntime;
 @inject NavigationManager NavigationManager;
+@inject LoadingService LoadingService
 
 <h3>Spends</h3>
 
@@ -93,14 +95,27 @@
 
     private async Task LoadSpends()
     {
-        var spends = await HttpClient.GetFromJsonAsync<List<SpendViewModel>>("/api/Spend?include=card,customer");
+        try
+        {
+            LoadingService.Show();
+            var spends = await HttpClient.GetFromJsonAsync<List<SpendViewModel>>("/api/Spend?include=card,customer");
 
-        allSpendsViewModel = spends
-            .Where(s => s.Deleted == 0)
-            .OrderByDescending(s => s.Date)
-            .ToList();
+            allSpendsViewModel = spends
+                .Where(s => s.Deleted == 0)
+                .OrderByDescending(s => s.Date)
+                .ToList();
 
-        StateHasChanged();
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            errorVisible = true;
+            errorMessage = $"Error loading spends: {ex.Message}";
+        }
+        finally
+        {
+            LoadingService.Hide();
+        }
     }
 
     private async void HandleValidSubmit()

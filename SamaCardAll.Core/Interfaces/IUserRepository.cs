@@ -7,5 +7,6 @@ namespace SamaCardAll.Core.Interfaces
         Task<User?> GetByEmailAsync(string email);
         Task<int> CreateAsync(User user);  
         Task<User?> GetByIdAsync(int id);
+        Task UpdateAsync(User user);
     }
 }

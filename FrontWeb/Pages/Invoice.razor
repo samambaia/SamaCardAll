@@ -1,6 +1,9 @@
 ﻿@page "/invoice"
 
+@attribute [Authorize]
+
 @using FrontWeb.Components
+@using FrontWeb.Services
 @using SamaCardAll.Shared.Contracts.ViewModels
 @using SamaCardAll.Shared.Contracts.Report
 @using System.Net
@@ -8,6 +11,7 @@
 @using Radzen.Blazor.Rendering
 
 @inject HttpClient HttpClient
+@inject LoadingService LoadingService
 
 <h2 class="radzen-heading">Invoice</h2>
 <h5 class="radzen-subheading">Monthly Customer Expense List</h5>
@@ -84,10 +88,6 @@
         </FooterTemplate>
     </RadzenDataGrid>
 }
-else if (isLoading)
-{
-    <RadzenProgressBar Style="width: 100%" />
-}
 else
 {
     <p class="alert">No installments found matching the filters...</p>
@@ -97,6 +97,7 @@ else
     private int? customerId;
     private string monthYear;
     private IEnumerable<string> monthYearList = new List<string>();
+    private List<InvoiceDTO> _installments;
 
     private decimal totalInstallmentSum = 0;
 
@@ -109,8 +110,6 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        isLoading = false;
-
         try
         {
             _customers = await HttpClient.GetFromJsonAsync<List<CustomerViewModel>>("/api/Customer");
@@ -134,14 +133,12 @@ else
         }
     }
 
-    private List<InvoiceDTO> _installments;
-    private bool isLoading = true;
-
     private async Task FetchInstallments()
     {
-        isLoading = true; // Show loading indicator
         try
         {
+            LoadingService.Show();
+
             string encodedMonthYear = WebUtility.UrlEncode(monthYear);
             string url = $"/api/Home/{customerId}/{encodedMonthYear}";
             var response = await HttpClient.GetAsync(url);
@@ -170,7 +167,7 @@ else
         }
         finally
         {
-            isLoading = false;
+            LoadingService.Hide();
         }
     }
 

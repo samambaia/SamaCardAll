@@ -7,11 +7,13 @@
 @using Radzen.Blazor
 @using Radzen.Blazor.Rendering
 @using FrontWeb.Components
+@using FrontWeb.Services
 @using System.Net
 
 @inject IJSRuntime JSRuntime
 @inject NotificationService NotificationService
 @inject HttpClient HttpClient
+@inject LoadingService LoadingService
 
 <h2>Welcome to SamaCard</h2>
 
@@ -108,28 +110,6 @@
 </ModalDialogHome>
 
 @code {
-    private void OpenModalAsync() => modalDialog.Open();
-
-    private void CloseModalAsync() => modalDialog.Close();
-
-    private async Task OnCardSeriesClick(object data)
-    {
-        var cardData = (TotalCardMonthYearDTO)data.GetType().GetProperty("Data").GetValue(data);
-
-        if (cardData != null)
-        {
-            _cardDetails = await GetCardDetails(cardData.IdCard, monthYear);
-            OpenModalAsync();
-        }
-        else
-        {
-            MessageAlert = "Error extracting IdCard";
-            visibleAlert = true;
-        }
-    }
-}
-
-@code {
     bool showDataLabels = true;
     bool visibleAlert = false;
 
@@ -162,10 +142,32 @@
         await FetchData();
     }
 
+    private void OpenModalAsync() => modalDialog.Open();
+
+    private void CloseModalAsync() => modalDialog.Close();
+
+    private async Task OnCardSeriesClick(object data)
+    {
+        var cardData = (TotalCardMonthYearDTO)data.GetType().GetProperty("Data").GetValue(data);
+
+        if (cardData != null)
+        {
+            _cardDetails = await GetCardDetails(cardData.IdCard, monthYear);
+            OpenModalAsync();
+        }
+        else
+        {
+            MessageAlert = "Error extracting IdCard";
+            visibleAlert = true;
+        }
+    }
+
     private async Task FetchData()
     {
         try
         {
+            LoadingService.Show();
+
             // Get the list of Month/Years from Installment table (Distinct)
             url = "/api/Home/distinct-monthYears";
             monthYearList = await HttpClient.GetFromJsonAsync<IEnumerable<string>>(url);
@@ -184,6 +186,7 @@
         }
         finally
         {
+            LoadingService.Hide();
             StateHasChanged();
         }
     }

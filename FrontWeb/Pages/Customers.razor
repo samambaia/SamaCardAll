@@ -4,12 +4,14 @@
 
 @using SamaCardAll.Shared.Contracts.ViewModels
 @using FrontWeb.Components
+@using FrontWeb.Services
 @using System.Text.Json
 @using Radzen.Blazor
 @using Radzen.Blazor.Rendering
 
 @inject HttpClient HttpClient
 @inject IJSRuntime JSRuntime;
+@inject LoadingService LoadingService
 
 <h3>Customers</h3>
 
@@ -95,6 +97,8 @@
     {
         try
         {
+            LoadingService.Show();
+
             customers = await HttpClient.GetFromJsonAsync<List<CustomerViewModel>>("/api/Customer");
 
             customers = customers.OrderByDescending(c => c.IdCustomer).ToList();
@@ -104,6 +108,10 @@
             errorVisible = true;
             errorMessage = $"Error loading customers: {ex.Message}";
         }
+        finally
+        {
+            LoadingService.Hide();
+        }   
     }
 
     private async void HandleValidSubmit()

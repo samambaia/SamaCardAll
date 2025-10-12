@@ -24,5 +24,10 @@ namespace SamaCardAll.Infra.Repository
         {
             return await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == id);
         }
+
+        public async Task UpdateAsync(User user)
+        {
+            await _context.SaveChangesAsync();
+        }
     }
 }

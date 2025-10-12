@@ -1,0 +1,97 @@
+﻿@page "/register"
+
+@using SamaCardAll.Shared.Contracts.DTOs
+@inject HttpClient Http
+@inject NavigationManager Nav
+
+<div class="login-container">
+    <RadzenCard Style="width: 450px; padding: 25px;">
+        <h3 class="mb-4">Criar Conta</h3>
+
+        <EditForm Model="@_model" OnValidSubmit="HandleRegister">
+            <DataAnnotationsValidator />
+
+            <div class="mb-3">
+                <RadzenLabel Text="Nome Completo" />
+                <RadzenTextBox @bind-Value="_model.FullName" Class="w-100" />
+                <ValidationMessage For="@(() => _model.FullName)" />
+            </div>
+
+            <div class="mb-3">
+                <RadzenLabel Text="Email" />
+                <RadzenTextBox @bind-Value="_model.Email" Class="w-100" />
+                <ValidationMessage For="@(() => _model.Email)" />
+            </div>
+
+            <div class="mb-4">
+                <RadzenLabel Text="Senha" />
+                <RadzenPassword @bind-Value="_model.Password" Class="w-100" />
+                <ValidationMessage For="@(() => _model.Password)" />
+            </div>
+
+            @if (!string.IsNullOrEmpty(_error))
+            {
+                <RadzenAlert Variant="Variant.Filled" AlertStyle="AlertStyle.Danger" Class="mb-3">@_error</RadzenAlert>
+            }
+            @if (_isSuccess)
+            {
+                <RadzenAlert Variant="Variant.Filled" AlertStyle="AlertStyle.Success" Class="mb-3">Conta criada com sucesso! Redirecionando para o login...</RadzenAlert>
+            }
+
+
+            <div class="d-flex justify-content-between align-items-center">
+                <RadzenButton Text="Cadastrar"
+                              ButtonType="ButtonType.Submit"
+                              ButtonStyle="ButtonStyle.Primary"
+                              Icon="person_add" />
+
+                <a href="/login" class="radzen-text-sm">Já tenho uma conta</a>
+            </div>
+        </EditForm>
+    </RadzenCard>
+</div>
+
+
+@code {
+    private RegisterUserDto _model = new RegisterUserDto();
+    private string _error = string.Empty;
+    private bool _isSuccess = false;
+
+    private async Task HandleRegister()
+    {
+        _error = string.Empty;
+        _isSuccess = false;
+
+        try
+        {
+            var response = await Http.PostAsJsonAsync("api/auth/register", _model);
+
+            if (response.IsSuccessStatusCode)
+            {
+                _isSuccess = true;
+                // Espera um pouco e redireciona para o login
+                await Task.Delay(2000);
+                Nav.NavigateTo("/login");
+            }
+            else
+            {
+                // Tenta ler a mensagem de erro da API (ex: "Este e-mail já está em uso.")
+                var errorContent = await response.Content.ReadAsStringAsync();
+
+                // Trata a mensagem de conflito (409)
+                if (response.StatusCode == System.Net.HttpStatusCode.Conflict)
+                {
+                    _error = errorContent;
+                }
+                else
+                {
+                    _error = "Ocorreu um erro durante o cadastro. Tente novamente.";
+                }
+            }
+        }
+        catch (Exception)
+        {
+            _error = "Não foi possível conectar ao servidor. Verifique sua conexão.";
+        }
+    }
+}

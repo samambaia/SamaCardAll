@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SamaCardAll.Core.Interfaces;
-using SamaCardAll.Core.Services;
 using SamaCardAll.Shared.Contracts.DTOs;
 
 namespace SamaCardAll.Api.Controllers
@@ -10,11 +9,11 @@ namespace SamaCardAll.Api.Controllers
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
-        private readonly UserService _userService;
+        private readonly IUserService _userService;
         private readonly IAuthService _authService;
         private readonly IUserContextService _userContextService;
 
-        public AuthController(IAuthService authService, UserService userService, IUserContextService userContextService) =>
+        public AuthController(IAuthService authService, IUserService userService, IUserContextService userContextService) =>
             (_authService, _userService, _userContextService) = (authService, userService, userContextService);
 
         [HttpPost("register")]

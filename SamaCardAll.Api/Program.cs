@@ -45,6 +45,7 @@ namespace SamaCardAll
             builder.Services.AddScoped<IReportService, ReportService>();
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<UserService>();
+            builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IUserContextService, UserContextService>();
 
             // Register Repositories and its implementation

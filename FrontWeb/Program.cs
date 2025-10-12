@@ -17,6 +17,7 @@ builder.Services.AddTransient<AuthHeaderHandler>();
 builder.Services.AddScoped<CustomAuthenticationStateProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider>(sp =>
     sp.GetRequiredService<CustomAuthenticationStateProvider>());
+builder.Services.AddScoped<LoadingService>();
 
 builder.Services.AddAuthorizationCore();
 

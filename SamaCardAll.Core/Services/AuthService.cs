@@ -76,8 +76,8 @@ namespace SamaCardAll.Core.Services
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
                 new Claim("FullName", user.FullName)
-            }), //TODO
-                Expires = DateTime.UtcNow.AddSeconds(30), //DateTime.UtcNow.AddMinutes(15), //Change when go to production
+            }), 
+                Expires = DateTime.UtcNow.AddMinutes(15), //Change when go to production
                 Issuer = _config["Jwt:Issuer"],
                 Audience = _config["Jwt:Audience"],
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)

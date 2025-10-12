@@ -1,0 +1,26 @@
+﻿@using FrontWeb.Services
+@inject LoadingService LoadingService
+@implements IDisposable
+
+<div class="loading-overlay" style="@(LoadingService.IsLoading ? "display: flex;" : "display: none;")">
+
+    <div class="loading-box">
+        <RadzenProgressBarCircular 
+            ProgressBarStyle="ProgressBarStyle.Primary" 
+            Value="100" ShowValue="false" 
+            Mode="ProgressBarMode.Indeterminate" />
+        <p class="radzen-text-sm mt-2">Processing...</p>
+    </div>
+</div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        LoadingService.OnChange += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        LoadingService.OnChange -= StateHasChanged;
+    }
+}

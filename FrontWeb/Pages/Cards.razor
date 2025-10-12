@@ -3,12 +3,14 @@
 @attribute [Authorize]
 
 @using FrontWeb.Components
+@using FrontWeb.Services
 @using Radzen.Blazor
 @using Radzen.Blazor.Rendering
 @using SamaCardAll.Shared.Contracts.ViewModels
 
 @inject HttpClient HttpClient
-@inject IJSRuntime JSRuntime;
+@inject IJSRuntime JSRuntime
+@inject LoadingService LoadingService
 
 <h3>Cards</h3>
 
@@ -88,12 +90,24 @@
 
     private async Task LoadCards()
     {
-        var allCards = await HttpClient.GetFromJsonAsync<List<CardViewModel>>("/api/Card");
+        try
+        {
+            LoadingService.Show();
+            var allCards = await HttpClient.GetFromJsonAsync<List<CardViewModel>>("/api/Card");
 
-        cards = allCards;
+            cards = allCards;
 
-        Console.WriteLine($"LoadCards: _cards.Count = {cards.Count}");
-        StateHasChanged();
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            errorVisible = true;
+            errorMessage = $"Error loading cards: {ex.Message}";
+        }
+        finally
+        {
+            LoadingService.Hide();
+        }
     }
 
     private async Task HandleValidSubmit()

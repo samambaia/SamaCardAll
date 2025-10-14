@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿#nullable enable
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SamaCardAll.Core.Models;
@@ -19,4 +20,7 @@ public class Card
     public string? Brand { get; set; } = "Mastercard";
     // 1 = Active, 0 = Inactive
     public short Active { get; set; } = 1;
+    public int UserIdUser { get; set; }
+    [ForeignKey(nameof(UserIdUser))]
+    public User? User { get; set; }
 }

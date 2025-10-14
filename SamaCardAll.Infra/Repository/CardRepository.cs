@@ -4,28 +4,31 @@ using SamaCardAll.Core.Models;
 
 namespace SamaCardAll.Infra.Repository
 {
-    public class CardRepository(AppDbContext context) : ICardRepository
+    public class CardRepository : ICardRepository
     {
-        private readonly AppDbContext _context = context ?? throw new ArgumentNullException(nameof(context));
+        private readonly IUserContextService _userContext;
+        private readonly AppDbContext _context;
+        private readonly int _userId;
 
-        public async Task CreateAsync(Card cardModel)
+        public CardRepository(AppDbContext context, IUserContextService userContext)
         {
-            var card = new Card
-            {
-                IdCard = await _context.Cards.MaxAsync(s => s.IdCard) + 1,
-                Bank = cardModel.Bank,
-                Number = cardModel.Number,
-                Expiration = cardModel.Expiration,
-                Brand = cardModel.Brand,
-                Active = cardModel.Active
-            };
-            await _context.AddAsync(card);
+            _context = context; 
+            _userContext = userContext;
+            _userId = _userContext.GetUserId();
+        }
+
+        public async Task CreateAsync(Card card)
+        {
+            card.UserIdUser = _userId;
+
+            // Add and save the new card
+            await _context.Cards.AddAsync(card);
             await _context.SaveChangesAsync();
         }
 
         public async Task<bool> DeleteAsync(int id)
         {
-            var cardToRemove = await _context.Cards.FindAsync(id);
+            var cardToRemove = await GetByIdAsync(id);
 
             if (cardToRemove == null)
                 return false;
@@ -37,9 +40,9 @@ namespace SamaCardAll.Infra.Repository
 
         public async Task<List<Card>> GetActiveCardsAsync()
         {
-            var activeCards = await _context.Cards.Where(c => c.Active == 1).ToListAsync();
+            var activeCards = await _context.Cards.Where(c => c.Active == 1 && c.UserIdUser == _userId).ToListAsync();
 
-            return activeCards.Select(c => new Card
+            return [.. activeCards.Select(c => new Card
             {
                 IdCard = c.IdCard,
                 Bank = c.Bank,
@@ -47,37 +50,42 @@ namespace SamaCardAll.Infra.Repository
                 Expiration = c.Expiration,
                 Brand = c.Brand,
                 Active = c.Active
-            }).ToList();
+            })];
         }
 
         public async Task<Card> GetByIdAsync(int id)
         {
-            return await _context.Cards.FindAsync(id);
+            var card = await _context.Cards
+                .Where(c => c.UserIdUser == _userId)
+                .FirstOrDefaultAsync(c => c.IdCard == id);
+
+            return card;
         }
 
         public async Task<List<Card>> GetCardsAsync()
         {
-            return await _context.Cards.ToListAsync();
+            var cards = await _context.Cards
+                .Where(c => c.UserIdUser == _userId)
+                .ToListAsync();
+            return cards;
         }
 
         public async Task<bool> UpdateAsync(Card card)
         {
-            var existingCard = await _context.Cards.FindAsync(card.IdCard);
+            var existingCard = await GetByIdAsync(card.IdCard);
 
-            if (existingCard != null)
-            {
-                existingCard.Bank = card.Bank;
-                existingCard.Number = card.Number;
-                existingCard.Expiration = card.Expiration;
-                existingCard.Brand = card.Brand;
-                existingCard.Active = card.Active;
-                await _context.SaveChangesAsync();
-
-                return true;
-
-            }
-            else
+            if (existingCard == null)
                 return false;
+
+            existingCard.Bank = card.Bank;
+            existingCard.Number = card.Number;
+            existingCard.Expiration = card.Expiration;
+            existingCard.Brand = card.Brand;
+            existingCard.Active = card.Active;
+            existingCard.UserIdUser = _userId;
+            await _context.SaveChangesAsync();
+
+            return true;
         }
     }
 }

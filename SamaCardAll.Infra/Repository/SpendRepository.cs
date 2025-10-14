@@ -10,11 +10,13 @@ namespace SamaCardAll.Infra.Repository
         private readonly AppDbContext _context;
         private readonly List<Installments> installmentsExist;
         private readonly IUserContextService _userContext;
+        private readonly int _userId;
 
         public SpendRepository(AppDbContext context, IUserContextService userContext)
         {
             _context = context;
             _userContext = userContext;
+            _userId = _userContext.GetUserId(); 
 
             var q = _context.Installments
                 .Include(s => s.Spend);
@@ -24,7 +26,7 @@ namespace SamaCardAll.Infra.Repository
 
         public async Task CreateAsync(Spend spend)
         {
-            spend.UserIdUser = _userContext.GetUserId();
+            spend.UserIdUser = _userId;
 
             // Add a new expense
             _context.Spends.Add(spend);
@@ -45,7 +47,8 @@ namespace SamaCardAll.Infra.Repository
 
         public async Task<bool> DeleteAsync(int id)
         {
-            var spend = await _context.Spends.FindAsync(id);
+            var spend = await GetByIdAsync(id);
+
             if (spend is null) return false;
 
             spend.Deleted = 1;
@@ -55,23 +58,28 @@ namespace SamaCardAll.Infra.Repository
 
         public async Task<Spend> GetByIdAsync(int id)
         {
-            return await _context.Spends.FindAsync(id);
+            var spend = await _context.Spends
+                .Where(s => s.UserIdUser == _userId && s.Deleted == 0)
+                .FirstOrDefaultAsync(s => s.IdSpend == id);
+
+            return spend;
         }
 
         public async Task<List<Spend>> GetSpendsAsync()
         {
             var getSpends = await _context.Spends
-                                          .Include(s => s.Customer)
-                                          .Include(s => s.Card)
-                                          .Include(s => s.User)
-                                          .ToListAsync();
+                .Where(s => s.UserIdUser == _userId && s.Deleted == 0)
+                .Include(s => s.Customer)
+                .Include(s => s.Card)
+                .Include(s => s.User)
+                .ToListAsync();
 
-            return [.. getSpends.Select(s => s)];
+            return getSpends;
         }
 
         public async Task<bool> UpdateAsync(Spend spend)
         {
-            var getSpend = await _context.Spends.FindAsync(spend.IdSpend);
+            var getSpend = await GetByIdAsync(spend.IdSpend);
 
             if (getSpend == null)
             {
@@ -99,7 +107,6 @@ namespace SamaCardAll.Infra.Repository
          * Private Methods
          * 
          */
-
         private List<Installments> GenerateInstallmentPlan(Spend spend, int installmentPlan, decimal installmentValue, DateTime purchaseDate)
         {
             var installmentsLocal = new List<Installments>();

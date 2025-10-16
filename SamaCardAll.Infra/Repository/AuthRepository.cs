@@ -19,6 +19,13 @@ namespace SamaCardAll.Infra.Repository
             return await _context.RefreshTokens.AsNoTracking().FirstOrDefaultAsync(t => t.Token == token);
         }
 
+        public async Task RemoveRefreshTokenAsync(int userId)
+        {
+            await _context.RefreshTokens
+                .Where(t => t.UserIdUser == userId)
+                .ExecuteDeleteAsync();
+        }
+
         public async Task RevokeRefreshTokenAsync(string token, string replacedByToken = null)
         {
             var existingToken = await _context.RefreshTokens.FirstOrDefaultAsync(r => r.Token == token);

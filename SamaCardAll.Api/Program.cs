@@ -32,7 +32,10 @@ namespace SamaCardAll
             var constr = builder.Configuration.GetConnectionString("DefaultConnection");
 
             // Enables controllers for API endpoints
-            builder.Services.AddControllers();
+            builder.Services.AddControllers(options =>
+            {
+                options.Filters.Add<SecurityExceptionFilter>(); // Register the custom exception filter globally
+            });
 
             // Need to access HTTP Context (where token is)
             builder.Services.AddHttpContextAccessor();
@@ -61,13 +64,13 @@ namespace SamaCardAll
                     var secret = builder.Configuration["Jwt:Secret"];
                     if (string.IsNullOrEmpty(secret))
                     {
-                        throw new InvalidOperationException("A variável Jwt:Secret não foi configurada. Verifique appsettings.json ou variáveis de ambiente.");
+                        throw new InvalidOperationException("The Jwt:Secret variable is not set. Check appsettings.json or environment variables.");
                     }
 
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
-                        ValidateIssuer = true,
-                        ValidateAudience = true,
+                        ValidateIssuer = false, // true,
+                        ValidateAudience = false, // true,
                         ValidateLifetime = true,
                         ValidateIssuerSigningKey = true,
                         ValidIssuer = builder.Configuration["Jwt:Issuer"],
@@ -76,7 +79,6 @@ namespace SamaCardAll
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret))
                     };
                 });
-
 
             builder.Services.AddAuthorization();
 

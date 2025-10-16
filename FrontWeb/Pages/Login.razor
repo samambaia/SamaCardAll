@@ -42,7 +42,7 @@
         </EditForm>
 
         <p class="mt-3 text-center">
-            Não tem uma conta? <a href="/register">Cadastre-se</a>
+            Don't have an account? <a href="/register">Register</a>
         </p>
 
     </RadzenCard>
@@ -50,12 +50,16 @@
 
 @code {
     @inject LoadingService LoadingService
+
     private LoginDto LoginModel = new LoginDto();
-    private string Error = "";
+    private string Error;
+    private string email;
+    private string password;
 
     private async Task HandleLogin()
     {
         LoadingService.Show();
+        Error = string.Empty;
 
         try
         {
@@ -72,12 +76,41 @@
                 }
 
                 Nav.NavigateTo("/");
-
             }
             else
             {
                 LoadingService.Hide();
-                Error = "Invalid credentials";
+
+                if (response.Content != null)
+                {
+                    var errorResponse = await response.Content.ReadFromJsonAsync<AuthFailureResponseDto>();
+
+                    if (errorResponse != null && !string.IsNullOrEmpty(errorResponse.Message))
+                    {
+                        Error = errorResponse.Message;
+                    }
+                    else
+                    {
+                        if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                        {
+                            Error = "Invalid credentials";
+                        }
+                        else if (response.StatusCode == System.Net.HttpStatusCode.Forbidden)
+                        {
+                            Error = "Access denied. Please contact the Admin.";
+                        }
+                        else
+                        {
+                            Error = "Login failed. Please try again.";
+                        }
+                    }
+                    Error = errorResponse?.Message ?? "Login failed. Please try again.";
+                    return;
+                }
+                else
+                {
+                    Error = "Failed to connect to the server. Please try again later."; 
+                }
             }
 
         }
@@ -95,5 +128,10 @@
     {
         public string AccessToken { get; set; }
         public string RefreshToken { get; set; }
+    }
+
+    public class AuthFailureResponseDto
+    {
+        public string Message { get; set; }
     }
 }

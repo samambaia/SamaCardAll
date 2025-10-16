@@ -4,6 +4,9 @@ using SamaCardAll.Shared.Contracts.DTOs;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text.Json;
+using Microsoft.AspNetCore.Components; // 🚨 NOVO: Para NavigationManager
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace FrontWeb.Services
 {
@@ -11,13 +14,22 @@ namespace FrontWeb.Services
     {
         private readonly TokenService _tokenService;
         private readonly HttpClient _httpClient;
+        private readonly IHttpClientFactory _httpClientFactory;
         private readonly IJSRuntime _jsRuntime;
+        private readonly NavigationManager _navigationManager; // 🚨 Adicionado: Para forçar o redirecionamento
 
-        public CustomAuthenticationStateProvider(TokenService tokenService, HttpClient httpClient, IJSRuntime jsRuntime)
+        public CustomAuthenticationStateProvider(
+            TokenService tokenService,
+            HttpClient httpClient,
+            IJSRuntime jsRuntime,
+            IHttpClientFactory httpClientFactory,
+            NavigationManager navigationManager) // 🚨 Injetado: NavigationManager
         {
             _tokenService = tokenService;
             _httpClient = httpClient;
             _jsRuntime = jsRuntime;
+            _httpClientFactory = httpClientFactory;
+            _navigationManager = navigationManager; // 🚨 Atribuído
         }
 
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
@@ -90,7 +102,7 @@ namespace FrontWeb.Services
         public async Task LoginAsync(string accessToken, string refreshToken)
         {
             // 1. Salvar AMBOS os tokens
-            await _tokenService.SetTokensAsync("accessToken", "refreshToken");
+            await _tokenService.SetTokensAsync(accessToken, refreshToken);
 
             // 2. Notificar o Blazor
             NotifyUserAuthentication(accessToken);
@@ -114,7 +126,9 @@ namespace FrontWeb.Services
                         "application/json"
                     );
 
-                    // Não verificamos o sucesso aqui, apenas tentamos invalidar o token no servidor.
+                    // Revogar usa o cliente padrão (com handlers). Como o token está expirado,
+                    // isso pode gerar um 401, mas o TokenRefreshHandler não tenta refresh em /revoke.
+                    // O Handler deve ser configurado para ignorar /revoke se não for um 401.
                     await _httpClient.PostAsync("api/auth/revoke", content);
                 }
                 catch (Exception ex)
@@ -127,62 +141,59 @@ namespace FrontWeb.Services
             // 3. Remover tokens do armazenamento local (SEMPRE)
             await _tokenService.RemoveTokensAsync();
 
-            // 4. Notificar o Blazor (força o redirecionamento para o /login)
+            // 4. Notificar o Blazor
             NotifyUserLogout();
+
+            // 🚨 CORREÇÃO: Redireciona o usuário para a página de login
+            // O true força o recarregamento, útil para limpar qualquer estado de componente.
+            _navigationManager.NavigateTo("/login", true);
         }
 
         public async Task<bool> RefreshTokensAsync(string refreshToken)
         {
+            using var authClient = _httpClientFactory.CreateClient("ApiAuth");
             try
             {
-                // 1. Preparar e Enviar a requisição para a API
                 var content = new StringContent(
                     JsonSerializer.Serialize(new { RefreshToken = refreshToken }),
                     System.Text.Encoding.UTF8,
                     "application/json"
                 );
 
-                var response = await _httpClient.PostAsync("api/auth/refresh", content);
+                var response = await authClient.PostAsync("api/auth/refresh", content);
 
                 if (response.IsSuccessStatusCode)
                 {
-                    // 2. Deserializar novos tokens (usando sua sintaxe de StringContent e JsonSerializer)
                     var jsonContent = await response.Content.ReadAsStringAsync();
-                    // Usamos PropertyNameCaseInsensitive = true para maior robustez na desserialização
                     var tokens = JsonSerializer.Deserialize<TokenResponse>(jsonContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
                     if (tokens is null || string.IsNullOrEmpty(tokens.AccessToken))
                     {
-                        // Resposta válida, mas dados inválidos. Trata como falha.
-                        throw new ApplicationException("API returned success but token data was missing.");
+                        return false;
                     }
 
-                    // 3. Salvar os novos tokens (usando o método auxiliar SetToken baseado em IJSRuntime)
                     await _tokenService.SetTokensAsync(tokens.AccessToken, tokens.RefreshToken);
-
-                    // 4. Notificar o Blazor sobre a mudança de estado
-                    // (Isso chama o ParseClaimsFromJwt e NotifyAuthenticationStateChanged)
                     await MarkUserAsAuthenticated(tokens.AccessToken);
 
                     return true; // Sucesso na renovação
                 }
                 else
                 {
+                    // Falha na renovação: limpar tokens e notificar logout
                     await _tokenService.RemoveTokensAsync();
-                    NotifyUserLogout();
+                    await LogoutAsync(); // Chama LogoutAsync que já tem a navegação
                     return false; // Falha na renovação
                 }
             }
             catch (Exception ex)
             {
                 // Logar o erro (opcional)
-                Console.WriteLine($"Refresh Token falhou devido a exceção: {ex.Message}");
-            }
+                Console.WriteLine($"Refresh Token failed due to exception: {ex.Message}");
 
-            // 5. Falha no refresh (código de status HTTP não-sucesso ou exceção)
-            // Chamamos LogoutAsync, que lida com a revogação na API e o NotifyUserLogout.
-            await LogoutAsync();
-            return false;
+                await _tokenService.RemoveTokensAsync();
+                await LogoutAsync(); // Chama LogoutAsync que já tem a navegação
+                return false; // Falha na renovação
+            }
         }
 
         // Assuma que este método existe e você o chama para autenticar o usuário após o login/refresh
@@ -201,6 +212,8 @@ namespace FrontWeb.Services
             return Task.CompletedTask;
         }
 
+        // ... (métodos GetPayloadFromJwt, Base64UrlDecode e ParseClaimsFromJwt permanecem inalterados) ...
+
         // Método auxiliar para decodificar o payload do JWT
         private static Dictionary<string, object> GetPayloadFromJwt(string jwt)
         {
@@ -210,7 +223,7 @@ namespace FrontWeb.Services
 
             var payloadJson = Base64UrlDecode(parts[1]);
             return JsonSerializer.Deserialize<Dictionary<string, object>>(payloadJson)
-                   ?? new Dictionary<string, object>();
+                       ?? new Dictionary<string, object>();
         }
 
         private static string Base64UrlDecode(string input)
@@ -248,6 +261,13 @@ namespace FrontWeb.Services
             }
 
             return claims;
+        }
+
+        // Modelo de resposta de token
+        private class TokenResponse
+        {
+            public string? AccessToken { get; set; }
+            public string? RefreshToken { get; set; }
         }
     }
 }

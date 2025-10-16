@@ -14,8 +14,14 @@ namespace SamaCardAll.Core.Interfaces
 
         public int GetUserId()
         {
-            // Tenta obter o ID a partir do Claim 'NameIdentifier' (padrão)
-            var userIdClaim = _httpContextAccessor.HttpContext?.User
+            var httpContext = _httpContextAccessor.HttpContext;
+
+            if (httpContext == null || httpContext.User == null || !httpContext.User.Identity.IsAuthenticated)
+            {
+                throw new UnauthorizedAccessException("User is not authenticated or invalid token.");
+            }
+
+            var userIdClaim = httpContext.User
                 .FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             if (int.TryParse(userIdClaim, out var userId))
@@ -23,8 +29,7 @@ namespace SamaCardAll.Core.Interfaces
                 return userId;
             }
 
-            // Isso indica que o token é inválido ou está faltando o claim do ID
-            throw new InvalidOperationException("Usuário não autenticado ou Claim de ID ausente.");
+            throw new InvalidOperationException("Missing claim ID from valid token.");
         }
     }
 }

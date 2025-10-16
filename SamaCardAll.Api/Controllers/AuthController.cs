@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SamaCardAll.Api.DTO;
 using SamaCardAll.Core.Interfaces;
 using SamaCardAll.Shared.Contracts.DTOs;
 
@@ -53,11 +54,23 @@ namespace SamaCardAll.Api.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto dto)
         {
-            var result = await _authService.AuthenticateAsync(dto.Email, dto.Password);
-            if (!result.Success)
-                return Unauthorized(new { message = result.Message });
+            var(success, accessToken, refreshToken, message) = await _authService.AuthenticateAsync(dto.Email, dto.Password);
 
-            return Ok(new { accessToken = result.AccessToken, refreshToken = result.RefreshToken });
+            if (success)
+            {
+                return Ok(new
+                {
+                    AccessToken = accessToken,
+                    RefreshToken = refreshToken
+                });
+            }
+
+            if (message == "User is inactive")
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, new AuthFailureResponseDto { Message = "Inactive user. Contact the Admin." });
+            }
+
+            return Unauthorized(new AuthFailureResponseDto { Message = "Invalid e-mail or password." });
         }
 
         [HttpPost("refresh")]

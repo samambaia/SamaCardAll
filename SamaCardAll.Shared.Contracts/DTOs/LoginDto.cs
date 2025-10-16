@@ -4,11 +4,11 @@ namespace SamaCardAll.Shared.Contracts.DTOs
 {
     public class LoginDto
     {
-        [Required(ErrorMessage = "O e-mail é obrigatório.")]
-        [EmailAddress(ErrorMessage = "O formato do e-mail é inválido.")]
+        [Required(ErrorMessage = "The e-email is required.")]
+        [EmailAddress(ErrorMessage = "The email format is invalid.")]
         public string Email { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "A senha é obrigatória.")]
+        [Required(ErrorMessage = "The password is required.")]
         public string Password { get; set; } = string.Empty;
     }
 }

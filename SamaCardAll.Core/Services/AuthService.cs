@@ -1,5 +1,4 @@
-﻿using BCrypt.Net;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using SamaCardAll.Core.Interfaces;
 using SamaCardAll.Core.Models;
@@ -31,6 +30,9 @@ namespace SamaCardAll.Core.Services
 
             if (!BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
                 return (false, null, null, "Invalid credentials");
+
+            if (!user.IsActive)
+                return (false, null, null, "User is inactive");
 
             var jwt = GenerateJwtToken(user);
             var refreshToken = GenerateRefreshToken(user.Id);
@@ -73,11 +75,12 @@ namespace SamaCardAll.Core.Services
             {
                 Subject = new ClaimsIdentity(new[]
                 {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-                new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                new Claim("FullName", user.FullName)
-            }), 
-                Expires = DateTime.UtcNow.AddMinutes(15), //Change when go to production
+                    new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+                    new Claim(JwtRegisteredClaimNames.Email, user.Email),
+                    new Claim("FullName", user.FullName),
+                    new Claim(ClaimTypes.Role, user.Role)
+                }),
+                Expires = DateTime.UtcNow.AddMinutes(30), //Change when go to production
                 Issuer = _config["Jwt:Issuer"],
                 Audience = _config["Jwt:Audience"],
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)

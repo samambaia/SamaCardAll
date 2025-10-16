@@ -27,6 +27,7 @@ namespace SamaCardAll.Infra.Repository
 
         public async Task UpdateAsync(User user)
         {
+            _context.Users.Update(user);
             await _context.SaveChangesAsync();
         }
     }

@@ -7,5 +7,6 @@ namespace SamaCardAll.Core.Interfaces
         Task<RefreshToken?> GetRefreshTokenAsync(string token);
         Task AddRefreshTokenAsync(RefreshToken token);
         Task RevokeRefreshTokenAsync(string token, string? replacedByToken = null);
+        Task RemoveRefreshTokenAsync(int userId);
     }
 }

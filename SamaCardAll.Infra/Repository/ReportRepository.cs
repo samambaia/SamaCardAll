@@ -7,6 +7,16 @@ namespace SamaCardAll.Infra.Repository
 {
     public class ReportRepository(AppDbContext context) : IReportRepository
     {
+        private readonly IUserContextService _userContext;
+        private readonly AppDbContext _context;  
+        private readonly int _userId;
+
+        public ReportRepository(AppDbContext context, IUserContextService userContext) : this(context)
+        {
+            _userContext = userContext;
+            _userId = _userContext.GetUserId();
+        }
+
         public Task<List<DetailedCardDTO>> DetailedCard(int? cardId, string monthYear)
         {
             string decodedMonthYear = monthYear.DecodeMonthYear();
@@ -14,7 +24,8 @@ namespace SamaCardAll.Infra.Repository
             var query = context.Installments
                                 .Where(i => (!cardId.HasValue || i.Spend.Card.IdCard == cardId) &&
                                             i.MonthYear == decodedMonthYear &&
-                                            i.Spend.Deleted == 0)
+                                            i.Spend.Deleted == 0 &&
+                                            i.Spend.UserIdUser == _userId)
                                 .Select(i => new DetailedCardDTO
                                 (
                                     i.Spend.Card.IdCard,
@@ -70,7 +81,9 @@ namespace SamaCardAll.Infra.Repository
 
             var query = await context.Installments
                 .Include(c => c.Spend.Card)
-                .Where(c => c.MonthYear == decodedMonthYear && c.Spend.Deleted == 0)
+                .Where(c => c.MonthYear == decodedMonthYear && 
+                            c.Spend.Deleted == 0 &&
+                            c.Spend.UserIdUser == _userId)
                 .GroupBy(c => new { c.Spend.Card.IdCard, c.Spend.Card.Bank, c.MonthYear })
                 .Select(d => new
                 {
@@ -97,7 +110,9 @@ namespace SamaCardAll.Infra.Repository
 
             var query = await context.Installments
                                .Include(i => i.Spend.Customer)
-                               .Where(i => i.MonthYear == decodedMonthYear && i.Spend.Deleted == 0)
+                               .Where(i => i.MonthYear == decodedMonthYear && 
+                                      i.Spend.Deleted == 0 &&
+                                      i.Spend.UserIdUser == _userId)
                                .GroupBy(i => new { i.Spend.Customer.CustomerName, i.MonthYear })
                                .Select(g => new
                                {
@@ -125,16 +140,14 @@ namespace SamaCardAll.Infra.Repository
 
             var totalSpends = await context.Installments
                                             .Include(i => i.Spend)
-                                            .Where(i => i.MonthYear == decodedMonthYear && i.Spend != null && i.Spend.Deleted == 0)
+                                            .Where(i => i.MonthYear == decodedMonthYear && 
+                                                   i.Spend != null && 
+                                                   i.Spend.Deleted == 0 &&
+                                                   i.Spend.UserIdUser == _userId)
                                             .Select(i => i.InstallmentValue)
                                             .ToListAsync();
 
             return totalSpends;
-        }
-
-        public Task UpdateInstallments()
-        {
-            throw new NotImplementedException();
         }
 
         /*

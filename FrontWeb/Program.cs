@@ -21,31 +21,32 @@ builder.Services.AddScoped<LoadingService>();
 
 builder.Services.AddAuthorizationCore();
 
-builder.Services.AddTransient<TokenRefreshHandler>();
+// TokenRefreshHandler precisa ser Scoped
+builder.Services.AddScoped<TokenRefreshHandler>();
 
 builder.Services.AddRadzenComponents();
 
+// --- NOVO: 1. CLIENTE AUTH (SEM HANDLERS) ---
+// Este é o cliente usado pelo CustomAuthenticationStateProvider para o refresh token.
+builder.Services.AddHttpClient("ApiAuth");
+
+// 2. Cliente principal COM Handlers
 builder.Services.AddHttpClient("ApiWithHandlers")
-    // 🚨 1. ADICIONE O REFRESH HANDLER (CHAMA O REFRESH EM CASO DE 401)
+    // O TokenRefreshHandler (que faz o bypass) precisa vir antes do AuthHeaderHandler.
     .AddHttpMessageHandler<TokenRefreshHandler>()
-    // 2. ADICIONE O AUTH HEADER HANDLER (ADICIONA O TOKEN ATUAL NO HEADER)
     .AddHttpMessageHandler<AuthHeaderHandler>();
 
-// Load configuration from appsettings.json
 var httpClient = new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) };
 
-// Load appsettings.json manually
 using var configStream = await httpClient.GetStreamAsync("appsettings.json");
 using var jsonDoc = await JsonDocument.ParseAsync(configStream);
 var root = jsonDoc.RootElement;
 
-// Detect environment from launchsettings.json
-var envName = builder.HostEnvironment.Environment ?? "Development"; // "Development", "Production", etc.
+var envName = builder.HostEnvironment.Environment ?? "Development";
 Console.WriteLine($"[INFO] Ambiente detectado: {envName}");
 
 var configKey = envName == "Development" ? "DEV" : "PROD";
 
-// 🔧 Reads API URL based on environment
 var apiBaseUrl = root
     .GetProperty("ApiSettings")
     .GetProperty(configKey)
@@ -54,16 +55,22 @@ var apiBaseUrl = root
 
 Console.WriteLine($"[DEBUG] API URL configurada: {apiBaseUrl}");
 
+
+// --- CONFIGURAÇÃO FINAL DO HTTPCLIENT ---
 builder.Services.AddScoped<HttpClient>(sp =>
 {
     var factory = sp.GetRequiredService<IHttpClientFactory>();
 
-    // Cria o cliente usando a definição "ApiWithHandlers" (que inclui os Handlers)
+    // 1. Configura e armazena o BaseAddress para o cliente padrão (ApiWithHandlers)
     var client = factory.CreateClient("ApiWithHandlers");
-
-    // Aplica o BaseAddress correto, carregado do appsettings.json
     client.BaseAddress = new Uri(apiBaseUrl!);
 
+    // 2. Configura e armazena o BaseAddress para o cliente de Autenticação (ApiAuth)
+    // Isso garante que o CustomAuthenticationStateProvider use a URL correta no refresh.
+    var authClient = factory.CreateClient("ApiAuth");
+    authClient.BaseAddress = new Uri(apiBaseUrl!);
+
+    // Retorna o cliente padrão (com handlers) para a injeção global de HttpClient
     return client;
 });
 

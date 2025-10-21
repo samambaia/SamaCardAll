@@ -369,3 +369,6 @@ MigrationBackup/
 FodyWeavers.xsd
 /FrontWeb/FrontWeb - Backup.csproj
 /FrontWeb/FrontWeb.slnold
+
+# Deploy
+/deploy/

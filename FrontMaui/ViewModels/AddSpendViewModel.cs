@@ -215,10 +215,18 @@ public class AddSpendViewModel : INotifyPropertyChanged
 
     private void RecalculateInstallment()
     {
-        if (InstallmentPlan <= 0) { InstallmentValue = 0; return; }
+        if (InstallmentPlan <= 0) 
+        { 
+            InstallmentValue = 0; 
+            return; 
+        }
+
         var value = Amount / InstallmentPlan;
+
         InstallmentValue = Math.Round(value, 2, MidpointRounding.AwayFromZero);
+
         OnPropertyChanged(nameof(InstallmentValueDisplay));
+
         (SubmitCommand as Command)?.ChangeCanExecute();
     }
 

@@ -43,10 +43,10 @@
         <ChildContent>
             <RadzenSeriesDataLabels Visible="@showDataLabels" />
         </ChildContent>
-        <TooltipTemplate Context="_customerTotal">
+        <TooltipTemplate Context="item">
             <div>
-                <span>@_customerTotal.CustomerName</span> in @_customerTotal.MonthYear:
-                <strong>@_customerTotal.InstallmentAmount.ToString("C")</strong>
+                <span>@item.CustomerName</span> in @item.MonthYear:
+                <strong>@item.InstallmentAmount.ToString("C")</strong>
             </div>
         </TooltipTemplate>
     </RadzenColumnSeries>
